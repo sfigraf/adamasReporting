@@ -1,5 +1,7 @@
+###sampleFData
 allDistinctWaterssql <- c("SELECT DISTINCT WaterName FROM SampleFView")
 allDistinctWaters <- dbGetQuery(CPW_AqDatAnalysis, allDistinctWaterssql)
+
 
 # allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
 # allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
@@ -34,7 +36,7 @@ sampleFData_UI <- function(id) {
   )
 }
 
-sampleFData_Server <- function(id) {
+sampleFData_Server <- function(id, tableName) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -42,7 +44,6 @@ sampleFData_Server <- function(id) {
 
 # UI Components -----------------------------------------------------------
   output$yearsSearchUI <- renderUI({
-    print(isTruthy(input$waterNameSearch))
     if(isTruthy(input$waterNameSearch)){
       singleWaterOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
         filter(WaterName == input$waterNameSearch)
@@ -65,7 +66,7 @@ sampleFData_Server <- function(id) {
 # data wrangling ----------------------------------------------------------
       
       sampleFDataToDisplay <- eventReactive(input$queryButton,ignoreNULL = TRUE,{
-        data <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+        data <- tbl(CPW_AqDatAnalysis, tableName) %>%
           filter(WaterName == input$waterNameSearch, 
                  year(SampleDate)==input$yearsSearch)
         data <- as.data.frame(data)

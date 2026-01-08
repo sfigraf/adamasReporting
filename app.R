@@ -23,14 +23,15 @@ for (i in list.files("./modules/")) {
 }
 
 
-
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   navbarPage(title = "Adamas Reporting",
              id = "tabs", 
              theme = shinytheme("cerulean"),
              tabPanel("SampleF Data", 
-                      sampleFData_UI("sampleFData"))
+                      sampleFData_UI("sampleFData")), 
+             tabPanel("Summarized Data", 
+                      summarizedData_UI("summarizedData"))
   )    
 
 )
@@ -38,7 +39,8 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   observe({
-    sampleFData_Server("sampleFData")
+    sampleFData_Server("sampleFData", tableName = "SampleFView")
+    summarizedData_Server("summarizedData")
   })
 }
 
