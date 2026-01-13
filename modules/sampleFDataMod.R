@@ -18,7 +18,7 @@ sampleFData_UI <- function(id) {
           search = TRUE,          
           autoSelectFirstOption = FALSE
         ), 
-        uiOutput(ns("yearsSearchUI")),
+        uiOutput(ns("yearSliderUI")),
         
         
         actionButton(ns("queryButton"), 
@@ -43,21 +43,29 @@ sampleFData_Server <- function(id, tableName) {
       ns <- session$ns
 
 # UI Components -----------------------------------------------------------
-  output$yearsSearchUI <- renderUI({
+  output$yearSliderUI <- renderUI({
     if(isTruthy(input$waterNameSearch)){
       singleWaterOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
         filter(WaterName == input$waterNameSearch)
       allyears <- singleWaterOnly %>%
         distinct(year(SampleDate)) %>%
         pull()
-      #print(singleWaterOnly)
+      print(class(allyears))
+      print(min(allyears))
       tagList(
-        virtualSelectInput(ns("yearsSearch"),
-                           label = "Year:",
-                           choices = sort(allyears),
-                           search = TRUE,     
-                           autoSelectFirstOption = FALSE
+        sliderInput(ns("yearSlider"), "Date",
+                    min = min(allyears),
+                    max = max(allyears),  
+                    value = c(min(allyears), max(allyears))#,
+                    #step = 1,
+                    #timeFormat = "%y"
         )
+        # virtualSelectInput(ns("yearsSearch"),
+        #                    label = "Year:",
+        #                    choices = sort(allyears),
+        #                    search = TRUE,     
+        #                    autoSelectFirstOption = FALSE
+        # )
       )
       
     }
@@ -66,10 +74,15 @@ sampleFData_Server <- function(id, tableName) {
 # data wrangling ----------------------------------------------------------
       
       sampleFDataToDisplay <- eventReactive(input$queryButton,ignoreNULL = TRUE,{
+        year_start <- as.integer(input$yearSlider[1])
+        year_end   <- as.integer(input$yearSlider[2])
+        
         data <- tbl(CPW_AqDatAnalysis, tableName) %>%
           filter(WaterName == input$waterNameSearch, 
-                 year(SampleDate)==input$yearsSearch)
-        data <- as.data.frame(data)
+                 year(SampleDate) >= year_start & year(SampleDate) <= year_end
+                 ) %>%
+          as.data.frame()
+        #data <- as.data.frame(data)
         return(data)
       })
 
