@@ -96,7 +96,8 @@ sampleFData_Server <- function(id, tableName) {
       output$yearSliderUI <- renderUI({
         
         #req(input$waterNameSearch)
-        if(isTruthy(input$waterNameSearch) || isTruthy(input$areaBioSearch) || isTruthy(input$SpConBioSearch)) {
+        if(isTruthy(input$waterNameSearch) ) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
+          print("waternameINput Found")
           #update years based on waterName, Sp Bio, AreaBio
           waterNames <- input$waterNameSearch
           areaBios <- input$areaBioSearch
@@ -107,15 +108,14 @@ sampleFData_Server <- function(id, tableName) {
           allyears <- selectedWatersOnly %>%
             distinct(year(SampleDate)) %>%
             pull()
-          # singleWaterOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-          #   filter(WaterName == input$waterNameSearch)
-          # allyears <- singleWaterOnly %>%
-          #   distinct(year(SampleDate)) %>%
+          
+          # selectedBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+          #   filter(AreaBio %in% areaBios)
+          # selectedWaterNames <- selectedWatersOnly %>%
+          #   distinct(WaterName) %>%
           #   pull()
-          # updateVirtualSelect(
-          #   session, 
-          #   
-          # )
+          
+          
           tagList(
             sliderInput(ns("yearSlider"), "Date",
                         min = min(allyears, na.rm = TRUE),
@@ -130,34 +130,53 @@ sampleFData_Server <- function(id, tableName) {
         }
       })
       # if any of these updates, I want the other UI elements to update
-      # inputsToListen <- reactive({
-      #   list(input$waterNameSearch,
-      #        input$areaBioSearch, 
-      #        input$SpConBioSearch
-      #   )
-      # })
-      #   
-      # observeEvent(inputsToListen(), {
-      # 
-      #   waterNames <- input$waterNameSearch
-      #   areaBios <- input$areaBioSearch
-      #   spConBios <- input$SpConBioSearch
-      # 
-      #   selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-      #     filter(WaterName %in% waterNames)
-      #   allyears <- selectedWatersOnly %>%
-      #     distinct(year(SampleDate)) %>%
-      #     pull()
-      # 
-      #   updateSliderInput(
-      #     session,
-      #     "yearSlider",
-      #     min = min(allyears),
-      #     max = max(allyears),
-      #     value = c(min(allyears), max(allyears))
-      #   )
-      # 
-      # }, ignoreInit = TRUE)
+      inputsToListen <- reactive({
+        list(#input$waterNameSearch,
+             input$areaBioSearch#,
+             #input$SpConBioSearch
+        )
+      })
+
+      observeEvent(inputsToListen(), {
+
+        waterNames <- input$waterNameSearch
+        areaBios <- input$areaBioSearch
+        spConBios <- input$SpConBioSearch
+        
+        selectedBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+          filter(AreaBio %in% areaBios)
+        selectedWaterNames <- selectedBios %>%
+          distinct(WaterName) %>%
+          collect() %>%
+          pull() 
+        #unname()
+        #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+        cleanChoices <- as.character(selectedWaterNames)
+        
+        #print(cleanChoices)
+        updateVirtualSelect(
+          session = session,
+          "waterNameSearch", 
+          choices = cleanChoices#, 
+          #selected = selectedWaterNames
+          
+        )
+
+        # selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+        #   filter(WaterName %in% waterNames)
+        # allyears <- selectedWatersOnly %>%
+        #   distinct(year(SampleDate)) %>%
+        #   pull()
+
+        # updateSliderInput(
+        #   session,
+        #   "yearSlider",
+        #   min = min(allyears),
+        #   max = max(allyears),
+        #   value = c(min(allyears), max(allyears))
+        # )
+
+      }, ignoreInit = TRUE)
       
 
 # data wrangling ----------------------------------------------------------

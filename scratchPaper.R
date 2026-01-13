@@ -59,4 +59,27 @@ allyears <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
   pull() 
 
 
+observeEvent(inputsToListen(), {
+  
+  waterNames <- input$waterNameSearch
+  areaBios <- input$areaBioSearch
+  spConBios <- input$SpConBioSearch
+  
+  selectedBios <- tbl(dbConection, "tableName") %>%
+    filter(AreaBio %in% areaBios)
+  selectedWaterNames <- selectedBios %>%
+    distinct(WaterName) %>%
+    pull()
+  
+  #print(selectedWaterNames)
+  updateVirtualSelect(
+    session,
+    "waterNameSearch", 
+    choices = selectedWaterNames()
+    
+  )
+
+  
+}, ignoreInit = TRUE)
+
   
