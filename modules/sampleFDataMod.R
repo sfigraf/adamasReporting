@@ -145,6 +145,9 @@ sampleFData_Server <- function(id, tableName) {
 # data wrangling ----------------------------------------------------------
       
       sampleFDataToDisplay <- eventReactive(input$queryButton,ignoreNULL = TRUE,{
+        validate(
+          need(input$waterNameSearch, "Please select a Water Name, Area Bio or Sp Con Bio")
+        )
         
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
         #caused because it's hard to dbplyr to translate R to sql with lists directly inside a filter for a remote database table
