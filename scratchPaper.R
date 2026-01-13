@@ -39,3 +39,24 @@ show_query(x)
 
 x1 <- as.data.frame(saveDat)
 datatable(x1)
+
+#coln names 
+dbListFields(CPW_AqDatAnalysis, "SampleFView")
+
+allBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+  distinct(AreaBio) %>%
+  show_query() %>%
+  pull() 
+
+allSPBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+  distinct(SpConBio) %>%
+  show_query() %>%
+  pull() 
+
+allyears <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+  distinct(year(SampleDate)) %>%
+  show_query() %>%
+  pull() 
+
+
+  
