@@ -130,38 +130,71 @@ sampleFData_Server <- function(id, tableName) {
         }
       })
       # if any of these updates, I want the other UI elements to update
-      inputsToListen <- reactive({
-        list(#input$waterNameSearch,
-             input$areaBioSearch#,
-             #input$SpConBioSearch
-        )
-      })
+      # inputsToListen <- reactive({
+      #   list(#input$waterNameSearch,
+      #        input$areaBioSearch#,
+      #        #input$SpConBioSearch
+      #   )
+      # })
+      #if the input for water name ahcnges, change the area bio names
+      observeEvent(input$waterNameSearch, {
+        waterNames <- input$waterNameSearch
+        
+        if(isTruthy(waterNames)){
+          selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+            filter(WaterName %in% waterNames)
+          selectedBios <- selectedWatersOnly %>%
+            distinct(AreaBio) %>%
+            collect() %>%
+            pull() 
+          #unname()
+          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+          cleanChoices <- as.character(selectedBios)
+          
+          #print(cleanChoices)
+          updateVirtualSelect(
+            session = session,
+            "areaBioSearch", 
+            choices = cleanChoices, 
+            selected = cleanChoices
+            
+          )
+          
+        }
+      }, ignoreInit = TRUE)
+      #if the area Bio changes, change the water names
 
-      observeEvent(inputsToListen(), {
+      observeEvent(input$areaBioSearch, {
 
         waterNames <- input$waterNameSearch
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
         
-        selectedBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-          filter(AreaBio %in% areaBios)
-        selectedWaterNames <- selectedBios %>%
-          distinct(WaterName) %>%
-          collect() %>%
-          pull() 
-        #unname()
-        #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
-        cleanChoices <- as.character(selectedWaterNames)
-        
-        #print(cleanChoices)
-        updateVirtualSelect(
-          session = session,
-          "waterNameSearch", 
-          choices = cleanChoices#, 
-          #selected = selectedWaterNames
+        if(isTruthy(areaBios)){
+          selectedBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+            filter(AreaBio %in% areaBios)
+          selectedWaterNames <- selectedBios %>%
+            distinct(WaterName) %>%
+            collect() %>%
+            pull() 
+          #unname()
+          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+          cleanChoices <- as.character(selectedWaterNames)
           
-        )
-
+          #print(cleanChoices)
+          updateVirtualSelect(
+            session = session,
+            "waterNameSearch", 
+            choices = cleanChoices, 
+            selected = cleanChoices
+            
+          )
+          
+        }
+        
+        
+        
+        
         # selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
         #   filter(WaterName %in% waterNames)
         # allyears <- selectedWatersOnly %>%
