@@ -83,19 +83,24 @@ sampleFData_Server <- function(id, tableName) {
     function(input, output, session) {
       ns <- session$ns
       
-      inputsToListen <- reactive({
-        list(input$waterNameSearch,
-             input$areaBioSearch, 
-             input$SpConBioSearch
-             )
-      })
+      # waterNames <- reactiveVal("")
+      # waterNames <- input$waterNameSearch
+      
 
 # UI Components -----------------------------------------------------------
-      
+      ###What we want
+      #slider renders and updates with changes to each of the virtualselectINputs
+      #each of the virtualSeelct iNputs udpate based on the others
+      #select all on change?
       
       output$yearSliderUI <- renderUI({
-        if(isTruthy(input$waterNameSearch)){
+        
+        #req(input$waterNameSearch)
+        if(isTruthy(input$waterNameSearch) || isTruthy(input$areaBioSearch) || isTruthy(input$SpConBioSearch)) {
+          #update years based on waterName, Sp Bio, AreaBio
           waterNames <- input$waterNameSearch
+          areaBios <- input$areaBioSearch
+          #spConBios <- input$SpConBioSearch
           
           selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
             filter(WaterName %in% waterNames)
@@ -107,6 +112,10 @@ sampleFData_Server <- function(id, tableName) {
           # allyears <- singleWaterOnly %>%
           #   distinct(year(SampleDate)) %>%
           #   pull()
+          # updateVirtualSelect(
+          #   session, 
+          #   
+          # )
           tagList(
             sliderInput(ns("yearSlider"), "Date",
                         min = min(allyears, na.rm = TRUE),
@@ -120,25 +129,34 @@ sampleFData_Server <- function(id, tableName) {
           
         }
       })
-        
-      # observeEvent(inputsToListen(), {
+      # if any of these updates, I want the other UI elements to update
+      # inputsToListen <- reactive({
+      #   list(input$waterNameSearch,
+      #        input$areaBioSearch, 
+      #        input$SpConBioSearch
+      #   )
+      # })
       #   
+      # observeEvent(inputsToListen(), {
+      # 
       #   waterNames <- input$waterNameSearch
+      #   areaBios <- input$areaBioSearch
+      #   spConBios <- input$SpConBioSearch
       # 
       #   selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
       #     filter(WaterName %in% waterNames)
       #   allyears <- selectedWatersOnly %>%
       #     distinct(year(SampleDate)) %>%
       #     pull()
-      #   
+      # 
       #   updateSliderInput(
-      #     session, 
+      #     session,
       #     "yearSlider",
       #     min = min(allyears),
-      #     max = max(allyears),  
+      #     max = max(allyears),
       #     value = c(min(allyears), max(allyears))
       #   )
-      #   
+      # 
       # }, ignoreInit = TRUE)
       
 
