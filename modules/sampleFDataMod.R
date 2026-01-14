@@ -69,7 +69,7 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
-        DTOutput(ns("sampleFData")), 
+        withSpinner(DTOutput(ns("sampleFData"))), 
         downloadData_UI(ns("downloadSampleFData"))
       )
     )
@@ -130,41 +130,41 @@ sampleFData_Server <- function(id, tableName) {
         }
       })
       # if any of these updates, I want the other UI elements to update
-      # inputsToListen <- reactive({
-      #   list(#input$waterNameSearch,
-      #        input$areaBioSearch#,
-      #        #input$SpConBioSearch
-      #   )
-      # })
+      inputsToListen <- reactive({
+        list(#input$waterNameSearch,
+             input$areaBioSearch#,
+             #input$SpConBioSearch
+        )
+      })
       #if the input for water name ahcnges, change the area bio names
-      observeEvent(input$waterNameSearch, {
-        waterNames <- input$waterNameSearch
-        
-        if(isTruthy(waterNames)){
-          selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-            filter(WaterName %in% waterNames)
-          selectedBios <- selectedWatersOnly %>%
-            distinct(AreaBio) %>%
-            collect() %>%
-            pull() 
-          #unname()
-          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
-          cleanChoices <- as.character(selectedBios)
-          
-          #print(cleanChoices)
-          updateVirtualSelect(
-            session = session,
-            "areaBioSearch", 
-            choices = cleanChoices, 
-            selected = cleanChoices
-            
-          )
-          
-        }
-      }, ignoreInit = TRUE)
+      # observeEvent(input$waterNameSearch, {
+      #   waterNames <- input$waterNameSearch
+      #   
+      #   if(isTruthy(waterNames)){
+      #     selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+      #       filter(WaterName %in% waterNames)
+      #     selectedBios <- selectedWatersOnly %>%
+      #       distinct(AreaBio) %>%
+      #       collect() %>%
+      #       pull() 
+      #     #unname()
+      #     #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+      #     cleanChoices <- as.character(selectedBios)
+      #     
+      #     #print(cleanChoices)
+      #     updateVirtualSelect(
+      #       session = session,
+      #       "areaBioSearch", 
+      #       choices = cleanChoices, 
+      #       selected = cleanChoices
+      #       
+      #     )
+      #     
+      #   }
+      # }, ignoreInit = TRUE)
       #if the area Bio changes, change the water names
 
-      observeEvent(input$areaBioSearch, {
+      observeEvent(inputsToListen(), {
 
         waterNames <- input$waterNameSearch
         areaBios <- input$areaBioSearch
@@ -190,7 +190,38 @@ sampleFData_Server <- function(id, tableName) {
             
           )
           
+        } else {
+          #print(cleanChoices)
+          updateVirtualSelect(
+            session = session,
+            "waterNameSearch", 
+            choices = allDistinctWaters#, 
+            #selected = cleanChoices
+            
+          )
         }
+        
+        # if(isTruthy(waterNames)){
+        #   selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+        #     filter(WaterName %in% waterNames)
+        #   selectedBios <- selectedWatersOnly %>%
+        #     distinct(AreaBio) %>%
+        #     collect() %>%
+        #     pull() 
+        #   #unname()
+        #   #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+        #   cleanChoices <- as.character(selectedBios)
+        #   
+        #   #print(cleanChoices)
+        #   updateVirtualSelect(
+        #     session = session,
+        #     "areaBioSearch", 
+        #     choices = cleanChoices, 
+        #     selected = cleanChoices
+        #     
+        #   )
+        #   
+        # }
         
         
         
