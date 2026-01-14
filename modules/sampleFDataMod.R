@@ -240,16 +240,27 @@ sampleFData_Server <- function(id, tableName) {
         yearMin <- as.integer(input$yearSlider[1])
         yearMax <- as.integer(input$yearSlider[2])
         waterNames <- input$waterNameSearch
+        areaBios <- input$areaBioSearch
+        spConBios <- input$SpConBioSearch
         
-        data <- tbl(CPW_AqDatAnalysis, tableName) %>%
+        waterNameFilteredData <- tbl(CPW_AqDatAnalysis, tableName) %>%
           filter(WaterName %in% waterNames, 
                  year(SampleDate) >= yearMin & year(SampleDate) <= yearMax
-                 # AreaBio %in% input$areaBioSearch, 
-                 # SpConBio %in% input$SpConBioSearch,
-                 ) %>%
+                 ) 
+        if(isTruthy(areaBios)){
+          waterNameFilteredData <- waterNameFilteredData %>%
+            #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+            filter(AreaBio %in% !!areaBios)
+          
+        }#allows it so query builds like a AND statement
+        if(isTruthy(spConBios)) {
+          waterNameFilteredData <- waterNameFilteredData %>%
+            filter(SpConBio %in% !!spConBios)
+        } 
+        finalFilteredData <- waterNameFilteredData %>%
           collect()
         #data <- as.data.frame(data)
-        return(data)
+        return(finalFilteredData)
       })
 
 # Output display ----------------------------------------------------------
