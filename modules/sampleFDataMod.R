@@ -82,8 +82,8 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
-        withSpinner(DTOutput(ns("sampleFData"))), 
-        downloadData_UI(ns("downloadSampleFData"))
+        withSpinner(DTOutput(ns("sampleFData"))) 
+        #downloadData_UI(ns("downloadSampleFData"))
       )
     )
   
@@ -328,12 +328,14 @@ sampleFData_Server <- function(id, tableName) {
                   filter = 'top',
                   options = list(
                     pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
-                    dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
-                    language = list(emptyTable = "Enter inputs and press Render Table")
+                    dom = 'Blfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
+                    language = list(emptyTable = "Enter inputs and press Render Table"), 
+                    buttons = c('csv', 'excel')
                   )
         )
-      })
-      downloadData_Server("downloadSampleFData", sampleFDataToDisplay(), paste0(input$waterNameSearch))
+        #server = FALSE
+      }, server = FALSE)
+      #downloadData_Server("downloadSampleFData", sampleFDataToDisplay(), paste0(input$waterNameSearch))
       
       
       
