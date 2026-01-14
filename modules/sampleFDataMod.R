@@ -16,6 +16,10 @@ allSPBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
   show_query() %>%
   pull() 
 
+allStationCodes <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+  distinct(StationCode) %>%
+  show_query() %>%
+  pull() 
 
 sampleFData_UI <- function(id) {
   ns <- NS(id)
@@ -50,6 +54,15 @@ sampleFData_UI <- function(id) {
           autoSelectFirstOption = FALSE, 
           #this ensures the dropdown is fully visible over the slider
           dropboxWrapper = "body" 
+        ), 
+        virtualSelectInput(ns("stationCodeSearch"),
+                           label = "Station Code",
+                           choices = sort(allStationCodes),
+                           multiple = TRUE,
+                           search = TRUE,          
+                           autoSelectFirstOption = FALSE, 
+                           #this ensures the dropdown is fully visible over the slider
+                           dropboxWrapper = "body" 
         ), 
         # sliderInput(ns("yearSlider"), "Date",
         #             min = min(allYears, na.rm = TRUE),
@@ -95,24 +108,27 @@ sampleFData_Server <- function(id, tableName) {
       output$yearSliderUI <- renderUI({
         
         #req(input$waterNameSearch)
-        if(isTruthy(input$waterNameSearch) ) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
-          #update years based on waterName, Sp Bio, AreaBio
+        if(isTruthy(input$waterNameSearch) | isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
+          #update years based on waterName,
           waterNames <- input$waterNameSearch
-          areaBios <- input$areaBioSearch
-          #spConBios <- input$SpConBioSearch
+          stationCodes <- input$stationCodeSearch
           
-          selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-            filter(WaterName %in% waterNames)
-          allyears <- selectedWatersOnly %>%
+          data <- tbl(CPW_AqDatAnalysis, "SampleFView")
+          
+          if(isTruthy(waterNames)){
+            selectedWatersOnly <- data %>%
+              filter(WaterName %in% waterNames)
+          }
+          
+          if(isTruthy(stationCodes)){
+            data <- data %>%
+              filter(StationCode %in% stationCodes)
+          }
+          
+          allyears <- data %>%
             distinct(year(SampleDate)) %>%
+            show_query() %>%
             pull()
-          
-          # selectedBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-          #   filter(AreaBio %in% areaBios)
-          # selectedWaterNames <- selectedWatersOnly %>%
-          #   distinct(WaterName) %>%
-          #   pull()
-          
           
           tagList(
             sliderInput(ns("yearSlider"), "Date",
@@ -129,7 +145,7 @@ sampleFData_Server <- function(id, tableName) {
       })
       # if any of these updates, I want the waterName element to update
       inputsToListen <- reactive({
-        list(#input$waterNameSearch,
+        list(
              input$areaBioSearch,
              input$SpConBioSearch
         )
@@ -153,6 +169,8 @@ sampleFData_Server <- function(id, tableName) {
             table <- table %>%
               filter(SpConBio %in% !!spConBios)
           } 
+          
+          #update waterNmaes based on bio selection
           selectedWaterNames <- table %>%
             distinct(WaterName) %>%
             show_query() %>%
@@ -160,26 +178,48 @@ sampleFData_Server <- function(id, tableName) {
             #returns as df
             collect() %>%
             #just pulls out the one column
-            pull() 
+            pull() %>%
+            as.character()
           #unname()
           #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
-          cleanChoices <- as.character(selectedWaterNames)
+          #cleanChoices <- as.character(selectedWaterNames)
           
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
-            choices = cleanChoices, 
-            selected = cleanChoices
-            
+            choices = selectedWaterNames, 
+            selected = selectedWaterNames
+          )
+          
+          #update station codes based on bio selection
+          selectedStationCodes <- table %>%
+            distinct(StationCode) %>%
+            show_query() %>%
+            #collect() is when the query actually runs, just builds a query until then
+            #returns as df
+            collect() %>%
+            #just pulls out the one column
+            pull() %>%
+            as.character()
+
+          updateVirtualSelect(
+            session = session,
+            "stationCodeSearch", 
+            choices = sort(selectedStationCodes), 
+            selected = selectedStationCodes
           )
           
         } else {
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
-            choices = allDistinctWaters#, 
-            #selected = cleanChoices
-            
+            choices = allDistinctWaters
+          )
+          
+          updateVirtualSelect(
+            session = session,
+            "stationCodeSearch", 
+            choices = allStationCodes
           )
         }
         
@@ -231,7 +271,7 @@ sampleFData_Server <- function(id, tableName) {
       
       sampleFDataToDisplay <- eventReactive(input$queryButton,ignoreNULL = TRUE,{
         validate(
-          need(input$waterNameSearch, "Please select a Water Name, Area Bio or Sp Con Bio")
+          need(list(input$waterNameSearch, input$stationCodeSearch), "Please select a Water Name, Station Code, Area Bio or Sp Con Bio")
         )
         
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
@@ -240,26 +280,38 @@ sampleFData_Server <- function(id, tableName) {
         yearMin <- as.integer(input$yearSlider[1])
         yearMax <- as.integer(input$yearSlider[2])
         waterNames <- input$waterNameSearch
+        stationCodes <- input$stationCodeSearch
+        
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
         
-        waterNameFilteredData <- tbl(CPW_AqDatAnalysis, tableName) %>%
-          filter(WaterName %in% waterNames, 
-                 year(SampleDate) >= yearMin & year(SampleDate) <= yearMax
-                 ) 
+        data <- tbl(CPW_AqDatAnalysis, tableName) %>%
+          filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax)
+        if(isTruthy(waterNames)){
+          data <- data %>%
+            filter(WaterName %in% waterNames
+            ) 
+        }
+        if(isTruthy(stationCodes)){
+          data <- data %>%
+            filter(StationCode %in% stationCodes
+            ) 
+        }
+          
         if(isTruthy(areaBios)){
-          waterNameFilteredData <- waterNameFilteredData %>%
+          data <- data %>%
             #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
             filter(AreaBio %in% !!areaBios)
           
         }#allows it so query builds like a AND statement
         if(isTruthy(spConBios)) {
-          waterNameFilteredData <- waterNameFilteredData %>%
+          data <- data %>%
             filter(SpConBio %in% !!spConBios)
         } 
-        finalFilteredData <- waterNameFilteredData %>%
+        
+        finalFilteredData <- data %>%
           collect()
-        #data <- as.data.frame(data)
+        
         return(finalFilteredData)
       })
 
