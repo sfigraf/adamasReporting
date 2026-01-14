@@ -89,15 +89,13 @@ sampleFData_Server <- function(id, tableName) {
 
 # UI Components -----------------------------------------------------------
       ###What we want
-      #slider renders and updates with changes to each of the virtualselectINputs
-      #each of the virtualSeelct iNputs udpate based on the others
-      #select all on change?
+      #slider renders and updates with changes to each of the waterNames
+      #waternames changes based on sp con bio or area bio
       
       output$yearSliderUI <- renderUI({
         
         #req(input$waterNameSearch)
         if(isTruthy(input$waterNameSearch) ) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
-          print("waternameINput Found")
           #update years based on waterName, Sp Bio, AreaBio
           waterNames <- input$waterNameSearch
           areaBios <- input$areaBioSearch
@@ -129,59 +127,44 @@ sampleFData_Server <- function(id, tableName) {
           
         }
       })
-      # if any of these updates, I want the other UI elements to update
+      # if any of these updates, I want the waterName element to update
       inputsToListen <- reactive({
         list(#input$waterNameSearch,
-             input$areaBioSearch#,
-             #input$SpConBioSearch
+             input$areaBioSearch,
+             input$SpConBioSearch
         )
       })
-      #if the input for water name ahcnges, change the area bio names
-      # observeEvent(input$waterNameSearch, {
-      #   waterNames <- input$waterNameSearch
-      #   
-      #   if(isTruthy(waterNames)){
-      #     selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-      #       filter(WaterName %in% waterNames)
-      #     selectedBios <- selectedWatersOnly %>%
-      #       distinct(AreaBio) %>%
-      #       collect() %>%
-      #       pull() 
-      #     #unname()
-      #     #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
-      #     cleanChoices <- as.character(selectedBios)
-      #     
-      #     #print(cleanChoices)
-      #     updateVirtualSelect(
-      #       session = session,
-      #       "areaBioSearch", 
-      #       choices = cleanChoices, 
-      #       selected = cleanChoices
-      #       
-      #     )
-      #     
-      #   }
-      # }, ignoreInit = TRUE)
-      #if the area Bio changes, change the water names
 
       observeEvent(inputsToListen(), {
 
-        waterNames <- input$waterNameSearch
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
+        #build query incrementally
+        table <- tbl(CPW_AqDatAnalysis, "SampleFView")
         
-        if(isTruthy(areaBios)){
-          selectedBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-            filter(AreaBio %in% areaBios)
-          selectedWaterNames <- selectedBios %>%
+        if(isTruthy(areaBios) | isTruthy(spConBios)){
+          if(isTruthy(areaBios)){
+            table <- table %>%
+              #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+              filter(AreaBio %in% !!areaBios)
+            
+          }#allows it so query builds like a AND statement
+          if(isTruthy(spConBios)) {
+            table <- table %>%
+              filter(SpConBio %in% !!spConBios)
+          } 
+          selectedWaterNames <- table %>%
             distinct(WaterName) %>%
+            show_query() %>%
+            #collect() is when the query actually runs, just builds a query until then
+            #returns as df
             collect() %>%
+            #just pulls out the one column
             pull() 
           #unname()
           #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
           cleanChoices <- as.character(selectedWaterNames)
           
-          #print(cleanChoices)
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
@@ -191,7 +174,6 @@ sampleFData_Server <- function(id, tableName) {
           )
           
         } else {
-          #print(cleanChoices)
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
@@ -200,6 +182,8 @@ sampleFData_Server <- function(id, tableName) {
             
           )
         }
+        
+        
         
         # if(isTruthy(waterNames)){
         #   selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
@@ -263,7 +247,7 @@ sampleFData_Server <- function(id, tableName) {
                  # AreaBio %in% input$areaBioSearch, 
                  # SpConBio %in% input$SpConBioSearch,
                  ) %>%
-          as.data.frame()
+          collect()
         #data <- as.data.frame(data)
         return(data)
       })
