@@ -335,7 +335,11 @@ sampleFData_Server <- function(id, tableName) {
         )
         #server = FALSE
       }, server = TRUE)
-      downloadData_Server("downloadSampleFData", sampleFDataToDisplay, paste0(input$waterNameSearch))
+      
+      #not using sampleFDataToDisplay() because that unwraps the object and passes the static result of the data at that exact moment. instead, 
+      #sampleFDataToDisplay passes the reactive object itself and tells the mod to "go get" the data
+      #same idea around making the filename reactive
+      downloadData_Server("downloadSampleFData", sampleFDataToDisplay, reactive({ paste0(input$waterNameSearch) }) )
       
       
       
