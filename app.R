@@ -25,11 +25,24 @@ for (i in list.files("./modules/")) {
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  navbarPage(title = "Adamas Reporting",
+  navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px"), " Adamas Reporting"), 
+             #selected = c("Map"),
+             windowTitle = HTML("<title>Residual Pool Depth</title> <link rel='icon' type='image/gif/png' href='CPWLogoLarge.png'>"),
+             #this part changes the navbar options
+             tags$head(
+               tags$style(HTML('.navbar-nav > li > a, .navbar-brand {
+                            padding-top:9px !important; 
+                            padding-bottom:0 !important;
+                            height: 80px;
+                            }
+                           .navbar {min-height:25px !important;}'))
+             ),
              id = "tabs", 
              theme = shinytheme("cerulean"),
              tabPanel("SampleF Data", 
                       sampleFData_UI("sampleFData")), 
+             tabPanel("SampleF Data UI 2", 
+                      sampleFData_UI2("sampleFData2")), 
              tabPanel("Summarized Data", 
                       summarizedData_UI("summarizedData"))
   )    
@@ -40,6 +53,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   observe({
     sampleFData_Server("sampleFData", tableName = "SampleFView")
+    sampleFData_Server2("sampleFData2", tableName = "SampleFView")
     summarizedData_Server("summarizedData")
   })
 }

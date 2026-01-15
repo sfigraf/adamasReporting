@@ -106,7 +106,7 @@ sampleFData_Server <- function(id, tableName) {
       #waternames changes based on sp con bio or area bio
       
       output$yearSliderUI <- renderUI({
-        
+        print("slider render")
         #req(input$waterNameSearch)
         if(isTruthy(input$waterNameSearch) | isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
           #update years based on waterName,
@@ -334,7 +334,7 @@ sampleFData_Server <- function(id, tableName) {
                   )
         )
         #server = FALSE
-      }, server = FALSE)
+      }, server = TRUE)
       #downloadData_Server("downloadSampleFData", sampleFDataToDisplay(), paste0(input$waterNameSearch))
       
       
