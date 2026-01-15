@@ -15,6 +15,7 @@ library(dbplyr)
 #install.packages("dbplyr")
 
 source("scripts/connectToDB.R")
+source("misc/graphicsOptions.R")
 
 for (i in list.files("./modules/")) {
   if (grepl(".R", i)) {
@@ -25,7 +26,7 @@ for (i in list.files("./modules/")) {
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px"), " Adamas Reporting"), 
+  navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
              windowTitle = HTML("<title>Residual Pool Depth</title> <link rel='icon' type='image/gif/png' href='CPWLogoLarge.png'>"),
              #this part changes the navbar options
@@ -39,11 +40,11 @@ ui <- fluidPage(
              ),
              id = "tabs", 
              theme = shinytheme("cerulean"),
-             tabPanel("SampleF Data", 
+             tabPanel(tags$div("SampleF Data",style = title_style), 
                       sampleFData_UI("sampleFData")), 
-             tabPanel("SampleF Data UI 2", 
-                      sampleFData_UI2("sampleFData2")), 
-             tabPanel("Summarized Data", 
+             # tabPanel("SampleF Data UI 2", 
+             #          sampleFData_UI2("sampleFData2")), 
+             tabPanel(tags$div("Summarized Data", style = title_style), 
                       summarizedData_UI("summarizedData"))
   )    
 
@@ -53,7 +54,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   observe({
     sampleFData_Server("sampleFData", tableName = "SampleFView")
-    sampleFData_Server2("sampleFData2", tableName = "SampleFView")
+    #sampleFData_Server2("sampleFData2", tableName = "SampleFView")
     summarizedData_Server("summarizedData")
   })
 }
