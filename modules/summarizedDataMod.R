@@ -88,17 +88,18 @@ summarizedData_Server <- function(id, tableName) {
         #only run this block when this button is clicked
         input$queryButton
         #do NOT re-run this block just becuase the values changed; wait for input$queryButton
-        yearInputCheck <- isolate(isTruthy(input$yearSlider))
+        yearInputCheck <- isolate(input$yearSlider)
+        print("running anyway")
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
           return(p("Please select a Area Bio, Water Name, or year range and click 'Render'.", 
                    style = "color: gray;"))
         }
         #check if waterNames or Station Code inputs are valid, and return a message if not
-        if (!yearInputCheck) {
-          return(p("Please select a valid year range before rendering.", 
-                   style = "color: gray;"))
-        }
+        # if (!yearInputCheck) {
+        #   return(p("Please select a valid year range before rendering.", 
+        #            style = "color: gray;"))
+        # }
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
         tagList(
           uiOutput(ns("downloadDataUI")),
@@ -138,19 +139,19 @@ summarizedData_Server <- function(id, tableName) {
         #     filter(AreaBio %in% !!areaBios)
         #   
         # }
-        print("about to collect")
         finalFilteredData <- data %>%
           show_query() %>%
-          collect()
+          collect() #%>%
+          #as.data.frame
         #columns in this db are "blobs" type which are found in DBs I guess. this converts them to character type and allows DT to display them
         finalFilteredData1 <- finalFilteredData %>%
           mutate(across(where(~inherits(., "blob")), 
                         ~sapply(., function(x) paste(as.character(x), collapse = ""))))
-        
+
         return(finalFilteredData1)
       })
       
-      output$currentSummaryData <- renderDT(server = TRUE, {
+      output$currentSummariesData <- renderDT(server = TRUE, {
         
         datatable(currentSummaryDataToDisplay(),
                   rownames = FALSE,
