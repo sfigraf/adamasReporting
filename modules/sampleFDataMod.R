@@ -82,8 +82,12 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
+        uiOutput(ns("downloadDataUI")),
+        box(
+          withSpinner(DTOutput(ns("sampleFData")))
+        )
         
-        uiOutput(ns("mainPanelUI"))
+        #uiOutput(ns("mainPanelUI"))
       )
     )
   
@@ -102,18 +106,18 @@ sampleFData_Server <- function(id, tableName) {
 
 # UI Components -----------------------------------------------------------
       
-      output$mainPanelUI <- renderUI({
-        req(input$queryButton)
-        validate(
-          need(isTruthy(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
-        )
-        tagList(
-          uiOutput(ns("downloadDataUI")),
-          box(
-            withSpinner(DTOutput(ns("sampleFData")))
-          )
-        )
-      })
+      # output$mainPanelUI <- renderUI({
+      #   req(input$queryButton)
+      #   validate(
+      #     need(isTruthy(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
+      #   )
+      #   tagList(
+      #     uiOutput(ns("downloadDataUI")),
+      #     box(
+      #       withSpinner(DTOutput(ns("sampleFData")))
+      #     )
+      #   )
+      # })
       # #save data option only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
         # validate(
