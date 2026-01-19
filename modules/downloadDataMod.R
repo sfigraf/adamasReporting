@@ -50,7 +50,8 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
       
       output$downloadCSV <- downloadHandler(
         filename = function() {
-          paste(fileName(), "_", Sys.Date(), ".csv", sep = "")
+          filenameReactive <- if (shiny::is.reactive(fileName)) fileName() else fileName
+          paste(filenameReactive, "_", Sys.Date(), ".csv", sep = "")
         },
         content = function(file) {
           on.exit(removeModal())
@@ -62,7 +63,8 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
       
       output$downloadRDS <- downloadHandler(
         filename = function() {
-          paste(fileName(), "_", Sys.Date(), ".rds", sep = "")
+          filenameReactive <- if (shiny::is.reactive(fileName)) fileName() else fileName
+          paste(filenameReactive, "_", Sys.Date(), ".rds", sep = "")
         },
         content = function(file) {
           on.exit(removeModal())

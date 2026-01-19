@@ -59,6 +59,7 @@ allyears <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
   pull() 
 
 
+
 observeEvent(inputsToListen(), {
   
   waterNames <- input$waterNameSearch
@@ -81,5 +82,15 @@ observeEvent(inputsToListen(), {
 
   
 }, ignoreInit = TRUE)
+#######
 
+data <- tbl(CPW_AqDatAnalysis, "SampleFView") 
+areaBios <- "brandtm"
+data <- data %>%
+  #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+  filter(AreaBio %in% !!areaBios)
+
+x <- data %>%
+  filter(WaterName == input$waterNameSearch, 
+         year(SampleDate)==input$yearsSearch)
   

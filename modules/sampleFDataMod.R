@@ -106,9 +106,10 @@ sampleFData_Server <- function(id, tableName) {
       #waternames changes based on sp con bio or area bio
       
       output$yearSliderUI <- renderUI({
-        print("slider render")
+        #print("slider render")
         #req(input$waterNameSearch)
-        if(isTruthy(input$waterNameSearch) | isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
+        #\|| means that second element will be only be evaluated if first isn't true
+        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
           #update years based on waterName,
           waterNames <- input$waterNameSearch
           stationCodes <- input$stationCodeSearch
@@ -116,7 +117,7 @@ sampleFData_Server <- function(id, tableName) {
           data <- tbl(CPW_AqDatAnalysis, "SampleFView")
           
           if(isTruthy(waterNames)){
-            selectedWatersOnly <- data %>%
+            data <- data %>%
               filter(WaterName %in% waterNames)
           }
           
@@ -127,8 +128,10 @@ sampleFData_Server <- function(id, tableName) {
           
           allyears <- data %>%
             distinct(year(SampleDate)) %>%
-            show_query() %>%
+            #show_query() %>%
             pull()
+          print("slider value rendered")
+          print(paste("min year:", min(allyears)))
           
           tagList(
             sliderInput(ns("yearSlider"), "Date",
@@ -158,7 +161,7 @@ sampleFData_Server <- function(id, tableName) {
         #build query incrementally
         table <- tbl(CPW_AqDatAnalysis, "SampleFView")
         
-        if(isTruthy(areaBios) | isTruthy(spConBios)){
+        if(isTruthy(areaBios) || isTruthy(spConBios)){
           if(isTruthy(areaBios)){
             table <- table %>%
               #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
@@ -169,11 +172,15 @@ sampleFData_Server <- function(id, tableName) {
             table <- table %>%
               filter(SpConBio %in% !!spConBios)
           } 
+          ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
+          #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
+          freezeReactiveValue(input, "waterNameSearch")
+          freezeReactiveValue(input, "stationCodeSearch")
           
           #update waterNmaes based on bio selection
           selectedWaterNames <- table %>%
             distinct(WaterName) %>%
-            show_query() %>%
+            #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
             #returns as df
             collect() %>%
@@ -183,33 +190,36 @@ sampleFData_Server <- function(id, tableName) {
           #unname()
           #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
           #cleanChoices <- as.character(selectedWaterNames)
-          
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
             choices = selectedWaterNames, 
             selected = selectedWaterNames
           )
+          print("waternames uptaed to selected waternames")
           
           #update station codes based on bio selection
           selectedStationCodes <- table %>%
             distinct(StationCode) %>%
-            show_query() %>%
+            #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
             #returns as df
             collect() %>%
             #just pulls out the one column
             pull() %>%
             as.character()
+         
 
           updateVirtualSelect(
             session = session,
             "stationCodeSearch", 
             choices = sort(selectedStationCodes), 
             selected = selectedStationCodes
-          )
+          ) 
+          print("stationcodes updated with selected stationcodes")
           
         } else {
+          print("waternams uptadad to all waternames")
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
@@ -338,8 +348,9 @@ sampleFData_Server <- function(id, tableName) {
       
       #not using sampleFDataToDisplay() because that unwraps the object and passes the static result of the data at that exact moment. instead, 
       #sampleFDataToDisplay passes the reactive object itself and tells the mod to "go get" the data
-      #same idea around making the filename reactive
-      downloadData_Server("downloadSampleFData", sampleFDataToDisplay, reactive({ paste0(input$waterNameSearch) }) )
+      #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
+      
+      downloadData_Server("downloadSampleFData", sampleFDataToDisplay,  "SampleFData")
       
       
       
