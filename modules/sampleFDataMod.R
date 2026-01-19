@@ -82,6 +82,7 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
+        
         uiOutput(ns("mainPanelUI"))
       )
     )
@@ -102,25 +103,26 @@ sampleFData_Server <- function(id, tableName) {
 # UI Components -----------------------------------------------------------
       
       output$mainPanelUI <- renderUI({
+        req(input$queryButton)
         validate(
           need(isTruthy(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
         )
         tagList(
-          downloadData_UI(ns("downloadSampleFData")),
+          uiOutput(ns("downloadDataUI")),
           box(
             withSpinner(DTOutput(ns("sampleFData")))
           )
         )
       })
       # #save data option only appears if there's a valid dataset to download
-      # output$downloadDataUI <- renderUI({
-      #   # validate( 
-      #   #   need(sampleFDataToDisplay(), "Please select a Water Name or Station Code")
-      #   # )
-      #   print("downloadUI rendered")
-      #   req(nrow(sampleFDataToDisplay()) > 0)
-      #   downloadData_UI(ns("downloadSampleFData"))
-      # })
+      output$downloadDataUI <- renderUI({
+        # validate(
+        #   need(sampleFDataToDisplay(), "Please select a Water Name or Station Code")
+        # )
+        print("downloadUI rendered")
+        req(nrow(sampleFDataToDisplay()) > 0)
+        downloadData_UI(ns("downloadSampleFData"))
+      })
       
       #slider renders and updates with changes to each of the waterNames or station codes
       #waternames changes based on sp con bio or area bio
@@ -149,9 +151,7 @@ sampleFData_Server <- function(id, tableName) {
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             pull()
-          print("slider value rendered")
-          print(paste("min year:", min(allyears)))
-          
+
           tagList(
             sliderInput(ns("yearSlider"), "Date",
                         min = min(allyears, na.rm = TRUE),
@@ -350,7 +350,7 @@ sampleFData_Server <- function(id, tableName) {
       
       
       output$sampleFData <- renderDT({
-        
+        req(sampleFDataToDisplay())
         #print(sampleFDataToDisplay())
         # validate(
         #   need(isTruthy(sampleFDataToDisplay()), "Please select a Water Name or Station Code")
