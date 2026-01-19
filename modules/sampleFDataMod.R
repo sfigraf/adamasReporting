@@ -82,11 +82,6 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
-        # uiOutput(ns("downloadDataUI")),
-        # box(
-        #   withSpinner(DTOutput(ns("sampleFData")))
-        # )
-        
         uiOutput(ns("mainPanelUI"))
       )
     )
@@ -99,29 +94,26 @@ sampleFData_Server <- function(id, tableName) {
     id,
     function(input, output, session) {
       ns <- session$ns
-      
-      # waterNames <- reactiveVal("")
-      # waterNames <- input$waterNameSearch
-      
 
 # UI Components -----------------------------------------------------------
       
       output$mainPanelUI <- renderUI({
+        #only run this block when this button is clicked
         input$queryButton
+        #do NOT re-run this block just becuase the values changed; wait for input$queryButton
         waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
         stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
-        
+        #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
-          return(p("Please select Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
+          return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
                    style = "color: gray;"))
         }
+        #check if waterNames or Station Code inputs are valid, and return a message if not
         if (!(waterNameInputCheck || stationCodeInputCheck)) {
           return(p("Please select a Water Name or Station Code before rendering.", 
-                   style = "color: red;"))
+                   style = "color: gray;"))
         }
-        # validate(
-        #   need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
-        # )
+        #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
         tagList(
           uiOutput(ns("downloadDataUI")),
           box(
@@ -131,12 +123,7 @@ sampleFData_Server <- function(id, tableName) {
       })
       # #save data option only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
-        #print(isTruthy(sampleFDataToDisplay()))
-        # validate(
-        #   need(nrow(sampleFDataToDisplay()) > 0, "Please select a Water Name or Station Code")
-        # )
         req(nrow(sampleFDataToDisplay()) > 0)
-        print("downloadUI rendered")
         downloadData_UI(ns("downloadSampleFData"))
       })
       
@@ -144,7 +131,6 @@ sampleFData_Server <- function(id, tableName) {
       #waternames changes based on sp con bio or area bio
       
       output$yearSliderUI <- renderUI({
-        #print("slider render")
         #\|| means that second element will be only be evaluated if first isn't true; not sure if it matters here but probably speeds it up a tad
         if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
           #update years based on waterName,
@@ -175,7 +161,6 @@ sampleFData_Server <- function(id, tableName) {
                         value = c(min(allyears, na.rm = TRUE), max(allyears, na.rm = TRUE)),
                         step = 1, 
                         sep = ""
-                        #timeFormat = "%y"
             )
           )
           
@@ -253,7 +238,6 @@ sampleFData_Server <- function(id, tableName) {
           ) 
 
         } else {
-          print("waternams uptadad to all waternames")
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
@@ -266,47 +250,6 @@ sampleFData_Server <- function(id, tableName) {
             choices = allStationCodes
           )
         }
-        
-        
-        
-        # if(isTruthy(waterNames)){
-        #   selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-        #     filter(WaterName %in% waterNames)
-        #   selectedBios <- selectedWatersOnly %>%
-        #     distinct(AreaBio) %>%
-        #     collect() %>%
-        #     pull() 
-        #   #unname()
-        #   #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
-        #   cleanChoices <- as.character(selectedBios)
-        #   
-        #   #print(cleanChoices)
-        #   updateVirtualSelect(
-        #     session = session,
-        #     "areaBioSearch", 
-        #     choices = cleanChoices, 
-        #     selected = cleanChoices
-        #     
-        #   )
-        #   
-        # }
-        
-        
-        
-        
-        # selectedWatersOnly <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
-        #   filter(WaterName %in% waterNames)
-        # allyears <- selectedWatersOnly %>%
-        #   distinct(year(SampleDate)) %>%
-        #   pull()
-
-        # updateSliderInput(
-        #   session,
-        #   "yearSlider",
-        #   min = min(allyears),
-        #   max = max(allyears),
-        #   value = c(min(allyears), max(allyears))
-        # )
 
       }, ignoreInit = TRUE)
       
@@ -314,14 +257,9 @@ sampleFData_Server <- function(id, tableName) {
 # data wrangling ----------------------------------------------------------
       
       sampleFDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
-        #double fires
-        # validate(
-        #   need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Water Name or Station Code")
-        # )
-        
+        #only run if one of these are true. if not, it will get get caught in the render UI above
         req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch))
-        print("query run")
-        
+
 
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
         #caused because it's hard to dbplyr to translate R to sql with lists directly inside a filter for a remote database table
@@ -370,16 +308,8 @@ sampleFData_Server <- function(id, tableName) {
       
       
       output$sampleFData <- renderDT({
-        #input$queryButton
+        
         req(sampleFDataToDisplay())
-        #print(sampleFDataToDisplay())
-        # validate(
-        #   need(isTruthy(sampleFDataToDisplay()), "Please select a Water Name or Station Code")
-        # )
-        # validate(
-        #   need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Water Name or Station Code")
-        # )
-        print("datatablke render")
         
         datatable(sampleFDataToDisplay(),
                   rownames = FALSE,
@@ -393,7 +323,7 @@ sampleFData_Server <- function(id, tableName) {
                     #buttons = c('csv', 'excel')
                   )
         )
-        #server = FALSE
+       
       }, server = TRUE)
       
       #not using sampleFDataToDisplay() because that unwraps the object and passes the static result of the data at that exact moment. instead, 

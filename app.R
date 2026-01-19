@@ -12,7 +12,7 @@ library(shinycssloaders) #withSpinner
 library(DT)
 library(shinyWidgets)
 library(dbplyr)
-#install.packages("dbplyr")
+library(openxlsx) #for saving excel file
 
 source("scripts/connectToDB.R")
 source("misc/graphicsOptions.R")

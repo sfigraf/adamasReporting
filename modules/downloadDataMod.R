@@ -23,6 +23,16 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             )
           ), 
           br(), 
+          
+          fluidRow(
+            column(
+              width = 12,
+              align = "center", 
+              downloadButton(ns("downloadExcel"), "Download as Excel")
+            )
+          ), 
+          br(), 
+          
           fluidRow(
             column(
               width = 12,
@@ -59,6 +69,20 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
           data <- if(is.reactive(data)) data() else data
           write_csv(data, file, progress = TRUE)
           
+        }
+      )
+      
+      output$downloadExcel <- downloadHandler(
+        filename = function() {
+          filenameReactive <- if (shiny::is.reactive(fileName)) fileName() else fileName
+          paste(filenameReactive, "_", Sys.Date(), ".xlsx", sep = "")
+        },
+        content = function(file) {
+          on.exit(removeModal())
+          #grabs the current version of that data with this call using ()
+          data <- if(is.reactive(data)) data() else data
+          openxlsx::write.xlsx(data, file)
+
         }
       )
       
