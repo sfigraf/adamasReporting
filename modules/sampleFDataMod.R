@@ -82,12 +82,12 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
-        uiOutput(ns("downloadDataUI")),
-        box(
-          withSpinner(DTOutput(ns("sampleFData")))
-        )
+        # uiOutput(ns("downloadDataUI")),
+        # box(
+        #   withSpinner(DTOutput(ns("sampleFData")))
+        # )
         
-        #uiOutput(ns("mainPanelUI"))
+        uiOutput(ns("mainPanelUI"))
       )
     )
   
@@ -106,18 +106,29 @@ sampleFData_Server <- function(id, tableName) {
 
 # UI Components -----------------------------------------------------------
       
-      # output$mainPanelUI <- renderUI({
-      #   req(input$queryButton)
-      #   validate(
-      #     need(isTruthy(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
-      #   )
-      #   tagList(
-      #     uiOutput(ns("downloadDataUI")),
-      #     box(
-      #       withSpinner(DTOutput(ns("sampleFData")))
-      #     )
-      #   )
-      # })
+      output$mainPanelUI <- renderUI({
+        input$queryButton
+        waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
+        stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
+        
+        if (input$queryButton == 0) {
+          return(p("Please select Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
+                   style = "color: gray;"))
+        }
+        if (!(waterNameInputCheck || stationCodeInputCheck)) {
+          return(p("Please select a Water Name or Station Code before rendering.", 
+                   style = "color: red;"))
+        }
+        # validate(
+        #   need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
+        # )
+        tagList(
+          uiOutput(ns("downloadDataUI")),
+          box(
+            withSpinner(DTOutput(ns("sampleFData")))
+          )
+        )
+      })
       # #save data option only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
         #print(isTruthy(sampleFDataToDisplay()))
@@ -359,14 +370,15 @@ sampleFData_Server <- function(id, tableName) {
       
       
       output$sampleFData <- renderDT({
-        #req(sampleFDataToDisplay())
+        #input$queryButton
+        req(sampleFDataToDisplay())
         #print(sampleFDataToDisplay())
         # validate(
         #   need(isTruthy(sampleFDataToDisplay()), "Please select a Water Name or Station Code")
         # )
-        validate(
-          need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Water Name or Station Code")
-        )
+        # validate(
+        #   need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Water Name or Station Code")
+        # )
         print("datatablke render")
         
         datatable(sampleFDataToDisplay(),
