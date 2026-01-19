@@ -55,7 +55,9 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
         },
         content = function(file) {
           on.exit(removeModal())
-          write_csv(data(), file, progress = TRUE)
+          #grabs the current version of that data with this call using ()
+          data <- if(is.reactive(data)) data() else data
+          write_csv(data, file, progress = TRUE)
           
         }
       )
@@ -68,7 +70,9 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
         },
         content = function(file) {
           on.exit(removeModal())
-          saveRDS(data(), file = file)
+          #grabs the current version of that data with this call using ()
+          data <- if(is.reactive(data)) data() else data
+          saveRDS(data, file = file)
         }
       )
       

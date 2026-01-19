@@ -82,8 +82,7 @@ sampleFData_UI <- function(id) {
       
       # Show a plot of the generated distribution
       mainPanel(
-        withSpinner(DTOutput(ns("sampleFData"))),
-        downloadData_UI(ns("downloadSampleFData"))
+        uiOutput(ns("mainPanelUI"))
       )
     )
   
@@ -101,14 +100,34 @@ sampleFData_Server <- function(id, tableName) {
       
 
 # UI Components -----------------------------------------------------------
-      ###What we want
-      #slider renders and updates with changes to each of the waterNames
+      
+      output$mainPanelUI <- renderUI({
+        validate(
+          need(isTruthy(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)), "Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'")
+        )
+        tagList(
+          downloadData_UI(ns("downloadSampleFData")),
+          box(
+            withSpinner(DTOutput(ns("sampleFData")))
+          )
+        )
+      })
+      # #save data option only appears if there's a valid dataset to download
+      # output$downloadDataUI <- renderUI({
+      #   # validate( 
+      #   #   need(sampleFDataToDisplay(), "Please select a Water Name or Station Code")
+      #   # )
+      #   print("downloadUI rendered")
+      #   req(nrow(sampleFDataToDisplay()) > 0)
+      #   downloadData_UI(ns("downloadSampleFData"))
+      # })
+      
+      #slider renders and updates with changes to each of the waterNames or station codes
       #waternames changes based on sp con bio or area bio
       
       output$yearSliderUI <- renderUI({
         #print("slider render")
-        #req(input$waterNameSearch)
-        #\|| means that second element will be only be evaluated if first isn't true
+        #\|| means that second element will be only be evaluated if first isn't true; not sure if it matters here but probably speeds it up a tad
         if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
           #update years based on waterName,
           waterNames <- input$waterNameSearch
@@ -174,6 +193,7 @@ sampleFData_Server <- function(id, tableName) {
           } 
           ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
           #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
+          #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
           freezeReactiveValue(input, "waterNameSearch")
           freezeReactiveValue(input, "stationCodeSearch")
           
@@ -196,8 +216,7 @@ sampleFData_Server <- function(id, tableName) {
             choices = selectedWaterNames, 
             selected = selectedWaterNames
           )
-          print("waternames uptaed to selected waternames")
-          
+
           #update station codes based on bio selection
           selectedStationCodes <- table %>%
             distinct(StationCode) %>%
@@ -216,8 +235,7 @@ sampleFData_Server <- function(id, tableName) {
             choices = sort(selectedStationCodes), 
             selected = selectedStationCodes
           ) 
-          print("stationcodes updated with selected stationcodes")
-          
+
         } else {
           print("waternams uptadad to all waternames")
           updateVirtualSelect(
@@ -279,11 +297,12 @@ sampleFData_Server <- function(id, tableName) {
 
 # data wrangling ----------------------------------------------------------
       
-      sampleFDataToDisplay <- eventReactive(input$queryButton,ignoreNULL = TRUE,{
-        validate(
-          need(list(input$waterNameSearch, input$stationCodeSearch), "Please select a Water Name, Station Code, Area Bio or Sp Con Bio")
-        )
+      sampleFDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
         
+        req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch))
+        print("query run")
+        
+
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
         #caused because it's hard to dbplyr to translate R to sql with lists directly inside a filter for a remote database table
         #making variables beforehand alllows us to to use them as "scalars" that it knows how to converrt to SQL values
@@ -320,16 +339,23 @@ sampleFData_Server <- function(id, tableName) {
         } 
         
         finalFilteredData <- data %>%
+          #show_query() %>%
           collect()
         
         return(finalFilteredData)
+        
       })
 
 # Output display ----------------------------------------------------------
-
       
       
       output$sampleFData <- renderDT({
+        
+        #print(sampleFDataToDisplay())
+        # validate(
+        #   need(isTruthy(sampleFDataToDisplay()), "Please select a Water Name or Station Code")
+        # )
+        print("datatablke render")
         
         datatable(sampleFDataToDisplay(),
                   rownames = FALSE,

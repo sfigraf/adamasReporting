@@ -23,8 +23,6 @@ for (i in list.files("./modules/")) {
   }
 }
 
-
-# Define UI for application that draws a histogram
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
@@ -50,7 +48,6 @@ ui <- fluidPage(
 
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
   observe({
     sampleFData_Server("sampleFData", tableName = "SampleFView")
