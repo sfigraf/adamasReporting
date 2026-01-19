@@ -120,11 +120,12 @@ sampleFData_Server <- function(id, tableName) {
       # })
       # #save data option only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
+        #print(isTruthy(sampleFDataToDisplay()))
         # validate(
-        #   need(sampleFDataToDisplay(), "Please select a Water Name or Station Code")
+        #   need(nrow(sampleFDataToDisplay()) > 0, "Please select a Water Name or Station Code")
         # )
-        print("downloadUI rendered")
         req(nrow(sampleFDataToDisplay()) > 0)
+        print("downloadUI rendered")
         downloadData_UI(ns("downloadSampleFData"))
       })
       
@@ -302,6 +303,10 @@ sampleFData_Server <- function(id, tableName) {
 # data wrangling ----------------------------------------------------------
       
       sampleFDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
+        #double fires
+        # validate(
+        #   need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Water Name or Station Code")
+        # )
         
         req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch))
         print("query run")
@@ -354,11 +359,14 @@ sampleFData_Server <- function(id, tableName) {
       
       
       output$sampleFData <- renderDT({
-        req(sampleFDataToDisplay())
+        #req(sampleFDataToDisplay())
         #print(sampleFDataToDisplay())
         # validate(
         #   need(isTruthy(sampleFDataToDisplay()), "Please select a Water Name or Station Code")
         # )
+        validate(
+          need(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch), "Please select a Water Name or Station Code")
+        )
         print("datatablke render")
         
         datatable(sampleFDataToDisplay(),
