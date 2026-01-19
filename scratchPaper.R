@@ -93,4 +93,5 @@ data <- data %>%
 x <- data %>%
   filter(WaterName == input$waterNameSearch, 
          year(SampleDate)==input$yearsSearch)
-  
+#coln names 
+dbListFields(CPW_AqDatAnalysis, "CurrentSummary")

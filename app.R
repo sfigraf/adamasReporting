@@ -52,7 +52,7 @@ server <- function(input, output) {
   observe({
     sampleFData_Server("sampleFData", tableName = "SampleFView")
     #sampleFData_Server2("sampleFData2", tableName = "SampleFView")
-    summarizedData_Server("summarizedData")
+    summarizedData_Server("summarizedData", tableName = "CurrentSummary")
   })
 }
 

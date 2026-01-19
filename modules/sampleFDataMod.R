@@ -80,7 +80,6 @@ sampleFData_UI <- function(id) {
         
       ),
       
-      # Show a plot of the generated distribution
       mainPanel(
         uiOutput(ns("mainPanelUI"))
       )
