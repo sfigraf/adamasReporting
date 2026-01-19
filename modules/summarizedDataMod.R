@@ -91,10 +91,11 @@ summarizedData_Server <- function(id, tableName) {
         yearInputCheck <- isolate(input$yearSlider)
         print("running anyway")
         #if button hasn't been clicked at all yet, retun this message
-        if (input$queryButton == 0) {
-          return(p("Please select a Area Bio, Water Name, or year range and click 'Render'.", 
+        if (input$queryButton == 0 || nrow(currentSummaryDataToDisplay()) == 0) {
+          return(p("Please select a valid area bio, Water Name, or year range and click 'Render'.", 
                    style = "color: gray;"))
         }
+        
         #check if waterNames or Station Code inputs are valid, and return a message if not
         # if (!yearInputCheck) {
         #   return(p("Please select a valid year range before rendering.", 
@@ -124,21 +125,20 @@ summarizedData_Server <- function(id, tableName) {
         areaBios <- input$areaBioSearch
         
         data <- tbl(CPW_AqDatAnalysis, tableName) %>%
-          filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax) %>%
-          show_query()
+          filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax)
         
-        # if(isTruthy(waterNames)){
-        #   data <- data %>%
-        #     filter(WaterName %in% waterNames
-        #     ) 
-        # }
-        # 
-        # if(isTruthy(areaBios)){
-        #   data <- data %>%
-        #     #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
-        #     filter(AreaBio %in% !!areaBios)
-        #   
-        # }
+        if(isTruthy(waterNames)){
+          data <- data %>%
+            filter(WaterName %in% waterNames
+            )
+        }
+
+        if(isTruthy(areaBios)){
+          data <- data %>%
+            #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+            filter(AreaBio %in% !!areaBios)
+
+        }
         finalFilteredData <- data %>%
           show_query() %>%
           collect() #%>%
@@ -147,6 +147,7 @@ summarizedData_Server <- function(id, tableName) {
         finalFilteredData1 <- finalFilteredData %>%
           mutate(across(where(~inherits(., "blob")), 
                         ~sapply(., function(x) paste(as.character(x), collapse = ""))))
+        print("returing data")
 
         return(finalFilteredData1)
       })
