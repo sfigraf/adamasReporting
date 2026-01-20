@@ -119,6 +119,10 @@ sampleFData_Server <- function(id, tableName) {
         #do NOT re-run this block just becuase the values changed; wait for input$queryButton
         waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
         stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
+        lengthInputCheck <- isolate(any(is.numeric(input$lengthSlider)))
+        # print(paste("length inputs:", input$lengthSlider))
+        # print(paste("length input checlk:", lengthInputCheck))
+        
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
           return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
@@ -127,6 +131,10 @@ sampleFData_Server <- function(id, tableName) {
         #check if waterNames or Station Code inputs are valid, and return a message if not
         if (!(waterNameInputCheck || stationCodeInputCheck)) {
           return(p("Please select a Water Name or Station Code before rendering.", 
+                   style = "color: gray;"))
+        }
+        if (input$lengthFilter & !(lengthInputCheck)) {
+          return(p("Only NA lengths detected at this water. Please turn off length filter before rendering this data.",
                    style = "color: gray;"))
         }
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
@@ -265,6 +273,7 @@ sampleFData_Server <- function(id, tableName) {
           #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
           freezeReactiveValue(input, "waterNameSearch")
           freezeReactiveValue(input, "stationCodeSearch")
+          freezeReactiveValue(input, "lengthSlider")
           
           #update waterNmaes based on bio selection
           selectedWaterNames <- table %>%
