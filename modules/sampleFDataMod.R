@@ -31,6 +31,11 @@ sampleFData_UI <- function(id) {
     pull() %>%
     sort()
   
+  allLengths <- sampleFData %>%
+    distinct(Length_mm) %>%
+    show_query() %>%
+    pull() 
+  
   tagList(
     sidebarLayout(
       sidebarPanel(
@@ -80,8 +85,13 @@ sampleFData_UI <- function(id) {
         
         uiOutput(ns("yearSliderUI")),
         
+        checkboxInput(ns("lengthFilter"), "Display Length Filter"),
+        uiOutput(ns("lengthFilterUI")), 
+        
         actionButton(ns("queryButton"), 
-                     label = "Render Data", width = "100%")
+                     label = "Render Data", width = "100%"), 
+        
+        h6("Note: entries with NA values in any of the filter fields are excluded from the results")
         
       ),
       
@@ -169,9 +179,27 @@ sampleFData_Server <- function(id, tableName) {
                         sep = ""
             )
           )
-          
         }
       })
+      
+      #adding optional length filter
+      output$lengthFilterUI <- renderUI({
+        
+        req(input$lengthFilter)
+        
+        tagList(
+          
+          h6("Note: adding this filter autmotically removes detections for fish who have NA for Length"),
+          
+          sliderInput(ns("lengthSlider"), "Length (mm)",
+                      min = min(allLengths, na.rm = TRUE),
+                      max = max(allLengths, na.rm = TRUE),  
+                      value = c(min(allLengths, na.rm = TRUE), max(allLengths, na.rm = TRUE)),
+                      step = 1
+          )
+        )
+      })
+      
       # if any of these updates, I want the waterName element to update
       inputsToListen <- reactive({
         list(
@@ -278,6 +306,8 @@ sampleFData_Server <- function(id, tableName) {
         stationCodes <- input$stationCodeSearch
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
+        lengthMin <- as.integer(input$lengthSlider[1])
+        lengthMax <- as.integer(input$lengthSlider[2])
         
         #filter data based on inputs
         #allows it so query builds like a AND statement
@@ -303,6 +333,11 @@ sampleFData_Server <- function(id, tableName) {
         if(isTruthy(spConBios)) {
           samplFDataFiltered <- samplFDataFiltered %>%
             filter(SpConBio %in% !!spConBios)
+        } 
+        
+        if(isTruthy(lengthMin) && isTruthy(lengthMax)) {
+          samplFDataFiltered <- samplFDataFiltered %>%
+            filter(Length_mm >= lengthMin & Length_mm <= lengthMax)
         } 
         
         finalFilteredData <- samplFDataFiltered %>%
