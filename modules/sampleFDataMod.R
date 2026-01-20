@@ -119,7 +119,7 @@ sampleFData_Server <- function(id, tableName) {
         #do NOT re-run this block just becuase the values changed; wait for input$queryButton
         waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
         stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
-        lengthInputCheck <- isolate(any(is.numeric(input$lengthSlider)))
+        lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
         # print(paste("length inputs:", input$lengthSlider))
         # print(paste("length input checlk:", lengthInputCheck))
         
@@ -133,8 +133,8 @@ sampleFData_Server <- function(id, tableName) {
           return(p("Please select a Water Name or Station Code before rendering.", 
                    style = "color: gray;"))
         }
-        if (input$lengthFilter & !(lengthInputCheck)) {
-          return(p("Only NA lengths detected at this water. Please turn off length filter before rendering this data.",
+        if (isolate(input$lengthFilter) & !(lengthInputCheck)) {
+          return(p("No data collected for selected year(s) or only NA lengths detected at this water. Please turn off length filter before rendering this data.",
                    style = "color: gray;"))
         }
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
@@ -216,6 +216,8 @@ sampleFData_Server <- function(id, tableName) {
               filter(StationCode %in% stationCodes)
           }
           #filter based off selected years as well
+          #wait until year slider is valid before running this part
+          req(all(is.numeric(input$yearSlider)))
           lengthListOptions <- sampleFForLengthSlider %>%
             filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax) %>%
             distinct(Length_mm) %>%
@@ -227,15 +229,15 @@ sampleFData_Server <- function(id, tableName) {
         tagList(
           
           h6("Note: adding this filter autmotically removes detections for fish who have NA for Length"),
-          
-          sliderInput(ns("lengthSlider"), "Length (mm)",
-                      min = min(lengthListOptions, na.rm = TRUE),
-                      max = max(lengthListOptions, na.rm = TRUE),  
-                      value = c(min(lengthListOptions, na.rm = TRUE), max(lengthListOptions, na.rm = TRUE)),
-                      step = 1
-          )
+          suppressWarnings({
+            sliderInput(ns("lengthSlider"), "Length (mm)",
+                        min = min(lengthListOptions, na.rm = TRUE),
+                        max = max(lengthListOptions, na.rm = TRUE),  
+                        value = c(min(lengthListOptions, na.rm = TRUE), max(lengthListOptions, na.rm = TRUE)),
+                        step = 1
+            )
+          })
         )
-        
         
       })
       
@@ -374,8 +376,8 @@ sampleFData_Server <- function(id, tableName) {
           samplFDataFiltered <- samplFDataFiltered %>%
             filter(SpConBio %in% !!spConBios)
         } 
-        #if checkbox clicked (aka true) use length filter slider
-        if(input$lengthFilter) {
+        #if checkbox clicked (aka true) and inputs are valid numeric use length filter slider
+        if(input$lengthFilter && all(is.numeric(input$lengthSlider))) {
           samplFDataFiltered <- samplFDataFiltered %>%
             filter(Length_mm >= lengthMin & Length_mm <= lengthMax)
         } 
