@@ -323,7 +323,14 @@ sampleFData_Server <- function(id, tableName) {
         }
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
         tagList(
-          uiOutput(ns("downloadDataUI")),
+          div(style = "display: flex; gap: 10px; margin-bottom: 10px; ",
+              uiOutput(ns("downloadDataUI")),
+              runReport_UI(ns("reportBuilderUI"))
+          ),
+          # fluidRow(
+          #   column(width = 2, uiOutput(ns("downloadDataUI"))),
+          #   column(width = 2, runReport_UI(ns("reportBuilderUI")))
+          # ),
           box(
             withSpinner(DTOutput(ns("sampleFData")))
           )
