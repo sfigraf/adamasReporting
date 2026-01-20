@@ -188,6 +188,10 @@ sampleFData_Server <- function(id, tableName) {
         req(input$lengthFilter)
         
         if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
+          
+          yearMin <- as.integer(input$yearSlider[1])
+          yearMax <- as.integer(input$yearSlider[2])
+          
           #update years based on waterName,
           waterNames <- input$waterNameSearch
           stationCodes <- input$stationCodeSearch
@@ -203,8 +207,9 @@ sampleFData_Server <- function(id, tableName) {
             sampleFForLengthSlider <- sampleFForLengthSlider %>%
               filter(StationCode %in% stationCodes)
           }
-          
+          #filter based off selected years as well
           lengthListOptions <- sampleFForLengthSlider %>%
+            filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax) %>%
             distinct(Length_mm) %>%
             #show_query() %>%
             pull()
@@ -360,8 +365,8 @@ sampleFData_Server <- function(id, tableName) {
           samplFDataFiltered <- samplFDataFiltered %>%
             filter(SpConBio %in% !!spConBios)
         } 
-        
-        if(isTruthy(lengthMin) && isTruthy(lengthMax)) {
+        #if checkbox clicked (aka true) use length filter slider
+        if(input$lengthFilter) {
           samplFDataFiltered <- samplFDataFiltered %>%
             filter(Length_mm >= lengthMin & Length_mm <= lengthMax)
         } 
