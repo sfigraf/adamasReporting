@@ -1,8 +1,0 @@
-library(odbc)
-library(DBI)
-CPW_AqDatAnalysis <- dbConnect(odbc::odbc(),
-                               Driver   = "ODBC Driver 17 for SQL Server",  # or "ODBC Driver 17 for SQL Server" depending on your setup
-                               Server   = "DNRCPWSQP01",
-                               Database = "CPW_AqDatAnalysis",
-                               Port     = 1433,
-                               Trusted_Connection = "Yes")

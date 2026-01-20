@@ -1,4 +1,6 @@
+.Rproj.user
 
+.Ruserdata
 connectToDB.R
 
 HowToConnectToADAMAS.R
@@ -10,3 +12,7 @@ HowToConnectToADAMAS.R
 .Rproj.user/5F17CE39/sources/session-fb9769fe/AC74D6C4
 
 .Rproj.user/5F17CE39/sources/session-fb9769fe/AC74D6C4-contents
+
+.RData
+
+.Rhistory
