@@ -51,11 +51,6 @@ summarizedData_UI <- function(id) {
                     step = 1, 
                     sep = ""
         ),
-
-        
-        # uiOutput(ns("yearsSearchUI")),
-
-
         actionButton(ns("queryButton"),
                      label = "Render Data", width = "100%")
 
@@ -64,10 +59,6 @@ summarizedData_UI <- function(id) {
       mainPanel(
         uiOutput(ns("mainPanelUI"))
       )
-      # mainPanel(
-      #   DTOutput(ns("currentSummaryData")),
-      #   downloadData_UI(ns("downloadCurentSummaryData"))
-      # )
     )
 
 
@@ -88,7 +79,7 @@ summarizedData_Server <- function(id, tableName) {
         #only run this block when this button is clicked
         input$queryButton
         #do NOT re-run this block just becuase the values changed; wait for input$queryButton
-        yearInputCheck <- isolate(input$yearSlider)
+        #yearInputCheck <- isolate(input$yearSlider)
         print("running anyway")
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0 || nrow(currentSummaryDataToDisplay()) == 0) {
@@ -114,11 +105,125 @@ summarizedData_Server <- function(id, tableName) {
         req(nrow(currentSummaryDataToDisplay()) > 0)
         downloadData_UI(ns("downloadcurrentSummariesData"))
       })
+      
+      #update watername based on inputs
+      inputsToListen <- reactive({
+        list(
+          input$areaBioSearch
+        )
+      })
 
+      observeEvent(inputsToListen(), {
+        
+        areaBios <- input$areaBioSearch
+        #build query incrementally
+        table <- tbl(CPW_AqDatAnalysis, tableName)
+        
+        if(isTruthy(areaBios)){
+          if(isTruthy(areaBios)){
+            table <- table %>%
+              #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+              filter(AreaBio %in% !!areaBios)
+            
+          }
+          ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
+          #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
+          #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
+          freezeReactiveValue(input, "waterNameSearch")
+          
+          #update waterNmaes based on bio selection
+          selectedWaterNames <- table %>%
+            distinct(WaterName) %>%
+            #show_query() %>%
+            #collect() is when the query actually runs, just builds a query until then
+            #returns as df
+            collect() %>%
+            #just pulls out the one column
+            pull() %>%
+            as.character()
+          #unname()
+          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+          #cleanChoices <- as.character(selectedWaterNames)
+          updateVirtualSelect(
+            session = session,
+            "waterNameSearch", 
+            choices = selectedWaterNames, 
+            selected = selectedWaterNames
+          )
+          
+        } else {
+          updateVirtualSelect(
+            session = session,
+            "waterNameSearch", 
+            choices = allDistinctWaters
+          )
+        }
+      }, ignoreInit = TRUE)
+      
+      observeEvent(input$waterNameSearch, {
+        print("input water search")
+        
+        waterNames <- input$waterNameSearch
+        areaBios <- input$areaBioSearch
+        
+        #build query incrementally
+        table <- tbl(CPW_AqDatAnalysis, tableName)
+        
+        if(isTruthy(waterNames)){
+          if(isTruthy(waterNames)){
+            table <- table %>%
+              filter(WaterName %in% waterNames
+              )
+            
+          }
+          if(isTruthy(areaBios)){
+            table <- table %>%
+              #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+              filter(AreaBio %in% !!areaBios)
+            
+          }
+          ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
+          #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
+          #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
+          #freezeReactiveValue(input, "yearSlider")
+          #freezeReactiveValue(input, "waterNameSearch")
+          
+          
+          #update waterNmaes based on bio selection
+          selectedYears <- table %>%
+            distinct(year(SampleDate)) %>%
+            #show_query() %>%
+            #collect() is when the query actually runs, just builds a query until then
+            #returns as df
+            collect() %>%
+            #just pulls out the one column
+            pull() 
+          #unname()
+          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+          #cleanChoices <- as.character(selectedWaterNames)
+          updateSliderInput(
+            session = session,
+            "yearSlider", 
+            min = min(selectedYears, na.rm = TRUE),
+            max = max(selectedYears, na.rm = TRUE),  
+            value = c(min(selectedYears, na.rm = TRUE), max(selectedYears, na.rm = TRUE))
+          )
+          
+        } else {
+          print("should update back to all years")
+          updateSliderInput(
+            session = session,
+            "yearSlider", 
+            min = min(allYears, na.rm = TRUE),
+            max = max(allYears, na.rm = TRUE),  
+            value = c(min(allYears, na.rm = TRUE), max(allYears, na.rm = TRUE))
+          )
+        }
+      }, ignoreInit = TRUE, ignoreNULL = FALSE) #ignoreNULL = FALSE means to react on an empty virtualSelect INput here
 # Data Wrangling ----------------------------------------------------------
 
       
-      currentSummaryDataToDisplay <- eventReactive(input$queryButton,ignoreNULL = TRUE,{
+      currentSummaryDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE,{
         yearMin <- as.integer(input$yearSlider[1])
         yearMax <- as.integer(input$yearSlider[2])
         waterNames <- input$waterNameSearch
