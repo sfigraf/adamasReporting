@@ -110,49 +110,101 @@ sampleFData_Server <- function(id, tableName) {
       ns <- session$ns
 
 # UI Components -----------------------------------------------------------
-      #render mainpanel UI when the query button is clicked
-      #if the inputs aren't valid then send a message
-      #otherwise, render datatable and save button
-      output$mainPanelUI <- renderUI({
-        #only run this block when this button is clicked
-        input$queryButton
-        #do NOT re-run this block just becuase the values changed; wait for input$queryButton
-        waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
-        stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
-        lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
-        # print(paste("length inputs:", input$lengthSlider))
-        # print(paste("length input checlk:", lengthInputCheck))
-        
-        #if button hasn't been clicked at all yet, retun this message
-        if (input$queryButton == 0) {
-          return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
-                   style = "color: gray;"))
-        }
-        #check if waterNames or Station Code inputs are valid, and return a message if not
-        if (!(waterNameInputCheck || stationCodeInputCheck)) {
-          return(p("Please select a Water Name or Station Code before rendering.", 
-                   style = "color: gray;"))
-        }
-        if (isolate(input$lengthFilter) & !(lengthInputCheck)) {
-          return(p("No data collected for selected year(s) or only NA lengths detected at this water. Please turn off length filter before rendering this data.",
-                   style = "color: gray;"))
-        }
-        #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
-        tagList(
-          uiOutput(ns("downloadDataUI")),
-          box(
-            withSpinner(DTOutput(ns("sampleFData")))
-          )
+      
+      # if sp bio or area bio updates, I want the waterNames and station codes to update
+      inputsToListen <- reactive({
+        list(
+          input$areaBioSearch,
+          input$SpConBioSearch
         )
       })
-      # #save data option only appears if there's a valid dataset to download
-      output$downloadDataUI <- renderUI({
-        req(nrow(sampleFDataToDisplay()) > 0)
-        downloadData_UI(ns("downloadSampleFData"))
-      })
       
-      #slider renders and updates with changes to each of the waterNames or station codes
-      #waternames changes based on sp con bio or area bio
+      observeEvent(inputsToListen(), {
+        
+        areaBios <- input$areaBioSearch
+        spConBios <- input$SpConBioSearch
+        #build query incrementally
+        table <- tbl(CPW_AqDatAnalysis, "SampleFView")
+        
+        #if there is anything selected in either areaBios or Specis bios, udpate waternames and station code options
+        #else, just go back to default options
+        if(isTruthy(areaBios) || isTruthy(spConBios)){
+          if(isTruthy(areaBios)){
+            table <- table %>%
+              #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
+              filter(AreaBio %in% !!areaBios)
+            
+          }#allows it so query builds like a AND statement
+          if(isTruthy(spConBios)) {
+            table <- table %>%
+              filter(SpConBio %in% !!spConBios)
+          } 
+          
+          ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
+          #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
+          #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
+          freezeReactiveValue(input, "waterNameSearch")
+          freezeReactiveValue(input, "stationCodeSearch")
+          freezeReactiveValue(input, "lengthSlider")
+          
+          #update waterNmaes based on bio selection
+          selectedWaterNames <- table %>%
+            distinct(WaterName) %>%
+            #show_query() %>%
+            #collect() is when the query actually runs, just builds a query until then
+            #returns as df
+            collect() %>%
+            #just pulls out the one column
+            pull() %>%
+            sort() %>%
+            as.character()
+          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
+          #cleanChoices <- as.character(selectedWaterNames)
+          updateVirtualSelect(
+            session = session,
+            "waterNameSearch", 
+            choices = selectedWaterNames, 
+            selected = selectedWaterNames
+          )
+          
+          #update station codes based on bio selection
+          selectedStationCodes <- table %>%
+            distinct(StationCode) %>%
+            #show_query() %>%
+            #collect() is when the query actually runs, just builds a query until then
+            #returns as df
+            collect() %>%
+            #just pulls out the one column
+            pull() %>%
+            sort() %>%
+            as.character()
+          
+          
+          updateVirtualSelect(
+            session = session,
+            "stationCodeSearch", 
+            choices = sort(selectedStationCodes), 
+            selected = selectedStationCodes
+          ) 
+          
+        } else {
+          updateVirtualSelect(
+            session = session,
+            "waterNameSearch", 
+            choices = allDistinctWaters
+          )
+          
+          updateVirtualSelect(
+            session = session,
+            "stationCodeSearch", 
+            choices = allStationCodes
+          )
+        }
+        
+      }, ignoreInit = TRUE) #not sure why i don't need ignoreNull here and it works but whatever
+      
+      #year slider renders and updates with changes to each of the waterNames or station codes
+      #waternames an changes based on sp con bio or area bio above
       
       output$yearSliderUI <- renderUI({
         #\|| means that second element will be only be evaluated if first isn't true; not sure if it matters here but probably speeds it up a tad
@@ -177,7 +229,7 @@ sampleFData_Server <- function(id, tableName) {
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             pull()
-
+          
           tagList(
             sliderInput(ns("yearSlider"), "Date",
                         min = min(allyears, na.rm = TRUE),
@@ -190,7 +242,7 @@ sampleFData_Server <- function(id, tableName) {
         }
       })
       
-      #adding optional length filter
+      #adding optional length filter that updates based off year slider, water names, and station code
       output$lengthFilterUI <- renderUI({
         
         req(input$lengthFilter)
@@ -228,7 +280,7 @@ sampleFData_Server <- function(id, tableName) {
         }
         tagList(
           
-          h6("Note: adding this filter autmotically removes detections for fish who have NA for Length"),
+          h6("Note: adding this filter automatically removes observations of fish with NA length"),
           suppressWarnings({
             sliderInput(ns("lengthSlider"), "Length (mm)",
                         min = min(lengthListOptions, na.rm = TRUE),
@@ -241,96 +293,47 @@ sampleFData_Server <- function(id, tableName) {
         
       })
       
-      # if any of these updates, I want the waterName element to update
-      inputsToListen <- reactive({
-        list(
-             input$areaBioSearch,
-             input$SpConBioSearch
+      ####render mainpanel UI when the query button is clicked
+      #if the inputs aren't valid then send a message
+      #otherwise, render datatable and save button
+      # INPUTS NEED TO BE WRAPPED IN isolate() or else it will alwys render when an input is called
+      
+      output$mainPanelUI <- renderUI({
+        #only run this block when this button is clicked
+        input$queryButton
+        #do NOT re-run this block just becuase the values changed; wait for input$queryButton
+        waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
+        stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
+        lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
+
+        #if button hasn't been clicked at all yet, retun this message
+        if (input$queryButton == 0) {
+          return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
+                   style = "color: gray;"))
+        }
+        #check if waterNames or Station Code inputs are valid, and return a message if not
+        if (!(waterNameInputCheck || stationCodeInputCheck)) {
+          return(p("Please select a Water Name or Station Code before rendering.", 
+                   style = "color: gray;"))
+        }
+        #pretty much every time an input is called explicitly it should be wrapped in isolate() within this block to prevent UI render before input$querybutton is clicked
+        if (isolate(input$lengthFilter) & !(lengthInputCheck)) {
+          return(p("No data collected for selected year(s) or only NA lengths detected at this water. Please turn off length filter before rendering this data.",
+                   style = "color: gray;"))
+        }
+        #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
+        tagList(
+          uiOutput(ns("downloadDataUI")),
+          box(
+            withSpinner(DTOutput(ns("sampleFData")))
+          )
         )
       })
-
-      observeEvent(inputsToListen(), {
-
-        areaBios <- input$areaBioSearch
-        spConBios <- input$SpConBioSearch
-        #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, "SampleFView")
-        
-        #if there is anything selected in either areaBios or Specis bios, udpate waternames and station code options
-        #else, just go back to default options
-        if(isTruthy(areaBios) || isTruthy(spConBios)){
-          if(isTruthy(areaBios)){
-            table <- table %>%
-              #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
-              filter(AreaBio %in% !!areaBios)
-            
-          }#allows it so query builds like a AND statement
-          if(isTruthy(spConBios)) {
-            table <- table %>%
-              filter(SpConBio %in% !!spConBios)
-          } 
-          
-          ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
-          #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
-          #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
-          freezeReactiveValue(input, "waterNameSearch")
-          freezeReactiveValue(input, "stationCodeSearch")
-          freezeReactiveValue(input, "lengthSlider")
-          
-          #update waterNmaes based on bio selection
-          selectedWaterNames <- table %>%
-            distinct(WaterName) %>%
-            #show_query() %>%
-            #collect() is when the query actually runs, just builds a query until then
-            #returns as df
-            collect() %>%
-            #just pulls out the one column
-            pull() %>%
-            as.character()
-          #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
-          #cleanChoices <- as.character(selectedWaterNames)
-          updateVirtualSelect(
-            session = session,
-            "waterNameSearch", 
-            choices = selectedWaterNames, 
-            selected = selectedWaterNames
-          )
-
-          #update station codes based on bio selection
-          selectedStationCodes <- table %>%
-            distinct(StationCode) %>%
-            #show_query() %>%
-            #collect() is when the query actually runs, just builds a query until then
-            #returns as df
-            collect() %>%
-            #just pulls out the one column
-            pull() %>%
-            as.character()
-         
-
-          updateVirtualSelect(
-            session = session,
-            "stationCodeSearch", 
-            choices = sort(selectedStationCodes), 
-            selected = selectedStationCodes
-          ) 
-
-        } else {
-          updateVirtualSelect(
-            session = session,
-            "waterNameSearch", 
-            choices = allDistinctWaters
-          )
-          
-          updateVirtualSelect(
-            session = session,
-            "stationCodeSearch", 
-            choices = allStationCodes
-          )
-        }
-
-      }, ignoreInit = TRUE) #not sure why i don't need ignoreNull here and it works but whatever
-      
+      # #save data option only appears if there's a valid dataset to download
+      output$downloadDataUI <- renderUI({
+        req(nrow(sampleFDataToDisplay()) > 0)
+        downloadData_UI(ns("downloadSampleFData"))
+      })
 
 # data wrangling ----------------------------------------------------------
       
