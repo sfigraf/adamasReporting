@@ -110,3 +110,10 @@ x <- sampleFData %>%
   #count(Length_mm) %>%
   collect() #%>%
   #sort(Length_mm) 
+
+NALengths <- sampleFData %>%
+  filter(is.na(Length_mm)) %>%
+  collect()
+NASurveyIDs <- sampleFData %>%
+  filter(is.na(SurveyID)) %>%
+  collect()

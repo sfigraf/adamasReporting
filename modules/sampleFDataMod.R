@@ -187,17 +187,43 @@ sampleFData_Server <- function(id, tableName) {
         
         req(input$lengthFilter)
         
+        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
+          #update years based on waterName,
+          waterNames <- input$waterNameSearch
+          stationCodes <- input$stationCodeSearch
+          
+          sampleFForLengthSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
+          
+          if(isTruthy(waterNames)){
+            sampleFForLengthSlider <- sampleFForLengthSlider %>%
+              filter(WaterName %in% waterNames)
+          }
+          
+          if(isTruthy(stationCodes)){
+            sampleFForLengthSlider <- sampleFForLengthSlider %>%
+              filter(StationCode %in% stationCodes)
+          }
+          
+          lengthListOptions <- sampleFForLengthSlider %>%
+            distinct(Length_mm) %>%
+            #show_query() %>%
+            pull()
+        } else {
+          lengthListOptions <- allLengths
+        }
         tagList(
           
           h6("Note: adding this filter autmotically removes detections for fish who have NA for Length"),
           
           sliderInput(ns("lengthSlider"), "Length (mm)",
-                      min = min(allLengths, na.rm = TRUE),
-                      max = max(allLengths, na.rm = TRUE),  
-                      value = c(min(allLengths, na.rm = TRUE), max(allLengths, na.rm = TRUE)),
+                      min = min(lengthListOptions, na.rm = TRUE),
+                      max = max(lengthListOptions, na.rm = TRUE),  
+                      value = c(min(lengthListOptions, na.rm = TRUE), max(lengthListOptions, na.rm = TRUE)),
                       step = 1
           )
         )
+        
+        
       })
       
       # if any of these updates, I want the waterName element to update
