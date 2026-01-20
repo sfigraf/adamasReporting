@@ -1,25 +1,35 @@
 ###sampleFData
-allDistinctWaterssql <- c("SELECT DISTINCT WaterName FROM SampleFView")
-allDistinctWaters <- dbGetQuery(CPW_AqDatAnalysis, allDistinctWaterssql)
+sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+# allDistinctWaterssql <- c("SELECT DISTINCT WaterName FROM SampleFView")
+# allDistinctWaters <- dbGetQuery(CPW_AqDatAnalysis, allDistinctWaterssql)
+
+allDistinctWaters <- sampleFData %>%
+  distinct(WaterName) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
 
 
 allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
 allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
 
-allBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+allBios <- sampleFData %>%
   distinct(AreaBio) %>%
   show_query() %>%
-  pull() 
+  pull() %>%
+  sort()
 
-allSPBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+allSPBios <- sampleFData %>%
   distinct(SpConBio) %>%
   show_query() %>%
-  pull() 
+  pull() %>%
+  sort()
 
-allStationCodes <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
+allStationCodes <- sampleFData %>%
   distinct(StationCode) %>%
   show_query() %>%
-  pull() 
+  pull() %>%
+  sort()
 
 sampleFData_UI <- function(id) {
   ns <- NS(id)

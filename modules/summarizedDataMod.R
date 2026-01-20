@@ -8,7 +8,13 @@ allYears <- data %>%
 allBios <- data %>%
   distinct(AreaBio) %>%
   show_query() %>%
-  pull() 
+  pull() %>%
+  sort()
+allDistinctWaters <- data %>%
+  distinct(WaterName) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
 
 # allSPBios <- data %>%
 #   distinct(SpConBio) %>%
@@ -140,7 +146,8 @@ summarizedData_Server <- function(id, tableName) {
             collect() %>%
             #just pulls out the one column
             pull() %>%
-            as.character()
+            as.character() %>%
+            sort()
           #unname()
           #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
           #cleanChoices <- as.character(selectedWaterNames)
