@@ -10,7 +10,10 @@ runReport_Server <- function(id, data) {
   moduleServer(
     id,
     function(input, output, session) {
+      
       ns <- session$ns
+      
+      values <- reactiveValues()
 
 # modal to appear on button click -----------------------------------------
 
@@ -45,7 +48,15 @@ runReport_Server <- function(id, data) {
           size = "s"
           
         ))
+        
       }, ignoreInit = TRUE)
+      
+      # params <- list(
+      #   sampleFData = data,
+      #   lengthWeightGraph = isolate(input$lengthWeightCheckbox),
+      #   lengthFrequencyGraph = isolate(input$lengthFrequencyCheckbox)
+      # )
+      # values$params <- params
 
 # rendering markdwon and save logic ---------------------------------------
       output$exportReportButton <- downloadHandler(
@@ -65,9 +76,13 @@ runReport_Server <- function(id, data) {
           removeModal()
           
           #showModal(RMDGenerationModal())
-          
+          reportParams <- list(
+            sampleFData = data,
+            lengthWeightGraph = isolate(input$lengthWeightCheckbox),
+            lengthFrequencyGraph = isolate(input$lengthFrequencyCheckbox)
+          )
           rmarkdown::render(tempReport, output_file = file,
-                            #params = values$params,
+                            params = reportParams,
                             envir = new.env(parent = globalenv()))
           showNotification("Report successfully saved.")
           #removeModal()

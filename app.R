@@ -13,6 +13,8 @@ library(DT)
 library(shinyWidgets)
 library(dbplyr)
 library(openxlsx) #for saving excel file
+library(knitr) #for rmarkdown
+
 
 source("scripts/connectToDB.R")
 source("misc/graphicsOptions.R")
