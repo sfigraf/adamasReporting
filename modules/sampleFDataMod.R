@@ -325,21 +325,21 @@ sampleFData_Server <- function(id, tableName) {
         tagList(
           div(style = "display: flex; gap: 10px; margin-bottom: 10px; ",
               uiOutput(ns("downloadDataUI")),
-              runReport_UI(ns("reportBuilderUI"))
+              uiOutput(ns("reportBuilderUI"))
           ),
-          # fluidRow(
-          #   column(width = 2, uiOutput(ns("downloadDataUI"))),
-          #   column(width = 2, runReport_UI(ns("reportBuilderUI")))
-          # ),
           box(
             withSpinner(DTOutput(ns("sampleFData")))
           )
         )
       })
-      # #save data option only appears if there's a valid dataset to download
+      # #save data option and run report options only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
         req(nrow(sampleFDataToDisplay()) > 0)
         downloadData_UI(ns("downloadSampleFData"))
+      })
+      output$reportBuilderUI <- renderUI({
+        req(nrow(sampleFDataToDisplay()) > 0)
+        runReport_UI(ns("reportBuilder"))
       })
 
 # data wrangling ----------------------------------------------------------
@@ -426,6 +426,7 @@ sampleFData_Server <- function(id, tableName) {
       #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
       
       downloadData_Server("downloadSampleFData", sampleFDataToDisplay,  "SampleFData")
+      runReport_Server("reportBuilder", sampleFDataToDisplay)
       
     }
   )
