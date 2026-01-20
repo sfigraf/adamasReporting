@@ -1,38 +1,36 @@
-###sampleFData
-sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
-# allDistinctWaterssql <- c("SELECT DISTINCT WaterName FROM SampleFView")
-# allDistinctWaters <- dbGetQuery(CPW_AqDatAnalysis, allDistinctWaterssql)
-
-allDistinctWaters <- sampleFData %>%
-  distinct(WaterName) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-
-
-allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
-allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
-
-allBios <- sampleFData %>%
-  distinct(AreaBio) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-
-allSPBios <- sampleFData %>%
-  distinct(SpConBio) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-
-allStationCodes <- sampleFData %>%
-  distinct(StationCode) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-
 sampleFData_UI <- function(id) {
   ns <- NS(id)
+  
+  ###sampleFData options for filters
+  sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+  
+  allDistinctWaters <- sampleFData %>%
+    distinct(WaterName) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  
+  allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
+  allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
+  
+  allBios <- sampleFData %>%
+    distinct(AreaBio) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  
+  allSPBios <- sampleFData %>%
+    distinct(SpConBio) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  
+  allStationCodes <- sampleFData %>%
+    distinct(StationCode) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  
   tagList(
     sidebarLayout(
       sidebarPanel(
@@ -44,7 +42,8 @@ sampleFData_UI <- function(id) {
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
                            #this ensures the dropdown is fully visible over the slider
-                           dropboxWrapper = "body" 
+                           dropboxWrapper = "body",
+                           zIndex = 99999 
         ), 
         virtualSelectInput(ns("SpConBioSearch"),
                            label = "Sp Con Bio",
@@ -53,7 +52,8 @@ sampleFData_UI <- function(id) {
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
                            #this ensures the dropdown is fully visible over the slider
-                           dropboxWrapper = "body" 
+                           dropboxWrapper = "body",
+                           zIndex = 99999
         ), 
         
         virtualSelectInput(ns("waterNameSearch"),
@@ -63,8 +63,10 @@ sampleFData_UI <- function(id) {
           search = TRUE,          
           autoSelectFirstOption = FALSE, 
           #this ensures the dropdown is fully visible over the slider
-          dropboxWrapper = "body" 
+          dropboxWrapper = "body",
+          zIndex = 99999
         ), 
+        
         virtualSelectInput(ns("stationCodeSearch"),
                            label = "Station Code",
                            choices = sort(allStationCodes),
@@ -72,18 +74,11 @@ sampleFData_UI <- function(id) {
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
                            #this ensures the dropdown is fully visible over the slider
-                           dropboxWrapper = "body" 
+                           dropboxWrapper = "body",
+                           zIndex = 99999
         ), 
-        # sliderInput(ns("yearSlider"), "Date",
-        #             min = min(allYears, na.rm = TRUE),
-        #             max = max(allYears, na.rm = TRUE),  
-        #             value = c(min(allYears, na.rm = TRUE), max(allYears, na.rm = TRUE)),
-        #             step = 1, 
-        #             sep = ""
-        #             #timeFormat = "%y"
-        # ),
-        uiOutput(ns("yearSliderUI")),
         
+        uiOutput(ns("yearSliderUI")),
         
         actionButton(ns("queryButton"), 
                      label = "Render Data", width = "100%")
@@ -105,7 +100,9 @@ sampleFData_Server <- function(id, tableName) {
       ns <- session$ns
 
 # UI Components -----------------------------------------------------------
-      
+      #render mainpanel UI when the query button is clicked
+      #if the inputs aren't valid then send a message
+      #otherwise, render datatable and save button
       output$mainPanelUI <- renderUI({
         #only run this block when this button is clicked
         input$queryButton
@@ -146,19 +143,19 @@ sampleFData_Server <- function(id, tableName) {
           waterNames <- input$waterNameSearch
           stationCodes <- input$stationCodeSearch
           
-          data <- tbl(CPW_AqDatAnalysis, "SampleFView")
+          sampleFForSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
           
           if(isTruthy(waterNames)){
-            data <- data %>%
+            sampleFForSlider <- sampleFForSlider %>%
               filter(WaterName %in% waterNames)
           }
           
           if(isTruthy(stationCodes)){
-            data <- data %>%
+            sampleFForSlider <- sampleFForSlider %>%
               filter(StationCode %in% stationCodes)
           }
           
-          allyears <- data %>%
+          allyears <- sampleFForSlider %>%
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             pull()
@@ -190,6 +187,8 @@ sampleFData_Server <- function(id, tableName) {
         #build query incrementally
         table <- tbl(CPW_AqDatAnalysis, "SampleFView")
         
+        #if there is anything selected in either areaBios or Specis bios, udpate waternames and station code options
+        #else, just go back to default options
         if(isTruthy(areaBios) || isTruthy(spConBios)){
           if(isTruthy(areaBios)){
             table <- table %>%
@@ -201,6 +200,7 @@ sampleFData_Server <- function(id, tableName) {
             table <- table %>%
               filter(SpConBio %in% !!spConBios)
           } 
+          
           ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
           #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
           #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
@@ -217,7 +217,6 @@ sampleFData_Server <- function(id, tableName) {
             #just pulls out the one column
             pull() %>%
             as.character()
-          #unname()
           #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
           #cleanChoices <- as.character(selectedWaterNames)
           updateVirtualSelect(
@@ -260,15 +259,15 @@ sampleFData_Server <- function(id, tableName) {
           )
         }
 
-      }, ignoreInit = TRUE)
+      }, ignoreInit = TRUE) #not sure why i don't need ignoreNull here and it works but whatever
       
 
 # data wrangling ----------------------------------------------------------
       
       sampleFDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
+        
         #only run if one of these are true. if not, it will get get caught in the render UI above
         req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch))
-
 
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
         #caused because it's hard to dbplyr to translate R to sql with lists directly inside a filter for a remote database table
@@ -277,35 +276,36 @@ sampleFData_Server <- function(id, tableName) {
         yearMax <- as.integer(input$yearSlider[2])
         waterNames <- input$waterNameSearch
         stationCodes <- input$stationCodeSearch
-        
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
         
-        data <- tbl(CPW_AqDatAnalysis, tableName) %>%
+        #filter data based on inputs
+        #allows it so query builds like a AND statement
+        samplFDataFiltered <- tbl(CPW_AqDatAnalysis, tableName) %>%
           filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax)
+        
         if(isTruthy(waterNames)){
-          data <- data %>%
-            filter(WaterName %in% waterNames
-            ) 
+          samplFDataFiltered <- samplFDataFiltered %>%
+            filter(WaterName %in% waterNames) 
         }
+        
         if(isTruthy(stationCodes)){
-          data <- data %>%
-            filter(StationCode %in% stationCodes
-            ) 
+          samplFDataFiltered <- samplFDataFiltered %>%
+            filter(StationCode %in% stationCodes) 
         }
           
         if(isTruthy(areaBios)){
-          data <- data %>%
+          samplFDataFiltered <- samplFDataFiltered %>%
             #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
             filter(AreaBio %in% !!areaBios)
-          
-        }#allows it so query builds like a AND statement
+        }
+        
         if(isTruthy(spConBios)) {
-          data <- data %>%
+          samplFDataFiltered <- samplFDataFiltered %>%
             filter(SpConBio %in% !!spConBios)
         } 
         
-        finalFilteredData <- data %>%
+        finalFilteredData <- samplFDataFiltered %>%
           #show_query() %>%
           collect()
         
@@ -314,7 +314,6 @@ sampleFData_Server <- function(id, tableName) {
       })
 
 # Output display ----------------------------------------------------------
-      
       
       output$sampleFData <- renderDT({
         
@@ -340,8 +339,6 @@ sampleFData_Server <- function(id, tableName) {
       #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
       
       downloadData_Server("downloadSampleFData", sampleFDataToDisplay,  "SampleFData")
-      
-      
       
     }
   )

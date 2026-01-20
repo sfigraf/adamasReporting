@@ -1,59 +1,50 @@
-# sql2<-"Select * from CurrentSummary where year(SampleDate)=2025"
-# SummarizedData<- dbGetQuery(CPW_AqDatAnalysis, sql2)
-data <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
-allYears <- data %>%
-  distinct(year(SampleDate)) %>%
-  pull()
-
-allBios <- data %>%
-  distinct(AreaBio) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-allDistinctWaters <- data %>%
-  distinct(WaterName) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-
-# allSPBios <- data %>%
-#   distinct(SpConBio) %>%
-#   show_query() %>%
-#   pull() 
-
-# allStationCodes <- data %>%
-#   distinct(StationCode) %>%
-#   show_query() %>%
-#   pull() 
-
 summarizedData_UI <- function(id) {
   ns <- NS(id)
+  
+  #current summary options for filters
+  data <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
+  allYearsSummarizedData <- data %>%
+    distinct(year(SampleDate)) %>%
+    pull()
+  allBiosSummarizedData <- data %>%
+    distinct(AreaBio) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  allDistinctWatersSummarizedData <- data %>%
+    distinct(WaterName) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  
   tagList(
 
     sidebarLayout(
       sidebarPanel(
         virtualSelectInput(ns("areaBioSearch"),
                            label = "Area Bio",
-                           choices = allBios,
+                           choices = allBiosSummarizedData,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
                            #this ensures the dropdown is fully visible over the slider
-                           dropboxWrapper = "body" 
+                           dropboxWrapper = "body",
+                           zIndex = 99999 
         ), 
         virtualSelectInput(ns("waterNameSearch"),
                            label = "Water Name",
-                           choices = allDistinctWaters,
+                           choices = allDistinctWatersSummarizedData,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
                            #this ensures the dropdown is fully visible over the slider
-                           dropboxWrapper = "body" 
+                           dropboxWrapper = "body", 
+                           zIndex = 99999
         ), 
         sliderInput(ns("yearSlider"), "Date",
-                    min = min(allYears, na.rm = TRUE),
-                    max = max(allYears, na.rm = TRUE),  
-                    value = c(min(allYears, na.rm = TRUE), max(allYears, na.rm = TRUE)),
+                    min = min(allYearsSummarizedData, na.rm = TRUE),
+                    max = max(allYearsSummarizedData, na.rm = TRUE),  
+                    value = c(min(allYearsSummarizedData, na.rm = TRUE), max(allYearsSummarizedData, na.rm = TRUE)),
                     step = 1, 
                     sep = ""
         ),
@@ -66,9 +57,6 @@ summarizedData_UI <- function(id) {
         uiOutput(ns("mainPanelUI"))
       )
     )
-
-
-
   )
 }
 
@@ -86,18 +74,12 @@ summarizedData_Server <- function(id, tableName) {
         input$queryButton
         #do NOT re-run this block just becuase the values changed; wait for input$queryButton
         #yearInputCheck <- isolate(input$yearSlider)
-        print("running anyway")
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0 || nrow(currentSummaryDataToDisplay()) == 0) {
           return(p("Please select a valid area bio, Water Name, or year range and click 'Render'.", 
                    style = "color: gray;"))
         }
-        
-        #check if waterNames or Station Code inputs are valid, and return a message if not
-        # if (!yearInputCheck) {
-        #   return(p("Please select a valid year range before rendering.", 
-        #            style = "color: gray;"))
-        # }
+
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
         tagList(
           uiOutput(ns("downloadDataUI")),
@@ -148,7 +130,6 @@ summarizedData_Server <- function(id, tableName) {
             pull() %>%
             as.character() %>%
             sort()
-          #unname()
           #error: in as.vector: cannot coerce type 'environment' to vector of type 'character' solved by explicitly making it a character. 
           #cleanChoices <- as.character(selectedWaterNames)
           updateVirtualSelect(
@@ -162,14 +143,13 @@ summarizedData_Server <- function(id, tableName) {
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
-            choices = allDistinctWaters
+            choices = allDistinctWatersSummarizedData
           )
         }
       }, ignoreInit = TRUE)
       
       observeEvent(input$waterNameSearch, {
-        print("input water search")
-        
+
         waterNames <- input$waterNameSearch
         areaBios <- input$areaBioSearch
         
@@ -189,9 +169,7 @@ summarizedData_Server <- function(id, tableName) {
               filter(AreaBio %in% !!areaBios)
             
           }
-          ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
-          #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
-          #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
+          
           #freezeReactiveValue(input, "yearSlider")
           #freezeReactiveValue(input, "waterNameSearch")
           
@@ -217,13 +195,13 @@ summarizedData_Server <- function(id, tableName) {
           )
           
         } else {
-          print("should update back to all years")
+          
           updateSliderInput(
             session = session,
             "yearSlider", 
-            min = min(allYears, na.rm = TRUE),
-            max = max(allYears, na.rm = TRUE),  
-            value = c(min(allYears, na.rm = TRUE), max(allYears, na.rm = TRUE))
+            min = min(allYearsSummarizedData, na.rm = TRUE),
+            max = max(allYearsSummarizedData, na.rm = TRUE),  
+            value = c(min(allYearsSummarizedData, na.rm = TRUE), max(allYearsSummarizedData, na.rm = TRUE))
           )
         }
       }, ignoreInit = TRUE, ignoreNULL = FALSE) #ignoreNULL = FALSE means to react on an empty virtualSelect INput here
@@ -231,6 +209,7 @@ summarizedData_Server <- function(id, tableName) {
 
       
       currentSummaryDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE,{
+        
         yearMin <- as.integer(input$yearSlider[1])
         yearMax <- as.integer(input$yearSlider[2])
         waterNames <- input$waterNameSearch
@@ -252,14 +231,13 @@ summarizedData_Server <- function(id, tableName) {
 
         }
         finalFilteredData <- data %>%
-          show_query() %>%
+          #show_query() %>%
           collect() #%>%
           #as.data.frame
         #columns in this db are "blobs" type which are found in DBs I guess. this converts them to character type and allows DT to display them
         finalFilteredData1 <- finalFilteredData %>%
           mutate(across(where(~inherits(., "blob")), 
                         ~sapply(., function(x) paste(as.character(x), collapse = ""))))
-        print("returing data")
 
         return(finalFilteredData1)
       })

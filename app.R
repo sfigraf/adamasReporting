@@ -39,9 +39,7 @@ ui <- fluidPage(
              id = "tabs", 
              theme = shinytheme("cerulean"),
              tabPanel(tags$div("SampleF Data",style = title_style), 
-                      sampleFData_UI("sampleFData")), 
-             # tabPanel("SampleF Data UI 2", 
-             #          sampleFData_UI2("sampleFData2")), 
+                      sampleFData_UI("sampleFData")),  
              tabPanel(tags$div("Summarized Data", style = title_style), 
                       summarizedData_UI("summarizedData"))
   )    
@@ -51,7 +49,6 @@ ui <- fluidPage(
 server <- function(input, output) {
   observe({
     sampleFData_Server("sampleFData", tableName = "SampleFView")
-    #sampleFData_Server2("sampleFData2", tableName = "SampleFView")
     summarizedData_Server("summarizedData", tableName = "CurrentSummary")
   })
 }
