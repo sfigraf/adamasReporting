@@ -5,21 +5,20 @@ output: html_document
 params:
   sampleFData: NULL
   lengthWeightGraph: FALSE
-  lengthFrequencyGraph: NULL
+  lengthFrequencyGraph: FALSE
 ---
 
 ```{r setup, include=FALSE}
 require(knitr)
 require(tidyverse)
 require(plotly)
+
+sampleFData <- params$sampleFData()
+
 ```
 
 ```{r lwGraph, include=TRUE, echo=FALSE}
-#print(params$lengthWeightGraph)
 if(params$lengthWeightGraph){
-  asis_output("## Parameter Passed")
-  
-  sampleFData <- params$sampleFData()
   
   plot <- sampleFData %>%
           ggplot(aes(x = Length_mm, y = Weight_g, color = CommonName)) +
@@ -27,6 +26,24 @@ if(params$lengthWeightGraph){
           theme_classic() +
           labs(title = "Length/Weight Data") #+
           #scale_color_manual(values = allColors)
+  ggplotly(plot)
+  
+} else{
+    asis_output("## Parameter not selected")
+
+}
+```
+
+```{r lfGraph, include=TRUE, echo=FALSE}
+if(params$lengthFrequencyGraph){
+  asis_output("## Length/Frequencies")
+  
+  plot <- sampleFData %>%
+          ggplot(aes(x = Length_mm, fill = CommonName) ) +
+          geom_histogram(binwidth = 20)+
+          theme_classic() +
+          labs(title = "Length Frequencies", caption = "Binwidth = 20mm") #+
+          #scale_fill_manual(values = allColors)
   ggplotly(plot)
   
 } else{

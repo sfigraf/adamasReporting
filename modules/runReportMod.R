@@ -30,6 +30,7 @@ runReport_Server <- function(id, data) {
             column(
               width = 12,
               align = "center", 
+              useShinyjs(),
               downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"))
             )
           ),
@@ -51,18 +52,22 @@ runReport_Server <- function(id, data) {
         
       }, ignoreInit = TRUE)
       
-      # params <- list(
-      #   sampleFData = data,
-      #   lengthWeightGraph = isolate(input$lengthWeightCheckbox),
-      #   lengthFrequencyGraph = isolate(input$lengthFrequencyCheckbox)
-      # )
-      # values$params <- params
+      observe({
+        # Enable only if at least one checkbox is selected
+        validReportInputs <- isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox)
+        
+        if (validReportInputs) {
+          shinyjs::enable("exportReportButton")
+        } else {
+          shinyjs::disable("exportReportButton")
+        }
+      })
 
 # rendering markdwon and save logic ---------------------------------------
       output$exportReportButton <- downloadHandler(
         
         filename = function() {
-          paste("SampleFDataReport_", Sys.Date(),  ".html")
+          paste0("SampleFDataReport_", Sys.Date(),  ".html")
           
         },
         
@@ -71,7 +76,6 @@ runReport_Server <- function(id, data) {
           #Create a temporary path for the template
           tempReport <- file.path(tempdir(), "report.Rmd")
           file.copy("./markdownTemplate/sampleFDataReport.Rmd", tempReport, overwrite = TRUE)
-          
           
           removeModal()
           
@@ -84,7 +88,7 @@ runReport_Server <- function(id, data) {
           rmarkdown::render(tempReport, output_file = file,
                             params = reportParams,
                             envir = new.env(parent = globalenv()))
-          showNotification("Report successfully saved.")
+          #showNotification("Report successfully saved.")
           #removeModal()
           
         }#,
