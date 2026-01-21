@@ -21,7 +21,7 @@ runReport_Server <- function(id, data) {
       observeEvent(input$reportBuilderButton, {
         
         showModal(modalDialog(
-          title = "Select Figures to Include in Exported Report",
+          title = "Select figures to include in report",
           
           checkboxInput(ns("lengthWeightCheckbox"), "Length/Weight Graph"),
           checkboxInput(ns("lengthFrequencyCheckbox"), "Length/Frequency Graph"),

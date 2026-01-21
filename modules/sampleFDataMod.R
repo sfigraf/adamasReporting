@@ -323,28 +323,46 @@ sampleFData_Server <- function(id, tableName) {
         }
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
         tagList(
-          div(style = "display: flex; gap: 10px; margin-bottom: 10px; ",
-              uiOutput(ns("downloadDataUI")),
-              uiOutput(ns("reportBuilderUI"))
-          ),
-          box(
-            withSpinner(DTOutput(ns("sampleFData")))
+          tabsetPanel(
+            tabPanel("Raw Data", 
+                     div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+                         uiOutput(ns("downloadDataUI")),
+                         uiOutput(ns("reportBuilderUI"))
+                     ),
+                     box(
+                       withSpinner(DTOutput(ns("sampleFData")))
+                     )
+            ), 
+            tabPanel("Summarized Data", 
+                     div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+                         uiOutput(ns("downloadSummarizedDataUI"))
+                     ),
+                     box(
+                       withSpinner(DTOutput(ns("sampleFSummarizedData")))
+                     )
+            )
           )
+          
         )
       })
       # #save data option and run report options only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
-        req(nrow(sampleFDataToDisplay()) > 0)
+        req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
         downloadData_UI(ns("downloadSampleFData"))
       })
       output$reportBuilderUI <- renderUI({
-        req(nrow(sampleFDataToDisplay()) > 0)
+        req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
         runReport_UI(ns("reportBuilder"))
+      })
+      #for summarized data
+      output$downloadSummarizedDataUI <- renderUI({
+        req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
+        downloadData_UI(ns("downloadSampleFSummarizedData"))
       })
 
 # data wrangling ----------------------------------------------------------
       
-      sampleFDataToDisplay <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
+      sampleFDataList <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
         
         #only run if one of these are true. if not, it will get get caught in the render UI above
         req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch))
@@ -396,7 +414,15 @@ sampleFData_Server <- function(id, tableName) {
           #show_query() %>%
           collect()
         
-        return(finalFilteredData)
+        sampleFSummarizedData <- finalFilteredData %>%
+          count(CommonName, name = "Number of Fish") 
+        
+        finalFilteredDataList <- list(
+          "sampleFRawDataToDisplay" = finalFilteredData, 
+          "sampleFSummarizedData" = sampleFSummarizedData
+        )
+        
+        return(finalFilteredDataList)
         
       })
 
@@ -404,9 +430,9 @@ sampleFData_Server <- function(id, tableName) {
       
       output$sampleFData <- renderDT({
         
-        req(sampleFDataToDisplay())
+        req(sampleFDataList()$sampleFRawDataToDisplay)
         
-        datatable(sampleFDataToDisplay(),
+        datatable(sampleFDataList()$sampleFRawDataToDisplay,
                   rownames = FALSE,
                   extensions = c('Buttons'),
                   #for slider filter instead of text input
@@ -421,12 +447,34 @@ sampleFData_Server <- function(id, tableName) {
        
       }, server = TRUE)
       
-      #not using sampleFDataToDisplay() because that unwraps the object and passes the static result of the data at that exact moment. instead, 
-      #sampleFDataToDisplay passes the reactive object itself and tells the mod to "go get" the data
+      output$sampleFSummarizedData <- renderDT({
+        
+        req(sampleFDataList()$sampleFSummarizedData)
+        
+        datatable(sampleFDataList()$sampleFSummarizedData,
+                  rownames = FALSE,
+                  extensions = c('Buttons'),
+                  #for slider filter instead of text input
+                  filter = 'top',
+                  options = list(
+                    pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
+                    dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
+                    language = list(emptyTable = "Enter inputs and press Render Table")
+                    #buttons = c('csv', 'excel')
+                  )
+        )
+        
+      }, server = TRUE)
+      
+      #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
+      #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
       #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
       
-      downloadData_Server("downloadSampleFData", sampleFDataToDisplay,  "SampleFData")
-      runReport_Server("reportBuilder", sampleFDataToDisplay)
+      #sample f rawe data tab
+      downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
+      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}))
+      #summarized data tab
+      downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
       
     }
   )
