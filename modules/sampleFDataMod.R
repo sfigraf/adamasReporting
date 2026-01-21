@@ -143,6 +143,8 @@ sampleFData_Server <- function(id, tableName) {
           ##freeze these input reactive values and ignore downstream observers (in this case, the Slider UI render) until they have completely finisheed
           #this prevents slider from "re-rendering" once first for watername update and again for stationcode update
           #could also try looking into debounce() to wait a few milliseconds for the reactives to settle
+          #from shiny website:  it’s actually good practice to always use it when you dynamically change an input value. The actual modification takes some time to flow to the browser then back to Shiny, and in the interim any reads of the value are at best wasted, and at worst lead to errors. Use freezeReactiveValue() to tell all downstream calculations that an input value is stale and they should save their effort until it’s useful.
+          #https://mastering-shiny.org/action-dynamic.html
           freezeReactiveValue(input, "waterNameSearch")
           freezeReactiveValue(input, "stationCodeSearch")
           freezeReactiveValue(input, "lengthSlider")
@@ -333,7 +335,7 @@ sampleFData_Server <- function(id, tableName) {
                        withSpinner(DTOutput(ns("sampleFData")))
                      )
             ), 
-            tabPanel("Summarized Data", 
+            tabPanel("Species Summarized Data", 
                      div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
                          uiOutput(ns("downloadSummarizedDataUI"))
                      ),
@@ -415,7 +417,14 @@ sampleFData_Server <- function(id, tableName) {
           collect()
         
         sampleFSummarizedData <- finalFilteredData %>%
-          count(CommonName, name = "Number of Fish") 
+          group_by(CommonName) %>%
+          summarize(`Number of Fish` = n(), 
+                    `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
+                    `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
+                    `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
+                    `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
+                    `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
+                    )
         
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData, 
