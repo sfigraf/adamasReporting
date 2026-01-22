@@ -31,6 +31,12 @@ sampleFData_UI <- function(id) {
     pull() %>%
     sort()
   
+  allSurveyIDs <- sampleFData %>%
+    distinct(SurveyID) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+  
   allLengths <- sampleFData %>%
     distinct(Length_mm) %>%
     show_query() %>%
@@ -75,6 +81,17 @@ sampleFData_UI <- function(id) {
         virtualSelectInput(ns("stationCodeSearch"),
                            label = "Station Code",
                            choices = sort(allStationCodes),
+                           multiple = TRUE,
+                           search = TRUE,          
+                           autoSelectFirstOption = FALSE, 
+                           #this ensures the dropdown is fully visible over the slider
+                           dropboxWrapper = "body",
+                           zIndex = 99999
+        ), 
+        
+        virtualSelectInput(ns("surveyIDSearch"),
+                           label = "Survey ID",
+                           choices = sort(allSurveyIDs),
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -147,7 +164,9 @@ sampleFData_Server <- function(id, tableName) {
           #https://mastering-shiny.org/action-dynamic.html
           freezeReactiveValue(input, "waterNameSearch")
           freezeReactiveValue(input, "stationCodeSearch")
+          freezeReactiveValue(input, "surveyIDSearch")
           freezeReactiveValue(input, "lengthSlider")
+          
           
           #update waterNmaes based on bio selection
           selectedWaterNames <- table %>%
@@ -189,6 +208,21 @@ sampleFData_Server <- function(id, tableName) {
             selected = selectedStationCodes
           ) 
           
+          #update SurveyID based on bio selection
+          selectedSurveyIDs <- table %>%
+            distinct(SurveyID) %>%
+            collect() %>%
+            pull() %>%
+            sort() %>%
+            as.character()
+          
+          updateVirtualSelect(
+            session = session,
+            "surveyIDSearch", 
+            choices = sort(selectedSurveyIDs), 
+            selected = selectedSurveyIDs
+          ) 
+          
         } else {
           updateVirtualSelect(
             session = session,
@@ -201,6 +235,13 @@ sampleFData_Server <- function(id, tableName) {
             "stationCodeSearch", 
             choices = allStationCodes
           )
+          
+          updateVirtualSelect(
+            session = session,
+            "surveyIDSearch", 
+            choices = allSurveyIDs
+          )
+          
         }
         
       }, ignoreInit = TRUE) #not sure why i don't need ignoreNull here and it works but whatever
@@ -210,10 +251,11 @@ sampleFData_Server <- function(id, tableName) {
       
       output$yearSliderUI <- renderUI({
         #\|| means that second element will be only be evaluated if first isn't true; not sure if it matters here but probably speeds it up a tad
-        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch)
+        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch) || isTruthy(input$surveyIDSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch)
           #update years based on waterName,
           waterNames <- input$waterNameSearch
           stationCodes <- input$stationCodeSearch
+          surveyIDs <- input$surveyIDSearch
 
           sampleFForSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
 
@@ -225,6 +267,11 @@ sampleFData_Server <- function(id, tableName) {
           if(isTruthy(stationCodes)){
             sampleFForSlider <- sampleFForSlider %>%
               filter(StationCode %in% stationCodes)
+          }
+          
+          if(isTruthy(surveyIDs)){
+            sampleFForSlider <- sampleFForSlider %>%
+              filter(SurveyID %in% surveyIDs)
           }
 
           allyears <- sampleFForSlider %>%
@@ -249,7 +296,7 @@ sampleFData_Server <- function(id, tableName) {
         
         req(input$lengthFilter)
         
-        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
+        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch) || isTruthy(input$surveyIDSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
           
           yearMin <- as.integer(input$yearSlider[1])
           yearMax <- as.integer(input$yearSlider[2])
@@ -257,6 +304,7 @@ sampleFData_Server <- function(id, tableName) {
           #update years based on waterName,
           waterNames <- input$waterNameSearch
           stationCodes <- input$stationCodeSearch
+          surveyIDs <- input$surveyIDSearch
           
           sampleFForLengthSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
           
@@ -268,6 +316,11 @@ sampleFData_Server <- function(id, tableName) {
           if(isTruthy(stationCodes)){
             sampleFForLengthSlider <- sampleFForLengthSlider %>%
               filter(StationCode %in% stationCodes)
+          }
+          
+          if(isTruthy(surveyIDs)){
+            sampleFForLengthSlider <- sampleFForLengthSlider %>%
+              filter(SurveyID %in% surveyIDs)
           }
           #filter based off selected years as well
           #wait until year slider is valid before running this part
@@ -306,6 +359,7 @@ sampleFData_Server <- function(id, tableName) {
         #do NOT re-run this block just becuase the values changed; wait for input$queryButton
         waterNameInputCheck <- isolate(isTruthy(input$waterNameSearch))
         stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
+        surveyIDInputCheck <- isolate(isTruthy(input$surveyIDSearch))
         lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
 
         #if button hasn't been clicked at all yet, retun this message
@@ -313,8 +367,8 @@ sampleFData_Server <- function(id, tableName) {
           return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
                    style = "color: gray;"))
         }
-        #check if waterNames or Station Code inputs are valid, and return a message if not
-        if (!(waterNameInputCheck || stationCodeInputCheck)) {
+        #check if waterNames or Station Code or survey ID inputs are valid, and return a message if not
+        if (!(waterNameInputCheck || stationCodeInputCheck || surveyIDInputCheck)) {
           return(p("Please select a Water Name or Station Code before rendering.", 
                    style = "color: gray;"))
         }
@@ -323,7 +377,7 @@ sampleFData_Server <- function(id, tableName) {
           return(p("No data collected for selected year(s) or only NA lengths detected at this water. Please turn off length filter before rendering this data.",
                    style = "color: gray;"))
         }
-        #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
+        #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
           tabsetPanel(
             tabPanel("Raw Data", 
@@ -367,7 +421,7 @@ sampleFData_Server <- function(id, tableName) {
       sampleFDataList <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
         
         #only run if one of these are true. if not, it will get get caught in the render UI above
-        req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch))
+        req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch) || isTruthy(input$surveyIDSearch))
 
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
         #caused because it's hard to dbplyr to translate R to sql with lists directly inside a filter for a remote database table
@@ -376,6 +430,7 @@ sampleFData_Server <- function(id, tableName) {
         yearMax <- as.integer(input$yearSlider[2])
         waterNames <- input$waterNameSearch
         stationCodes <- input$stationCodeSearch
+        surveyIDs <- input$surveyIDSearch
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
         lengthMin <- as.integer(input$lengthSlider[1])
@@ -394,6 +449,11 @@ sampleFData_Server <- function(id, tableName) {
         if(isTruthy(stationCodes)){
           samplFDataFiltered <- samplFDataFiltered %>%
             filter(StationCode %in% stationCodes) 
+        }
+        
+        if(isTruthy(surveyIDs)){
+          samplFDataFiltered <- samplFDataFiltered %>%
+            filter(SurveyID %in% surveyIDs) 
         }
           
         if(isTruthy(areaBios)){
