@@ -82,18 +82,6 @@ sampleFData_UI <- function(id) {
                            dropboxWrapper = "body",
                            zIndex = 99999
         ), 
-        conditionalPanel(
-          condition = "(input.stationCodeSearch != null && input.stationCodeSearch != '') ||
-               (input.waterNameSearch != null && input.waterNameSearch != '')",
-          ns = ns,
-          sliderInput(ns("yearSlider2"), "Date Year SLider 2",
-                      min = min(allYears, na.rm = TRUE),
-                      max = max(allYears, na.rm = TRUE),  
-                      value = c(min(allYears, na.rm = TRUE), max(allYears, na.rm = TRUE)),
-                      step = 1, 
-                      sep = ""
-          )
-        ),
         
         uiOutput(ns("yearSliderUI")),
         
@@ -253,45 +241,6 @@ sampleFData_Server <- function(id, tableName) {
                         sep = ""
             )
           )
-        }
-      })
-      
-      observeEvent(list(input$waterNameSearch, input$stationCodeSearch), {
-        
-        
-        if(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch)) { #|| isTruthy(input$SpConBioSearch) #|| isTruthy(input$areaBioSearch) 
-          #update years based on waterName,
-          waterNames <- input$waterNameSearch
-          stationCodes <- input$stationCodeSearch
-          
-          # freezeReactiveValue(input, "waterNameSearch")
-          # freezeReactiveValue(input, "stationCodeSearch")
-          
-          sampleFForSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
-          
-          if(isTruthy(waterNames)){
-            sampleFForSlider <- sampleFForSlider %>%
-              filter(WaterName %in% waterNames)
-          }
-          
-          if(isTruthy(stationCodes)){
-            sampleFForSlider <- sampleFForSlider %>%
-              filter(StationCode %in% stationCodes)
-          }
-          
-          allyears <- sampleFForSlider %>%
-            distinct(year(SampleDate)) %>%
-            #show_query() %>%
-            pull()
-          freezeReactiveValue(input, "yearSlider2")
-          
-          
-          updateSliderInput(inputId = "yearSlider2", 
-                            session = session,
-                            min = min(allyears, na.rm = TRUE),
-                            max = max(allyears, na.rm = TRUE),  
-                            value = c(min(allyears, na.rm = TRUE), max(allyears, na.rm = TRUE))
-                            )
         }
       })
       
