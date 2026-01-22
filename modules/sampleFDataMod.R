@@ -1,46 +1,5 @@
-sampleFData_UI <- function(id) {
+sampleFData_UI <- function(id, initialValues) {
   ns <- NS(id)
-  
-  ###sampleFData options for filters
-  sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
-  
-  allDistinctWaters <- sampleFData %>%
-    distinct(WaterName) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  
-  allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
-  allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
-  
-  allBios <- sampleFData %>%
-    distinct(AreaBio) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  
-  allSPBios <- sampleFData %>%
-    distinct(SpConBio) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  
-  allStationCodes <- sampleFData %>%
-    distinct(StationCode) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  
-  allSurveyIDs <- sampleFData %>%
-    distinct(SurveyID) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  
-  allLengths <- sampleFData %>%
-    distinct(Length_mm) %>%
-    show_query() %>%
-    pull() 
   
   tagList(
     sidebarLayout(
@@ -48,7 +7,7 @@ sampleFData_UI <- function(id) {
         
         virtualSelectInput(ns("areaBioSearch"),
                            label = "Area Bio",
-                           choices = allBios,
+                           choices = initialValues$allBios,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -58,7 +17,7 @@ sampleFData_UI <- function(id) {
         ), 
         virtualSelectInput(ns("SpConBioSearch"),
                            label = "Sp Con Bio",
-                           choices = allSPBios,
+                           choices = initialValues$allSPBios,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -69,7 +28,7 @@ sampleFData_UI <- function(id) {
         
         virtualSelectInput(ns("waterNameSearch"),
           label = "Water Name",
-          choices = allDistinctWaters,
+          choices = initialValues$allDistinctWaters,
           multiple = TRUE,
           search = TRUE,          
           autoSelectFirstOption = FALSE, 
@@ -80,7 +39,7 @@ sampleFData_UI <- function(id) {
         
         virtualSelectInput(ns("stationCodeSearch"),
                            label = "Station Code",
-                           choices = sort(allStationCodes),
+                           choices = sort(initialValues$allStationCodes),
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -91,7 +50,7 @@ sampleFData_UI <- function(id) {
         
         virtualSelectInput(ns("surveyIDSearch"),
                            label = "Survey ID",
-                           choices = sort(allSurveyIDs),
+                           choices = sort(initialValues$allSurveyIDs),
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -120,7 +79,7 @@ sampleFData_UI <- function(id) {
   )
 }
 
-sampleFData_Server <- function(id, tableName) {
+sampleFData_Server <- function(id, tableName, initialValues) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -141,7 +100,7 @@ sampleFData_Server <- function(id, tableName) {
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
         #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, "SampleFView")
+        table <- tbl(CPW_AqDatAnalysis, tableName)
         
         #if there is anything selected in either areaBios or Specis bios, udpate waternames and station code options
         #else, just go back to default options
@@ -227,19 +186,19 @@ sampleFData_Server <- function(id, tableName) {
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
-            choices = allDistinctWaters
+            choices = initialValues$allDistinctWaters
           )
           
           updateVirtualSelect(
             session = session,
             "stationCodeSearch", 
-            choices = allStationCodes
+            choices = initialValues$allStationCodes
           )
           
           updateVirtualSelect(
             session = session,
             "surveyIDSearch", 
-            choices = allSurveyIDs
+            choices = initialValues$allSurveyIDs
           )
           
         }
@@ -257,7 +216,7 @@ sampleFData_Server <- function(id, tableName) {
           stationCodes <- input$stationCodeSearch
           surveyIDs <- input$surveyIDSearch
 
-          sampleFForSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
+          sampleFForSlider <- tbl(CPW_AqDatAnalysis, tableName)
 
           if(isTruthy(waterNames)){
             sampleFForSlider <- sampleFForSlider %>%
@@ -306,7 +265,7 @@ sampleFData_Server <- function(id, tableName) {
           stationCodes <- input$stationCodeSearch
           surveyIDs <- input$surveyIDSearch
           
-          sampleFForLengthSlider <- tbl(CPW_AqDatAnalysis, "SampleFView")
+          sampleFForLengthSlider <- tbl(CPW_AqDatAnalysis, tableName)
           
           if(isTruthy(waterNames)){
             sampleFForLengthSlider <- sampleFForLengthSlider %>%

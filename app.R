@@ -26,6 +26,59 @@ for (i in list.files("./modules/")) {
   }
 }
 
+##get inital Vlaues
+
+###sampleFData options for filters
+sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+
+allDistinctWaters <- sampleFData %>%
+  distinct(WaterName) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
+allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
+
+allBios <- sampleFData %>%
+  distinct(AreaBio) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+allSPBios <- sampleFData %>%
+  distinct(SpConBio) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+allStationCodes <- sampleFData %>%
+  distinct(StationCode) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+allSurveyIDs <- sampleFData %>%
+  distinct(SurveyID) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+allLengths <- sampleFData %>%
+  distinct(Length_mm) %>%
+  show_query() %>%
+  pull() 
+
+sampleFInitialFilterValues <- list(
+  "allBios" = allBios,
+  "allSPBios" = allSPBios,
+  "allDistinctWaters" = allDistinctWaters,
+  "allStationCodes" = allStationCodes,
+  "allSurveyIDs" = allSurveyIDs,
+  "allYears" = allYears,
+  "allLengths" = allLengths
+)
+
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
@@ -42,7 +95,7 @@ ui <- fluidPage(
              id = "tabs", 
              theme = shinytheme("cerulean"),
              tabPanel(tags$div("SampleF Data",style = title_style), 
-                      sampleFData_UI("sampleFData")),  
+                      sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
              tabPanel(tags$div("Summarized Data", style = title_style), 
                       summarizedData_UI("summarizedData"))
   )    
@@ -51,7 +104,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   observe({
-    sampleFData_Server("sampleFData", tableName = "SampleFView")
+    sampleFData_Server("sampleFData", tableName = "SampleFView", sampleFInitialFilterValues)
     summarizedData_Server("summarizedData", tableName = "CurrentSummary")
   })
 }
