@@ -100,7 +100,6 @@ runReport_Server <- function(id, data) {
           
           removeModal()
           
-          #showModal(RMDGenerationModal())
           reportParams <- list(
             sampleFData = data,
             summaryTable = list(
@@ -121,15 +120,9 @@ runReport_Server <- function(id, data) {
           rmarkdown::render(tempReport, output_file = file,
                             params = reportParams,
                             envir = new.env(parent = globalenv()))
-          #showNotification("Report successfully saved.")
-          #removeModal()
           
-        }#,
-        #contentType = "application/zip"
+        }
       )
-
-      
-      
     }
   )
 }

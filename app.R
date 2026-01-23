@@ -26,7 +26,7 @@ for (i in list.files("./modules/")) {
   }
 }
 
-##get inital Vlaues
+##get initial Vlaues
 
 ###sampleFData options for filters
 sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
