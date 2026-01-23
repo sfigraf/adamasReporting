@@ -44,7 +44,7 @@ summarizedData_UI <- function(id, initialValues) {
   )
 }
 
-summarizedData_Server <- function(id, tableName, initialValues) {
+summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -89,11 +89,11 @@ summarizedData_Server <- function(id, tableName, initialValues) {
         
         areaBios <- input$areaBioSearch
         #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, tableName)
+        currentSummaryDataforWaterNames<- currentSummaryDataAsTable
         
         if(isTruthy(areaBios)){
           if(isTruthy(areaBios)){
-            table <- table %>%
+            currentSummaryDataforWaterNames <- currentSummaryDataforWaterNames %>%
               #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
               filter(AreaBio %in% !!areaBios)
             
@@ -104,7 +104,7 @@ summarizedData_Server <- function(id, tableName, initialValues) {
           freezeReactiveValue(input, "waterNameSearch")
           
           #update waterNmaes based on bio selection
-          selectedWaterNames <- table %>%
+          selectedWaterNames <- currentSummaryDataforWaterNames %>%
             distinct(WaterName) %>%
             #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
@@ -138,17 +138,17 @@ summarizedData_Server <- function(id, tableName, initialValues) {
         areaBios <- input$areaBioSearch
         
         #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, tableName)
+        currentSummaryDataForYears <- currentSummaryDataAsTable
         
         if(isTruthy(waterNames)){
           if(isTruthy(waterNames)){
-            table <- table %>%
+            currentSummaryDataForYears <- currentSummaryDataForYears %>%
               filter(WaterName %in% waterNames
               )
             
           }
           if(isTruthy(areaBios)){
-            table <- table %>%
+            currentSummaryDataForYears <- currentSummaryDataForYears %>%
               #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
               filter(AreaBio %in% !!areaBios)
             
@@ -159,7 +159,7 @@ summarizedData_Server <- function(id, tableName, initialValues) {
           
           
           #update waterNmaes based on bio selection
-          selectedYears <- table %>%
+          selectedYears <- currentSummaryDataForYears %>%
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
@@ -199,25 +199,24 @@ summarizedData_Server <- function(id, tableName, initialValues) {
         waterNames <- input$waterNameSearch
         areaBios <- input$areaBioSearch
         
-        data <- tbl(CPW_AqDatAnalysis, tableName) %>%
+        currentSummaryDataToFilter <- currentSummaryDataAsTable %>%
           filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax)
         
         if(isTruthy(waterNames)){
-          data <- data %>%
+          currentSummaryDataToFilter <- currentSummaryDataToFilter %>%
             filter(WaterName %in% waterNames
             )
         }
 
         if(isTruthy(areaBios)){
-          data <- data %>%
+          currentSummaryDataToFilter <- currentSummaryDataToFilter %>%
             #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
             filter(AreaBio %in% !!areaBios)
 
         }
-        finalFilteredData <- data %>%
+        finalFilteredData <- currentSummaryDataToFilter %>%
           #show_query() %>%
-          collect() #%>%
-          #as.data.frame
+          collect() 
         #columns in this db are "blobs" type which are found in DBs I guess. this converts them to character type and allows DT to display them
         finalFilteredData1 <- finalFilteredData %>%
           mutate(across(where(~inherits(., "blob")), 

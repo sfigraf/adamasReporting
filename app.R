@@ -128,8 +128,8 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   observe({
-    sampleFData_Server("sampleFData", tableName = "SampleFView", sampleFInitialFilterValues)
-    summarizedData_Server("summarizedData", tableName = "CurrentSummary", currentSummariesInitialFilterValues)
+    sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues)
+    summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
   })
 }
 

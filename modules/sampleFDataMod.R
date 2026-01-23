@@ -79,7 +79,7 @@ sampleFData_UI <- function(id, initialValues) {
   )
 }
 
-sampleFData_Server <- function(id, tableName, initialValues) {
+sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -100,19 +100,18 @@ sampleFData_Server <- function(id, tableName, initialValues) {
         areaBios <- input$areaBioSearch
         spConBios <- input$SpConBioSearch
         #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, tableName)
         
         #if there is anything selected in either areaBios or Specis bios, udpate waternames and station code options
         #else, just go back to default options
         if(isTruthy(areaBios) || isTruthy(spConBios)){
           if(isTruthy(areaBios)){
-            table <- table %>%
+            sampleFDataAsTable <- sampleFDataAsTable %>%
               #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
               filter(AreaBio %in% !!areaBios)
             
           }#allows it so query builds like a AND statement
           if(isTruthy(spConBios)) {
-            table <- table %>%
+            sampleFDataAsTable <- sampleFDataAsTable %>%
               filter(SpConBio %in% !!spConBios)
           } 
           
@@ -128,7 +127,7 @@ sampleFData_Server <- function(id, tableName, initialValues) {
           
           
           #update waterNmaes based on bio selection
-          selectedWaterNames <- table %>%
+          selectedWaterNames <- sampleFDataAsTable %>%
             distinct(WaterName) %>%
             #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
@@ -148,7 +147,7 @@ sampleFData_Server <- function(id, tableName, initialValues) {
           )
           
           #update station codes based on bio selection
-          selectedStationCodes <- table %>%
+          selectedStationCodes <- sampleFDataAsTable %>%
             distinct(StationCode) %>%
             #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
@@ -168,12 +167,12 @@ sampleFData_Server <- function(id, tableName, initialValues) {
           ) 
           
           #update SurveyID based on bio selection
-          selectedSurveyIDs <- table %>%
+          selectedSurveyIDs <- sampleFDataAsTable %>%
             distinct(SurveyID) %>%
             collect() %>%
             pull() %>%
-            sort() %>%
-            as.character()
+            as.numeric() %>%
+            sort() 
           
           updateVirtualSelect(
             session = session,
@@ -215,8 +214,9 @@ sampleFData_Server <- function(id, tableName, initialValues) {
           waterNames <- input$waterNameSearch
           stationCodes <- input$stationCodeSearch
           surveyIDs <- input$surveyIDSearch
-
-          sampleFForSlider <- tbl(CPW_AqDatAnalysis, tableName)
+          
+          #redundant but helps me keep straight in my head
+          sampleFForSlider <- sampleFDataAsTable
 
           if(isTruthy(waterNames)){
             sampleFForSlider <- sampleFForSlider %>%
@@ -265,7 +265,7 @@ sampleFData_Server <- function(id, tableName, initialValues) {
           stationCodes <- input$stationCodeSearch
           surveyIDs <- input$surveyIDSearch
           
-          sampleFForLengthSlider <- tbl(CPW_AqDatAnalysis, tableName)
+          sampleFForLengthSlider <- sampleFDataAsTable
           
           if(isTruthy(waterNames)){
             sampleFForLengthSlider <- sampleFForLengthSlider %>%
@@ -397,7 +397,7 @@ sampleFData_Server <- function(id, tableName, initialValues) {
         
         #filter data based on inputs
         #allows it so query builds like a AND statement
-        samplFDataFiltered <- tbl(CPW_AqDatAnalysis, tableName) %>%
+        samplFDataFiltered <- sampleFDataAsTable %>%
           filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax)
         
         if(isTruthy(waterNames)){
