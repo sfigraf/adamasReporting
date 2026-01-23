@@ -79,6 +79,30 @@ sampleFInitialFilterValues <- list(
   "allLengths" = allLengths
 )
 
+
+###Same thing for current summaries
+#current summary options for filters
+currentSummaryData <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
+allYearsSummarizedData <- currentSummaryData %>%
+  distinct(year(SampleDate)) %>%
+  pull()
+allBiosSummarizedData <- currentSummaryData %>%
+  distinct(AreaBio) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+allDistinctWatersSummarizedData <- currentSummaryData %>%
+  distinct(WaterName) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+currentSummariesInitialFilterValues <- list(
+  "allYearsSummarizedData" = allYearsSummarizedData, 
+  "allBiosSummarizedData" = allBiosSummarizedData, 
+  "allDistinctWatersSummarizedData" = allDistinctWatersSummarizedData
+)
+
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
@@ -97,7 +121,7 @@ ui <- fluidPage(
              tabPanel(tags$div("SampleF Data",style = title_style), 
                       sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
              tabPanel(tags$div("Summarized Data", style = title_style), 
-                      summarizedData_UI("summarizedData"))
+                      summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
   )    
 
 )
@@ -105,7 +129,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   observe({
     sampleFData_Server("sampleFData", tableName = "SampleFView", sampleFInitialFilterValues)
-    summarizedData_Server("summarizedData", tableName = "CurrentSummary")
+    summarizedData_Server("summarizedData", tableName = "CurrentSummary", currentSummariesInitialFilterValues)
   })
 }
 

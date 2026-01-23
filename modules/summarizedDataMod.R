@@ -1,21 +1,5 @@
-summarizedData_UI <- function(id) {
+summarizedData_UI <- function(id, initialValues) {
   ns <- NS(id)
-  
-  #current summary options for filters
-  data <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
-  allYearsSummarizedData <- data %>%
-    distinct(year(SampleDate)) %>%
-    pull()
-  allBiosSummarizedData <- data %>%
-    distinct(AreaBio) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  allDistinctWatersSummarizedData <- data %>%
-    distinct(WaterName) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
   
   tagList(
 
@@ -23,7 +7,7 @@ summarizedData_UI <- function(id) {
       sidebarPanel(
         virtualSelectInput(ns("areaBioSearch"),
                            label = "Area Bio",
-                           choices = allBiosSummarizedData,
+                           choices = initialValues$allBiosSummarizedData,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -33,7 +17,7 @@ summarizedData_UI <- function(id) {
         ), 
         virtualSelectInput(ns("waterNameSearch"),
                            label = "Water Name",
-                           choices = allDistinctWatersSummarizedData,
+                           choices = initialValues$allDistinctWatersSummarizedData,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -42,9 +26,9 @@ summarizedData_UI <- function(id) {
                            zIndex = 99999
         ), 
         sliderInput(ns("yearSlider"), "Date",
-                    min = min(allYearsSummarizedData, na.rm = TRUE),
-                    max = max(allYearsSummarizedData, na.rm = TRUE),  
-                    value = c(min(allYearsSummarizedData, na.rm = TRUE), max(allYearsSummarizedData, na.rm = TRUE)),
+                    min = min(initialValues$allYearsSummarizedData, na.rm = TRUE),
+                    max = max(initialValues$allYearsSummarizedData, na.rm = TRUE),  
+                    value = c(min(initialValues$allYearsSummarizedData, na.rm = TRUE), max(initialValues$allYearsSummarizedData, na.rm = TRUE)),
                     step = 1, 
                     sep = ""
         ),
@@ -60,7 +44,7 @@ summarizedData_UI <- function(id) {
   )
 }
 
-summarizedData_Server <- function(id, tableName) {
+summarizedData_Server <- function(id, tableName, initialValues) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -143,7 +127,7 @@ summarizedData_Server <- function(id, tableName) {
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
-            choices = allDistinctWatersSummarizedData
+            choices = initialValues$allDistinctWatersSummarizedData
           )
         }
       }, ignoreInit = TRUE)
@@ -199,9 +183,9 @@ summarizedData_Server <- function(id, tableName) {
           updateSliderInput(
             session = session,
             "yearSlider", 
-            min = min(allYearsSummarizedData, na.rm = TRUE),
-            max = max(allYearsSummarizedData, na.rm = TRUE),  
-            value = c(min(allYearsSummarizedData, na.rm = TRUE), max(allYearsSummarizedData, na.rm = TRUE))
+            min = min(initialValues$allYearsSummarizedData, na.rm = TRUE),
+            max = max(initialValues$allYearsSummarizedData, na.rm = TRUE),  
+            value = c(min(initialValues$allYearsSummarizedData, na.rm = TRUE), max(initialValues$allYearsSummarizedData, na.rm = TRUE))
           )
         }
       }, ignoreInit = TRUE, ignoreNULL = FALSE) #ignoreNULL = FALSE means to react on an empty virtualSelect INput here
