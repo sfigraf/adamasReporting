@@ -1,0 +1,88 @@
+---
+title: "sampleFDataReport"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  sampleFData: NULL
+  summaryTable: NULL
+  lengthWeightGraph: FALSE
+  lengthFrequencyGraph: FALSE
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+require(tidyverse)
+require(plotly)
+
+sampleFData <- params$sampleFData()
+
+```
+
+`r if(params$summaryTable$display) "## Summary Table"`
+
+```{r summaryTable, include=TRUE, echo=FALSE, warning=FALSE,message=FALSE,error=FALSE}
+if(params$summaryTable$display){
+  groupByCols <- params$summaryTable$groupingCols
+  
+  sampleFSummarized <- sampleFData %>%
+    mutate(Year = year(SampleDate)) %>%
+    group_by(across(any_of(groupByCols))) %>%
+    summarize(`Number of Fish` = n(), 
+              `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
+              `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
+              `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
+              `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
+              `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
+    )
+  
+  datatable(sampleFSummarized,
+            rownames = FALSE,
+            extensions = c('Buttons'),
+            #for slider filter instead of text input
+            filter = 'top',
+            options = list(
+              pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
+              dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
+              language = list(emptyTable = "Enter inputs and press Render Table")
+              #buttons = c('csv', 'excel')
+            )
+  )
+}
+
+```
+
+`r if(params$lengthWeightGraph) "## Length/Weights"`
+
+```{r lwGraph, include=TRUE, echo=FALSE}
+if(params$lengthWeightGraph){
+  
+  plot <- sampleFData %>%
+          ggplot(aes(x = Length_mm, y = Weight_g, color = CommonName)) +
+          geom_point() + 
+          theme_classic() +
+          labs(title = "Length/Weight Data") #+
+          #scale_color_manual(values = allColors)
+  ggplotly(plot)
+  
+} #else{
+    #asis_output("## Parameter not selected")
+
+#}
+```
+
+`r if(params$lengthFrequencyGraph) "## Length Frequencies"`
+
+```{r lfGraph, include=TRUE, echo=FALSE}
+if(params$lengthFrequencyGraph){
+
+  plot <- sampleFData %>%
+          ggplot(aes(x = Length_mm, fill = CommonName) ) +
+          geom_histogram(binwidth = 20)+
+          theme_classic() +
+          labs(title = "Length Frequencies", caption = "Binwidth = 20mm") #+
+          #scale_fill_manual(values = allColors)
+  ggplotly(plot)
+  
+} 
+```
+

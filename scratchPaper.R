@@ -95,3 +95,25 @@ x <- data %>%
          year(SampleDate)==input$yearsSearch)
 #coln names 
 dbListFields(CPW_AqDatAnalysis, "CurrentSummary")
+dbListFields(CPW_AqDatAnalysis, "SampleFView")
+
+sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+
+allLengths <- sampleFData %>%
+  distinct(Length_mm) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+
+x <- sampleFData %>%
+  filter(as.numeric(Length_mm) > 500) %>%
+  #count(Length_mm) %>%
+  collect() #%>%
+  #sort(Length_mm) 
+
+NALengths <- sampleFData %>%
+  filter(is.na(Length_mm)) %>%
+  collect()
+NASurveyIDs <- sampleFData %>%
+  filter(is.na(SurveyID)) %>%
+  collect()

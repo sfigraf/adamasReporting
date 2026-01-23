@@ -1,21 +1,5 @@
-summarizedData_UI <- function(id) {
+summarizedData_UI <- function(id, initialValues) {
   ns <- NS(id)
-  
-  #current summary options for filters
-  data <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
-  allYearsSummarizedData <- data %>%
-    distinct(year(SampleDate)) %>%
-    pull()
-  allBiosSummarizedData <- data %>%
-    distinct(AreaBio) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
-  allDistinctWatersSummarizedData <- data %>%
-    distinct(WaterName) %>%
-    show_query() %>%
-    pull() %>%
-    sort()
   
   tagList(
 
@@ -23,7 +7,7 @@ summarizedData_UI <- function(id) {
       sidebarPanel(
         virtualSelectInput(ns("areaBioSearch"),
                            label = "Area Bio",
-                           choices = allBiosSummarizedData,
+                           choices = initialValues$allBiosSummarizedData,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -33,7 +17,7 @@ summarizedData_UI <- function(id) {
         ), 
         virtualSelectInput(ns("waterNameSearch"),
                            label = "Water Name",
-                           choices = allDistinctWatersSummarizedData,
+                           choices = initialValues$allDistinctWatersSummarizedData,
                            multiple = TRUE,
                            search = TRUE,          
                            autoSelectFirstOption = FALSE, 
@@ -42,9 +26,9 @@ summarizedData_UI <- function(id) {
                            zIndex = 99999
         ), 
         sliderInput(ns("yearSlider"), "Date",
-                    min = min(allYearsSummarizedData, na.rm = TRUE),
-                    max = max(allYearsSummarizedData, na.rm = TRUE),  
-                    value = c(min(allYearsSummarizedData, na.rm = TRUE), max(allYearsSummarizedData, na.rm = TRUE)),
+                    min = min(initialValues$allYearsSummarizedData, na.rm = TRUE),
+                    max = max(initialValues$allYearsSummarizedData, na.rm = TRUE),  
+                    value = c(min(initialValues$allYearsSummarizedData, na.rm = TRUE), max(initialValues$allYearsSummarizedData, na.rm = TRUE)),
                     step = 1, 
                     sep = ""
         ),
@@ -60,7 +44,7 @@ summarizedData_UI <- function(id) {
   )
 }
 
-summarizedData_Server <- function(id, tableName) {
+summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -105,11 +89,11 @@ summarizedData_Server <- function(id, tableName) {
         
         areaBios <- input$areaBioSearch
         #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, tableName)
+        currentSummaryDataforWaterNames<- currentSummaryDataAsTable
         
         if(isTruthy(areaBios)){
           if(isTruthy(areaBios)){
-            table <- table %>%
+            currentSummaryDataforWaterNames <- currentSummaryDataforWaterNames %>%
               #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
               filter(AreaBio %in% !!areaBios)
             
@@ -120,7 +104,7 @@ summarizedData_Server <- function(id, tableName) {
           freezeReactiveValue(input, "waterNameSearch")
           
           #update waterNmaes based on bio selection
-          selectedWaterNames <- table %>%
+          selectedWaterNames <- currentSummaryDataforWaterNames %>%
             distinct(WaterName) %>%
             #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
@@ -143,7 +127,7 @@ summarizedData_Server <- function(id, tableName) {
           updateVirtualSelect(
             session = session,
             "waterNameSearch", 
-            choices = allDistinctWatersSummarizedData
+            choices = initialValues$allDistinctWatersSummarizedData
           )
         }
       }, ignoreInit = TRUE)
@@ -154,17 +138,17 @@ summarizedData_Server <- function(id, tableName) {
         areaBios <- input$areaBioSearch
         
         #build query incrementally
-        table <- tbl(CPW_AqDatAnalysis, tableName)
+        currentSummaryDataForYears <- currentSummaryDataAsTable
         
         if(isTruthy(waterNames)){
           if(isTruthy(waterNames)){
-            table <- table %>%
+            currentSummaryDataForYears <- currentSummaryDataForYears %>%
               filter(WaterName %in% waterNames
               )
             
           }
           if(isTruthy(areaBios)){
-            table <- table %>%
+            currentSummaryDataForYears <- currentSummaryDataForYears %>%
               #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
               filter(AreaBio %in% !!areaBios)
             
@@ -175,7 +159,7 @@ summarizedData_Server <- function(id, tableName) {
           
           
           #update waterNmaes based on bio selection
-          selectedYears <- table %>%
+          selectedYears <- currentSummaryDataForYears %>%
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             #collect() is when the query actually runs, just builds a query until then
@@ -199,9 +183,9 @@ summarizedData_Server <- function(id, tableName) {
           updateSliderInput(
             session = session,
             "yearSlider", 
-            min = min(allYearsSummarizedData, na.rm = TRUE),
-            max = max(allYearsSummarizedData, na.rm = TRUE),  
-            value = c(min(allYearsSummarizedData, na.rm = TRUE), max(allYearsSummarizedData, na.rm = TRUE))
+            min = min(initialValues$allYearsSummarizedData, na.rm = TRUE),
+            max = max(initialValues$allYearsSummarizedData, na.rm = TRUE),  
+            value = c(min(initialValues$allYearsSummarizedData, na.rm = TRUE), max(initialValues$allYearsSummarizedData, na.rm = TRUE))
           )
         }
       }, ignoreInit = TRUE, ignoreNULL = FALSE) #ignoreNULL = FALSE means to react on an empty virtualSelect INput here
@@ -215,25 +199,24 @@ summarizedData_Server <- function(id, tableName) {
         waterNames <- input$waterNameSearch
         areaBios <- input$areaBioSearch
         
-        data <- tbl(CPW_AqDatAnalysis, tableName) %>%
+        currentSummaryDataToFilter <- currentSummaryDataAsTable %>%
           filter(year(SampleDate) >= yearMin & year(SampleDate) <= yearMax)
         
         if(isTruthy(waterNames)){
-          data <- data %>%
+          currentSummaryDataToFilter <- currentSummaryDataToFilter %>%
             filter(WaterName %in% waterNames
             )
         }
 
         if(isTruthy(areaBios)){
-          data <- data %>%
+          currentSummaryDataToFilter <- currentSummaryDataToFilter %>%
             #!! bang bang operator tells it to evaluate this statement instead of looking for a column named areaBios; not sure if 100% needed but ok
             filter(AreaBio %in% !!areaBios)
 
         }
-        finalFilteredData <- data %>%
+        finalFilteredData <- currentSummaryDataToFilter %>%
           #show_query() %>%
-          collect() #%>%
-          #as.data.frame
+          collect() 
         #columns in this db are "blobs" type which are found in DBs I guess. this converts them to character type and allows DT to display them
         finalFilteredData1 <- finalFilteredData %>%
           mutate(across(where(~inherits(., "blob")), 
