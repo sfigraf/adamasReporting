@@ -1,5 +1,12 @@
 ---
-title: "sampleFDataReport"
+title: |
+  <img src="CPWLogoLarge.png" style="float: left; width: 100px; padding-right: 15px;"> sampleFDataReport
+subtitle: |
+   <span style='font-size: 0.6em;'>**Area Bio(s): ** `r sort(unique(params$sampleFData()$AreaBio))`</span>
+   <span style='font-size: 0.6em;'>**Sp Con Bio(s): ** `r sort(unique(params$sampleFData()$SpConBio))`</span>
+   <span style='font-size: 0.6em;'>**Water Name(s): ** `r sort(unique(params$sampleFData()$WaterName))`</span>
+   <span style='font-size: 0.6em;'>**Station Code(s): ** `r sort(unique(params$sampleFData()$StationCode))`</span>
+   <span style='font-size: 0.6em;'>**Survey ID(s): ** `r sort(unique(params$sampleFData()$SurveyID))`</span>
 date: "`r Sys.Date()`"
 output: html_document
 params:
@@ -15,6 +22,13 @@ require(tidyverse)
 require(plotly)
 
 sampleFData <- params$sampleFData()
+areaBios <- sort(unique(sampleFData$AreaBio))
+spConBios <- sort(unique(sampleFData$SpConBio))
+waterNames <- sort(unique(sampleFData$WaterName))
+stationCode <- sort(unique(sampleFData$StationCode))
+surveyIds <- sort(unique(sampleFData$SurveyID))
+
+
 
 ```
 

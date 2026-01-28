@@ -36,10 +36,10 @@ runReport_Server <- function(id, data) {
               checkboxGroupInput(
                 ns("summaryTableGroupingOptions"), 
                 label = "Group By:",
-                choiceNames = c("Species", "Water Name", "Station Code", "Year"),
+                choiceNames = c("Species", "Water Name", "Station Code", "Survey ID", "Year"),
                 #values except Year need to match column names 
                 #year column is made in the markdwon before grouping
-                choiceValues = c("CommonName", "WaterName", "StationCode", "Year")
+                choiceValues = c("CommonName", "WaterName", "StationCode", "SurveyID", "Year")
               )
             )
           ),
@@ -97,6 +97,8 @@ runReport_Server <- function(id, data) {
           #Create a temporary path for the template
           tempReport <- file.path(tempdir(), "report.Rmd")
           file.copy("./markdownTemplate/sampleFDataReport.Rmd", tempReport, overwrite = TRUE)
+          
+          file.copy("www/CPWLogoLarge.png", file.path(tempdir(), "CPWLogoLarge.png"))
           
           removeModal()
           
