@@ -26,11 +26,11 @@ require(tidyverse)
 require(plotly)
 
 sampleFData <- params$sampleFData()
-areaBios <- sort(unique(sampleFData$AreaBio))
-spConBios <- sort(unique(sampleFData$SpConBio))
-waterNames <- sort(unique(sampleFData$WaterName))
-stationCode <- sort(unique(sampleFData$StationCode))
-surveyIds <- sort(unique(sampleFData$SurveyID))
+# areaBios <- sort(unique(sampleFData$AreaBio))
+# spConBios <- sort(unique(sampleFData$SpConBio))
+# waterNames <- sort(unique(sampleFData$WaterName))
+# stationCode <- sort(unique(sampleFData$StationCode))
+# surveyIds <- sort(unique(sampleFData$SurveyID))
 # date: |
 #   <div style="clear: both; padding-top: 10px;">
 #     `r Sys.Date()`
@@ -78,18 +78,18 @@ if(params$summaryTable$display){
 if(params$lengthWeightGraph){
   
   plot <- sampleFData %>%
-          ggplot(aes(x = Length_mm, y = Weight_g, color = CommonName, 
-                     
-                                  text = paste0('Length (mm): ', as.character(Length_mm),
-                                                '<br>Weight (g): ', Weight_g, 
-                                                '<br>Species: ', CommonName, 
-                                                '<br>Survey ID: ', SurveyID
-                                                )
-                     )) +
-          geom_point() + 
-          theme_classic() +
-          labs(title = "Length/Weight Data") #+
-          #scale_color_manual(values = allColors)
+    ggplot(aes(x = Length_mm, y = Weight_g, 
+               color = CommonName, 
+               text = paste0('Length (mm): ', as.character(Length_mm),
+                             '<br>Weight (g): ', Weight_g, 
+                             '<br>Species: ', CommonName, 
+                             '<br>Survey ID: ', SurveyID
+               )
+    )) +
+    geom_point() + 
+    theme_classic() +
+    labs(title = "Length/Weight Data") #+
+  #scale_color_manual(values = allColors)
   ggplotly(plot, tooltip = "text")
   
 } #else{
@@ -104,12 +104,22 @@ if(params$lengthWeightGraph){
 if(params$lengthFrequencyGraph){
 
   plot <- sampleFData %>%
-          ggplot(aes(x = Length_mm, fill = CommonName) ) +
-          geom_histogram(binwidth = 20)+
-          theme_classic() +
-          labs(title = "Length Frequencies", caption = "Binwidth = 20mm") #+
-          #scale_fill_manual(values = allColors)
-  ggplotly(plot)
+    ggplot(aes(x = Length_mm, fill = CommonName
+               
+    )) +
+    geom_histogram(binwidth = 20, 
+                   aes(
+                     group = CommonName,
+                     label = CommonName,
+                     text = paste0('Length (mm) Range: ', after_stat(xmin), " to ", after_stat(xmax),  
+                                   "<br>Count: ", after_stat(count),
+                                   '<br>Species: ', after_stat(label)
+                     )
+                   )) +
+    theme_classic() +
+    labs(title = "Length Frequencies", caption = "Binwidth = 20mm") #+
+  #scale_fill_manual(values = allColors)
+  ggplotly(plot, tooltip = "text")
   
 } 
 ```
