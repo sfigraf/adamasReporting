@@ -97,7 +97,8 @@ runReport_Server <- function(id, data) {
           #Create a temporary path for the template
           tempReport <- file.path(tempdir(), "report.Rmd")
           file.copy("./markdownTemplate/sampleFDataReport.Rmd", tempReport, overwrite = TRUE)
-          
+          #need to copy over image as well bc with download handler the data is rendered with a temp directory. 
+          #so now the report can "See" the image bc it's also in a temp directory with the markdown
           file.copy("www/CPWLogoLarge.png", file.path(tempdir(), "CPWLogoLarge.png"))
           
           removeModal()
