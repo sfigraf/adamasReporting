@@ -22,28 +22,47 @@ runReport_Server <- function(id, data) {
         
         showModal(modalDialog(
           title = "Select figures to include in report",
-          
+          # SUMMARY TABLE
           checkboxInput(ns("summaryTableCheckbox"), "Summary Table"),
-          conditionalPanel(
-            condition = "input.summaryTableCheckbox == true",
-            #need to tell it to look for namespacing since we're in the server
-            ns = ns,
-            div(
-              style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
-              tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                "#", ns("summaryTableGroupingOptions"), " .control-label { font-weight: normal; }"
-              ))), # Makes the title not bold
-              checkboxGroupInput(
-                ns("summaryTableGroupingOptions"), 
-                label = "Group By:",
-                choiceNames = c("Species", "Water Name", "Station Code", "Survey ID", "Year"),
-                #values except Year need to match column names 
-                #year column is made in the markdwon before grouping
-                choiceValues = c("CommonName", "WaterName", "StationCode", "SurveyID", "Year")
+            conditionalPanel(
+              condition = "input.summaryTableCheckbox == true",
+              #need to tell it to look for namespacing since we're in the server
+              ns = ns,
+              div(
+                style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
+                tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
+                  "#", ns("summaryTableGroupingOptions"), " .control-label { font-weight: normal; }"
+                ))), # Makes the title not bold
+                checkboxGroupInput(
+                  ns("summaryTableGroupingOptions"), 
+                  label = "Group By:",
+                  choiceNames = c("Species", "Water Name", "Station Code", "Survey ID", "Year"),
+                  #values except Year need to match column names 
+                  #year column is made in the markdwon before grouping
+                  choiceValues = c("CommonName", "WaterName", "StationCode", "SurveyID", "Year")
+                )
               )
-            )
-          ),
+            ),
+          #LENGTH WEIGHT GRAPH
           checkboxInput(ns("lengthWeightCheckbox"), "Length/Weight Graph"),
+            conditionalPanel(
+              condition = "input.lengthWeightCheckbox == true",
+              ns = ns,
+              div(
+                style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
+                tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
+                  "#", ns("lengthWeight_LengthOptions"), " .control-label { font-weight: normal; }"
+                ))), # Makes the title not bold
+                radioButtons(
+                  ns("lengthWeight_LengthOptions"), 
+                  label = "Length Display:",
+                  choiceNames = c("Millimeters", "Inches"),
+                  #values need to match column names 
+                  choiceValues = c("Length_mm", "Length_inch")
+                )
+              )
+            ),
+          #LENGTH FREUQNCY GRAPH
           checkboxInput(ns("lengthFrequencyCheckbox"), "Length/Frequency Graph"),
           
           
@@ -109,8 +128,13 @@ runReport_Server <- function(id, data) {
               "display" = isolate(input$summaryTableCheckbox), 
               "groupingCols" = isolate(input$summaryTableGroupingOptions)
             ),
-            lengthWeightGraph = isolate(input$lengthWeightCheckbox),
-            lengthFrequencyGraph = isolate(input$lengthFrequencyCheckbox)
+            lengthWeightGraph = list(
+              "display" = isolate(input$lengthWeightCheckbox),
+              "lengthOptions" = isolate(input$lengthWeight_LengthOptions)
+            ),
+            lengthFrequencyGraph = list(
+              "display" = isolate(input$lengthFrequencyCheckbox)
+              )
           )
           
           id <- showNotification(

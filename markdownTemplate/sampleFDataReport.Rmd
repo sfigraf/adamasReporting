@@ -31,11 +31,6 @@ sampleFData <- params$sampleFData()
 # waterNames <- sort(unique(sampleFData$WaterName))
 # stationCode <- sort(unique(sampleFData$StationCode))
 # surveyIds <- sort(unique(sampleFData$SurveyID))
-# date: |
-#   <div style="clear: both; padding-top: 10px;">
-#     `r Sys.Date()`
-#   </div>
-
 
 ```
 
@@ -72,15 +67,15 @@ if(params$summaryTable$display){
 
 ```
 
-`r if(params$lengthWeightGraph) "## Length/Weights"`
+`r if(params$lengthWeightGraph$display) "## Length/Weights"`
 
 ```{r lwGraph, include=TRUE, echo=FALSE}
-if(params$lengthWeightGraph){
-  
+if(params$lengthWeightGraph$display){
+  #using .data pronoun to access column by string
   plot <- sampleFData %>%
-    ggplot(aes(x = Length_mm, y = Weight_g, 
+    ggplot(aes(x = .data[[params$lengthWeightGraph$lengthOptions]], y = Weight_g, 
                color = CommonName, 
-               text = paste0('Length (mm): ', as.character(Length_mm),
+               text = paste0('Length: ', as.character(round(.data[[params$lengthWeightGraph$lengthOptions]], 2)),
                              '<br>Weight (g): ', Weight_g, 
                              '<br>Species: ', CommonName, 
                              '<br>Survey ID: ', SurveyID
@@ -98,10 +93,10 @@ if(params$lengthWeightGraph){
 #}
 ```
 
-`r if(params$lengthFrequencyGraph) "## Length Frequencies"`
+`r if(params$lengthFrequencyGraph$display) "## Length Frequencies"`
 
 ```{r lfGraph, include=TRUE, echo=FALSE}
-if(params$lengthFrequencyGraph){
+if(params$lengthFrequencyGraph$display){
 
   plot <- sampleFData %>%
     ggplot(aes(x = Length_mm, fill = CommonName
