@@ -57,12 +57,19 @@ if(params$summaryTable$display){
 if(params$lengthWeightGraph){
   
   plot <- sampleFData %>%
-          ggplot(aes(x = Length_mm, y = Weight_g, color = CommonName)) +
+          ggplot(aes(x = Length_mm, y = Weight_g, color = CommonName, 
+                     
+                                  text = paste0('Length (mm): ', as.character(Length_mm),
+                                                '<br>Weight (g): ', Weight_g, 
+                                                '<br>Species: ', CommonName, 
+                                                '<br>Survey ID: ', SurveyID
+                                                )
+                     )) +
           geom_point() + 
           theme_classic() +
           labs(title = "Length/Weight Data") #+
           #scale_color_manual(values = allColors)
-  ggplotly(plot)
+  ggplotly(plot, tooltip = "text")
   
 } #else{
     #asis_output("## Parameter not selected")
