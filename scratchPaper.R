@@ -117,3 +117,16 @@ NALengths <- sampleFData %>%
 NASurveyIDs <- sampleFData %>%
   filter(is.na(SurveyID)) %>%
   collect()
+cat(dbListTables(CPW_AqDatAnalysis), sep = ", ")
+##strain translation table
+StrainTranslationTable <- tbl(CPW_AqDatAnalysis, "StrainTranslationTable") %>%
+  collect()
+stockingRecordsView <- tbl(CPW_AqDatAnalysis, "StockingRecordsView") %>%
+  collect()
+# have any of the rainbow strains been stocked 
+stockedStrains <- stockingRecordsView %>%
+  filter(#SpeciesCode %in% c(StrainTranslationTable$SpeciesCode), 
+         WaterTypeName == "Stream", 
+         year(Planted) >= "2024", 
+         AreaBioName %in% "Kendall Bakich")
+

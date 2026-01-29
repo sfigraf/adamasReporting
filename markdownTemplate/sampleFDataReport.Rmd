@@ -73,10 +73,10 @@ if(params$summaryTable$display){
 if(params$lengthWeightGraph$display){
   #using .data pronoun to access column by string
   plot <- sampleFData %>%
-    ggplot(aes(x = .data[[params$lengthWeightGraph$lengthOptions]], y = Weight_g, 
+    ggplot(aes(x = .data[[params$lengthWeightGraph$lengthOptions]], y = .data[[params$lengthWeightGraph$weightOptions]], 
                color = CommonName, 
                text = paste0('Length: ', as.character(round(.data[[params$lengthWeightGraph$lengthOptions]], 2)),
-                             '<br>Weight (g): ', Weight_g, 
+                             '<br>Weight: ', as.character(round(.data[[params$lengthWeightGraph$weightOptions]], 2)), 
                              '<br>Species: ', CommonName, 
                              '<br>Survey ID: ', SurveyID
                )
@@ -99,7 +99,7 @@ if(params$lengthWeightGraph$display){
 if(params$lengthFrequencyGraph$display){
 
   plot <- sampleFData %>%
-    ggplot(aes(x = Length_mm, fill = CommonName
+    ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], fill = CommonName
                
     )) +
     geom_histogram(binwidth = 20, 

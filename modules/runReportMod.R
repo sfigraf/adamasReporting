@@ -51,20 +51,66 @@ runReport_Server <- function(id, data) {
               div(
                 style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
                 tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                  "#", ns("lengthWeight_LengthOptions"), " .control-label { font-weight: normal; }"
+                  "#", ns("lengthWeight_LengthOptions"), " .control-label, ", 
+                  "#", ns("lengthWeight_WeightOptions"), " .control-label ",
+                  "{ font-weight: normal; }"
                 ))), # Makes the title not bold
-                radioButtons(
-                  ns("lengthWeight_LengthOptions"), 
-                  label = "Length Display:",
-                  choiceNames = c("Millimeters", "Inches"),
-                  #values need to match column names 
-                  choiceValues = c("Length_mm", "Length_inch")
+                fluidRow(
+                  column(6, 
+                         radioButtons(
+                           ns("lengthWeight_LengthOptions"), 
+                           label = "Length Display:",
+                           choiceNames = c("Millimeters", "Inches"),
+                           #values need to match column names 
+                           choiceValues = c("Length_mm", "Length_inch")
+                         )
+                         ), 
+                  column(6, 
+                         radioButtons(
+                           ns("lengthWeight_WeightOptions"), 
+                           label = "Weight Display:",
+                           choiceNames = c("Grams", "Ounces"),
+                           #values need to match column names 
+                           choiceValues = c("Weight_g", "Weight_oz")
+                         )
+                         )
                 )
               )
             ),
           #LENGTH FREUQNCY GRAPH
           checkboxInput(ns("lengthFrequencyCheckbox"), "Length/Frequency Graph"),
-          
+          #lengthFrequency_LengthOptions
+          conditionalPanel(
+            condition = "input.lengthFrequencyCheckbox == true",
+            ns = ns,
+            div(
+              style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
+              tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
+                "#", ns("lengthFrequency_LengthOptions"), " .control-label ",
+                "{ font-weight: normal; }"
+              ))),
+              fluidRow(
+                column(12, 
+                       radioButtons(
+                         ns("lengthFrequency_LengthOptions"), 
+                         label = "Length Display:",
+                         choiceNames = c("Millimeters", "Inches"),
+                         #values need to match column names 
+                         choiceValues = c("Length_mm", "Length_inch")
+                       )
+                )
+                # column(6, 
+                #        radioButtons(
+                #          ns("lengthWeight_WeightOptions"), 
+                #          label = "Weight Display:",
+                #          choiceNames = c("Grams", "Ounces"),
+                #          #values need to match column names 
+                #          choiceValues = c("Weight_g", "Weight_oz")
+                #        )
+                # )
+              )
+            )
+          ),
           
           fluidRow(
             column(
@@ -130,10 +176,12 @@ runReport_Server <- function(id, data) {
             ),
             lengthWeightGraph = list(
               "display" = isolate(input$lengthWeightCheckbox),
-              "lengthOptions" = isolate(input$lengthWeight_LengthOptions)
+              "lengthOptions" = isolate(input$lengthWeight_LengthOptions), 
+              "weightOptions" = isolate(input$lengthWeight_WeightOptions)
             ),
             lengthFrequencyGraph = list(
-              "display" = isolate(input$lengthFrequencyCheckbox)
+              "display" = isolate(input$lengthFrequencyCheckbox), 
+              "lengthOptions" = isolate(input$lengthFrequency_LengthOptions)
               )
           )
           
