@@ -102,6 +102,9 @@ currentSummariesInitialFilterValues <- list(
   "allBiosSummarizedData" = allBiosSummarizedData, 
   "allDistinctWatersSummarizedData" = allDistinctWatersSummarizedData
 )
+#rsd limits for graph rsd ranges
+rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
+  collect()
 
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
@@ -128,7 +131,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   observe({
-    sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues)
+    sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
     summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
   })
 }

@@ -6,7 +6,7 @@ runReport_UI <- function(id) {
   )
 }
 
-runReport_Server <- function(id, data) {
+runReport_Server <- function(id, data, rsdLimits) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -170,6 +170,7 @@ runReport_Server <- function(id, data) {
           
           reportParams <- list(
             sampleFData = data,
+            rsdLimits = rsdLimits,
             summaryTable = list(
               "display" = isolate(input$summaryTableCheckbox), 
               "groupingCols" = isolate(input$summaryTableGroupingOptions)

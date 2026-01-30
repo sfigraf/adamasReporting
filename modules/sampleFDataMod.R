@@ -79,7 +79,7 @@ sampleFData_UI <- function(id, initialValues) {
   )
 }
 
-sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
+sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -500,7 +500,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
       
       #sample f rawe data tab
       downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
-      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}))
+      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
       #summarized data tab
       downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
       

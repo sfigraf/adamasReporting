@@ -15,6 +15,7 @@ subtitle: |
 output: html_document
 params:
   sampleFData: NULL
+  rsdLimits: Null
   summaryTable: NULL
   lengthWeightGraph: FALSE
   lengthFrequencyGraph: FALSE
@@ -105,24 +106,45 @@ if(params$lengthFrequencyGraph$display){
     labs(title = "Length Frequencies", caption = "Binwidth = 20mm")
   
   if(params$lengthFrequencyGraph$lengthOptions == "RSD"){
-    plot <- plot +
-      geom_histogram(stat = "count", 
-                     aes(
-                       #group = CommonName,
-                       # label = RSD,
-                       # fill = CommonName,
-                       # label = paste0( 'RSD: ', RSD,
-                       #                 '<br>Species: ', CommonName
-                       # ),
-                       text = paste0(#'RSD: ', RSD,
-                                       #'<br>Species: ', CommonName,
-                                     "<br>Count: ", after_stat(count)
-                       )
-                     )
-                     
-      )
+    sampleFDataRSD <- sampleFData %>%
+      count(RSD, CommonName, name = "Count") %>%
+      left_join(params$rsdLimits, by = "CommonName") %>%
+      mutate(hoverText = case_when(RSD == "Stock" ~ paste0(CommonName, " 'Stock' Range (mm): ", SLEN, " - ", QLEN), 
+                                   RSD == "Quality" ~ paste0(CommonName, " 'Quality' Range (mm): ", QLEN, " - ", PLEN), 
+                                   RSD == "Preferred" ~ paste0(CommonName, " 'Preferred' Range (mm): ", PLEN, " - ", MLEN), 
+                                   RSD == "Memorable" ~ paste0(CommonName, " 'Memorable' Range (mm): ", MLEN, " - ", TLEN), 
+                                   RSD == "Trophy" ~ paste0(CommonName, " 'Trophy' Range (mm): ", TLEN, "+"), 
+                                   TRUE ~ paste0(CommonName, ": No RSD Assigned")
+                                   
+      ), 
+      RSD = factor(RSD, levels = c("Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
+      ungroup()
+    plot <- ggplot(sampleFDataRSD, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
+      geom_col()
+    
+    
+    # plot <- plot +
+    #   geom_histogram(stat = "count", 
+    #                  aes(
+    #                    #group = CommonName,
+    #                    # label = RSD,
+    #                    # fill = CommonName,
+    #                    # label = paste0( 'RSD: ', RSD,
+    #                    #                 '<br>Species: ', CommonName
+    #                    # ),
+    #                    text = paste0(#'RSD: ', RSD,
+    #                                    #'<br>Species: ', CommonName,
+    #                                  "<br>Count: ", after_stat(count)
+    #                    )
+    #                  )
+    #                  
+    #   )
   } else{
-    plot <- plot +
+    plot <- sampleFData %>%
+      ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], 
+                 fill = CommonName)) +
+      #theme_classic() +
+      # labs(title = "Length Frequencies", caption = "Binwidth = 20mm") +
       geom_histogram(binwidth = 20, 
                      aes(
                        group = CommonName,
@@ -133,7 +155,10 @@ if(params$lengthFrequencyGraph$display){
                        )
                      )) 
   }
-  
+  plot <- plot + 
+    theme_classic() +
+    labs(title = "Length Frequencies") #, caption = "Binwidth = 20mm"
+
   #+
   #scale_fill_manual(values = allColors)
   ggplotly(plot, tooltip = "text")

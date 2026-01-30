@@ -147,9 +147,34 @@ plot <- survey1239 %>%
 plot1 <- plot +
   geom_histogram(stat = "count")
 
-
-plot <- survey1239 %>%
+#"Memorable" "Preferred" "Quality"   "Stock"     "Trophy"   
+survey1239Data <- survey1239 %>%
   count(RSD, CommonName, name = "Count") %>%
+  left_join(rsdLimits, by = "CommonName") %>%
+  mutate(hoverText = case_when(RSD == "Stock" ~ paste0(CommonName, " 'Stock' Range (mm): ", SLEN, " - ", QLEN), 
+                               RSD == "Quality" ~ paste0(CommonName, " 'Quality' Range (mm): ", QLEN, " - ", PLEN), 
+                               RSD == "Preferred" ~ paste0(CommonName, " 'Preferred' Range (mm): ", PLEN, " - ", MLEN), 
+                               RSD == "Memorable" ~ paste0(CommonName, " 'Memorable' Range (mm): ", MLEN, " - ", TLEN), 
+                               RSD == "Trophy" ~ paste0(CommonName, " 'Trophy' Range (mm): ", TLEN, "+"), 
+                               TRUE ~ paste0(CommonName, ": No RSD Assigned")
+                               
+                               ), 
+         RSD = factor(RSD, levels = c("Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
+  ungroup()
+plot1 <- ggplot(survey1239Data, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
+  geom_col()
+# plot1 <- ggplot(survey1239Data, aes(x = RSD, fill = commonName)) +
+#   geom_histogram(
+#     stat = "count",
+#     aes(
+#       # Map custom text and labels to 'dummy' aesthetics so they persist
+#       label = hoverText,
+#       text = paste0(after_stat(label), "<br>Count: ", after_stat(count))
+#     )
+#   )
+ggplotly(plot1, tooltip = "text")
+
+plot <- survey1239Data %>%
   ggplot(aes(x = RSD, y = Count,
              fill = CommonName)) +
   theme_classic() +
