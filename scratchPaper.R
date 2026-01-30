@@ -129,4 +129,60 @@ stockedStrains <- stockingRecordsView %>%
          WaterTypeName == "Stream", 
          year(Planted) >= "2024", 
          AreaBioName %in% "Kendall Bakich")
+######
+sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView") 
+survey1239 <- sampleFData %>%
+  filter(SurveyID == 1239) %>%
+  collect()
 
+survey1239 %>%
+  ggplot(aes(x = RSD)) +
+  geom_histogram(stat = "count")
+
+plot <- survey1239 %>%
+  ggplot(aes(x = RSD, fill = CommonName
+             
+  ))
+
+plot1 <- plot +
+  geom_histogram(stat = "count")
+
+
+plot <- survey1239 %>%
+  count(RSD, CommonName, name = "Count") %>%
+  ggplot(aes(x = RSD, y = Count,
+             fill = CommonName)) +
+  theme_classic() +
+  labs(title = "Length Frequencies", caption = "Binwidth = 20mm")
+
+plot1 <- plot +
+  geom_histogram(#stat = "count",
+                 aes(
+                   # group = CommonName,
+                   # #label = .data[[RSD]],
+                   # fill = CommonName,
+                   # label = paste0( 'RSD: ', RSD,
+                   #                 '<br>Species: ', CommonName
+                   # ),
+                   text = paste0(#'RSD: ', RSD,
+                                 '<br>Species: ', CommonName,
+                                 "<br>Count: ", after_stat(count)
+                   )
+                 )
+                 
+  )
+ggplotly(plot1, tooltip = "text")
+
+sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+
+allDistinctRSD <- sampleFData %>%
+  distinct(RSD) %>%
+  show_query() %>%
+  pull() %>%
+  sort()
+#rsd limits 
+individvualrsd <- tbl(CPW_AqDatAnalysis, "IndividualRSDView") %>%
+  collect()
+
+rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
+  collect()

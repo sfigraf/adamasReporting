@@ -99,20 +99,42 @@ if(params$lengthWeightGraph$display){
 if(params$lengthFrequencyGraph$display){
 
   plot <- sampleFData %>%
-    ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], fill = CommonName
-               
-    )) +
-    geom_histogram(binwidth = 20, 
-                   aes(
-                     group = CommonName,
-                     label = CommonName,
-                     text = paste0('Length (mm) Range: ', after_stat(xmin), " to ", after_stat(xmax),  
-                                   "<br>Count: ", after_stat(count),
-                                   '<br>Species: ', after_stat(label)
-                     )
-                   )) +
+    ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], 
+               fill = CommonName)) +
     theme_classic() +
-    labs(title = "Length Frequencies", caption = "Binwidth = 20mm") #+
+    labs(title = "Length Frequencies", caption = "Binwidth = 20mm")
+  
+  if(params$lengthFrequencyGraph$lengthOptions == "RSD"){
+    plot <- plot +
+      geom_histogram(stat = "count", 
+                     aes(
+                       #group = CommonName,
+                       # label = RSD,
+                       # fill = CommonName,
+                       # label = paste0( 'RSD: ', RSD,
+                       #                 '<br>Species: ', CommonName
+                       # ),
+                       text = paste0(#'RSD: ', RSD,
+                                       #'<br>Species: ', CommonName,
+                                     "<br>Count: ", after_stat(count)
+                       )
+                     )
+                     
+      )
+  } else{
+    plot <- plot +
+      geom_histogram(binwidth = 20, 
+                     aes(
+                       group = CommonName,
+                       label = CommonName,
+                       text = paste0('Length (mm) Range: ', after_stat(xmin), " to ", after_stat(xmax),  
+                                     "<br>Count: ", after_stat(count),
+                                     '<br>Species: ', after_stat(label)
+                       )
+                     )) 
+  }
+  
+  #+
   #scale_fill_manual(values = allColors)
   ggplotly(plot, tooltip = "text")
   

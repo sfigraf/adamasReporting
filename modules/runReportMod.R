@@ -90,24 +90,24 @@ runReport_Server <- function(id, data) {
                 "{ font-weight: normal; }"
               ))),
               fluidRow(
-                column(12, 
+                column(6, 
                        radioButtons(
                          ns("lengthFrequency_LengthOptions"), 
                          label = "Length Display:",
-                         choiceNames = c("Millimeters", "Inches"),
+                         choiceNames = c("Millimeters", "Inches", "RSD Counts"),
                          #values need to match column names 
-                         choiceValues = c("Length_mm", "Length_inch")
+                         choiceValues = c("Length_mm", "Length_inch", "RSD")
+                       )
+                ),
+                column(6,
+                       radioButtons(
+                         ns("lengthFrequencyBinwidthOptions"),
+                         label = "Weight Display:",
+                         choiceNames = c("Grams", "Ounces"),
+                         #values need to match column names
+                         choiceValues = c("Weight_g", "Weight_oz")
                        )
                 )
-                # column(6, 
-                #        radioButtons(
-                #          ns("lengthWeight_WeightOptions"), 
-                #          label = "Weight Display:",
-                #          choiceNames = c("Grams", "Ounces"),
-                #          #values need to match column names 
-                #          choiceValues = c("Weight_g", "Weight_oz")
-                #        )
-                # )
               )
             )
           ),
