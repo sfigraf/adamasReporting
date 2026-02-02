@@ -13,6 +13,20 @@ runReport_Server <- function(id, data, rsdLimits) {
       
       ns <- session$ns
       
+      iv <- InputValidator$new()
+      # 2. Add rules for your numeric input
+      iv$add_rule("lengthFrequencyBinwidthOptions", sv_required()) # Ensure it's not empty
+      iv$add_rule("lengthFrequencyBinwidthOptions", sv_numeric())  # Ensure it's a number
+      
+      # Rule to prevent zero: must be greater than 0
+      iv$add_rule("lengthFrequencyBinwidthOptions", sv_gt(0, message = "Value must be greater than 0"))
+      
+      # Use this if you just want to avoid 0 specifically (e.g., negatives are okay)
+      # iv$add_rule("my_number", sv_not_equal(0, message = "Value cannot be zero"))
+      
+      # 3. Enable the validator
+      iv$enable()
+      
       values <- reactiveValues()
 
 # modal to appear on button click -----------------------------------------
@@ -86,7 +100,8 @@ runReport_Server <- function(id, data, rsdLimits) {
             div(
               style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
               tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                "#", ns("lengthFrequency_LengthOptions"), " .control-label ",
+                "#", ns("lengthFrequency_LengthOptions"), " .control-label, ",
+                "#", ns("lengthFrequencyBinwidthOptions"), " .control-label ",
                 "{ font-weight: normal; }"
               ))),
               fluidRow(
@@ -100,12 +115,11 @@ runReport_Server <- function(id, data, rsdLimits) {
                        )
                 ),
                 column(6,
-                       radioButtons(
-                         ns("lengthFrequencyBinwidthOptions"),
-                         label = "Weight Display:",
-                         choiceNames = c("Grams", "Ounces"),
-                         #values need to match column names
-                         choiceValues = c("Weight_g", "Weight_oz")
+                       conditionalPanel(
+                         condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
+                         ns = ns,
+                         numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
+                                      min = 0)
                        )
                 )
               )
@@ -138,9 +152,15 @@ runReport_Server <- function(id, data, rsdLimits) {
         
       }, ignoreInit = TRUE)
       
+      # update binwidth based on button click; default 1 inch or 10 mm
+      observeEvent(input$lengthFrequency_LengthOptions, {
+        numericInputVal <- if (input$lengthFrequency_LengthOptions == "Length_inch") 1 else 10
+        updateNumericInput(session, "lengthFrequencyBinwidthOptions", value = numericInputVal)
+      })
+      
       observe({
         # Enable only if at least one checkbox is selected
-        validReportInputs <-isTruthy(input$summaryTableCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) 
+        validReportInputs <- isTruthy(input$summaryTableCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) || isTruthy(iv$is_valid())
         
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
@@ -182,7 +202,8 @@ runReport_Server <- function(id, data, rsdLimits) {
             ),
             lengthFrequencyGraph = list(
               "display" = isolate(input$lengthFrequencyCheckbox), 
-              "lengthOptions" = isolate(input$lengthFrequency_LengthOptions)
+              "lengthOptions" = isolate(input$lengthFrequency_LengthOptions), 
+              "binwidth" = isolate(input$lengthFrequencyBinwidthOptions)
               )
           )
           

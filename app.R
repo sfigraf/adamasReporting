@@ -15,6 +15,7 @@ library(dbplyr)
 library(openxlsx) #for saving excel file
 library(knitr) #for rmarkdown
 library(shinyjs) #for greying out buttons
+library(shinyvalidate)
 
 
 source("scripts/connectToDB.R")

@@ -99,11 +99,11 @@ if(params$lengthWeightGraph$display){
 ```{r lfGraph, include=TRUE, echo=FALSE}
 if(params$lengthFrequencyGraph$display){
 
-  plot <- sampleFData %>%
-    ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], 
-               fill = CommonName)) +
-    theme_classic() +
-    labs(title = "Length Frequencies", caption = "Binwidth = 20mm")
+  # plot <- sampleFData %>%
+  #   ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], 
+  #              fill = CommonName)) +
+  #   theme_classic() +
+  #   labs(title = "Length Frequencies", caption = paste("Binwidth = 20mm"))
   
   if(params$lengthFrequencyGraph$lengthOptions == "RSD"){
     sampleFDataRSD <- sampleFData %>%
@@ -120,40 +120,25 @@ if(params$lengthFrequencyGraph$display){
       RSD = factor(RSD, levels = c("Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
       ungroup()
     plot <- ggplot(sampleFDataRSD, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
-      geom_col()
+      geom_col() +
+      labs(caption = "RSD (mm)")
     
-    
-    # plot <- plot +
-    #   geom_histogram(stat = "count", 
-    #                  aes(
-    #                    #group = CommonName,
-    #                    # label = RSD,
-    #                    # fill = CommonName,
-    #                    # label = paste0( 'RSD: ', RSD,
-    #                    #                 '<br>Species: ', CommonName
-    #                    # ),
-    #                    text = paste0(#'RSD: ', RSD,
-    #                                    #'<br>Species: ', CommonName,
-    #                                  "<br>Count: ", after_stat(count)
-    #                    )
-    #                  )
-    #                  
-    #   )
   } else{
     plot <- sampleFData %>%
       ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]], 
                  fill = CommonName)) +
       #theme_classic() +
       # labs(title = "Length Frequencies", caption = "Binwidth = 20mm") +
-      geom_histogram(binwidth = 20, 
+      geom_histogram(binwidth = params$lengthFrequencyGraph$binwidth, 
                      aes(
                        group = CommonName,
                        label = CommonName,
-                       text = paste0('Length (mm) Range: ', after_stat(xmin), " to ", after_stat(xmax),  
+                       text = paste0("Length ", if_else(params$lengthFrequencyGraph$lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
                                      "<br>Count: ", after_stat(count),
                                      '<br>Species: ', after_stat(label)
                        )
-                     )) 
+                     )) +
+      labs(caption = paste(params$lengthFrequencyGraph$lengthOptions, ": Binwidth", params$lengthFrequencyGraph$binwidth))
   }
   plot <- plot + 
     theme_classic() +
