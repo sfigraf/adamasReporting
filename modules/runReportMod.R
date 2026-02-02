@@ -100,10 +100,11 @@ runReport_Server <- function(id, data, rsdLimits) {
             div(
               style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
               tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                "#", ns("lengthFrequency_LengthOptions"), " .control-label, ",
-                "#", ns("lengthFrequencyBinwidthOptions"), " .control-label ",
-                "{ font-weight: normal; }"
-              ))),
+                "#", ns("lengthFrequency_LengthOptions"), " .control-label, ", 
+                "#", ns("lengthFrequencyBinwidthOptions"), "-label ",
+                "{ font-weight: normal !important; }"
+              ))), # Makes the title not bold
+              
               fluidRow(
                 column(6, 
                        radioButtons(
@@ -160,8 +161,8 @@ runReport_Server <- function(id, data, rsdLimits) {
       
       observe({
         # Enable only if at least one checkbox is selected
-        validReportInputs <- isTruthy(input$summaryTableCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) || isTruthy(iv$is_valid())
-        
+        #for the binwidth one, make sure that frequcny graph is checked (truthy) and input is true. It's true if the conditional binwidth panel doesn't display
+        validReportInputs <- isTruthy(input$summaryTableCheckbox) || isTruthy(input$lengthWeightCheckbox) || (isTruthy(input$lengthFrequencyCheckbox) && iv$is_valid())
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
         } else {
