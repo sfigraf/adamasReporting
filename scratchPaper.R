@@ -215,4 +215,59 @@ species <- tbl(CPW_AqDatAnalysis, "SpeciesView") %>%
   collect()
 species1 <- tbl(CPW_AqDatAnalysis, "SpeciesOccursWhereView") %>%
   collect()
+### combined summaries table 
+singlesurvey <- sampleFData %>%
+  filter(SurveyID == "42671") %>%
+  collect()
+
+#proportinal stock density table
+proportionalstockdensitytable <- singlesurvey %>%
+  group_by(CommonName) %>%
+  summarize(`Total Catch` = sum(NumFish),
+            #not entirely sure why using mean works but it does
+            `Percent Stock size` = round(mean(RSD == "Stock", na.rm = TRUE) *100, 2), 
+            `Percent Quality size` = round(mean(RSD == "Quality", na.rm = TRUE) *100, 2), 
+            `Percent Preferred size` = round(mean(RSD == "Preferred", na.rm = TRUE) *100, 2), 
+            `Percent Memorable size` = round(mean(RSD == "Memorable", na.rm = TRUE) *100, 2), 
+            `Percent Trophy size` = round(mean(RSD == "Trophy", na.rm = TRUE) *100, 2), 
+            `Max Length (mm)` = max(Length_mm, na.rm = TRUE)
+            )
+### mean min max length and weight
+meanMinMaxLengthWeights <- singlesurvey %>%
+  group_by(CommonName) %>%
+  summarize(`Total Catch` = sum(NumFish), 
+            `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
+            `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
+            `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
+            `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
+            `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2), 
+            
+            `Average Weight (g)` = round(mean(Weight_g, na.rm = TRUE), 2), 
+            `Median Weight (g)` = round(median(Weight_g, na.rm = TRUE), 2), 
+            `Min Weight (g)` = round(min(Weight_g, na.rm = TRUE), 2),
+            `Max Weight (g)` = round(max(Weight_g, na.rm = TRUE), 2), 
+            `Standard Deviation (mm)` = round(sd(Weight_g, na.rm = TRUE), 2), 
+  )
+
+#### relative abundace and CPUE
+relAbundanceCPue <- singlesurvey %>%
+  group_by(CommonName) %>%
+  summarize(`Total Catch` = sum(NumFish), 
+            `Weight Kg` = round(sum(Weight_g, na.rm = TRUE)/1000, 2), 
+            #sums whole column numfish but ignores group_by()
+            #could also do the same thing with mutating after
+            `Percent Total Catch` = round(sum(NumFish, na.rm = TRUE)/sum(.$NumFish, na.rm = TRUE) *100, 2), 
+            `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
+  )
+###
+abundanceBiomass <- singlesurvey %>%
+  group_by(CommonName) %>%
+  summarize(`Total Catch` = sum(NumFish), 
+            `Weight Kg` = round(sum(Weight_g, na.rm = TRUE)/1000, 2), 
+            #sums whole column numfish but ignores group_by()
+            #could also do the same thing with mutating after
+            `Percent Total Catch` = round(sum(NumFish, na.rm = TRUE)/sum(.$NumFish, na.rm = TRUE) *100, 2), 
+            `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
+  )
+sampleFData <- singlesurvey
 

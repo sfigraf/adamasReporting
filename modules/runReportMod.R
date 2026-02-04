@@ -34,18 +34,18 @@ runReport_Server <- function(id, data, rsdLimits) {
         showModal(modalDialog(
           title = "Select figures to include in report",
           # SUMMARY TABLE
-          checkboxInput(ns("summaryTableCheckbox"), "Summary Table"),
+          checkboxInput(ns("combinedSummariesCheckbox"), "Combined Summaries Tables"),
             conditionalPanel(
-              condition = "input.summaryTableCheckbox == true",
+              condition = "input.combinedSummariesCheckbox == true",
               #need to tell it to look for namespacing since we're in the server
               ns = ns,
               div(
                 style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
                 tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                  "#", ns("summaryTableGroupingOptions"), " .control-label { font-weight: normal; }"
+                  "#", ns("combinedSummariesGroupingOptions"), " .control-label { font-weight: normal; }"
                 ))), # Makes the title not bold
                 checkboxGroupInput(
-                  ns("summaryTableGroupingOptions"), 
+                  ns("combinedSummariesGroupingOptions"), 
                   label = "Group By:",
                   choiceNames = c("Species", "Water Name", "Station Code", "Survey ID", "Year"),
                   #values except Year need to match column names 
@@ -159,7 +159,7 @@ runReport_Server <- function(id, data, rsdLimits) {
       observe({
         # Enable only if at least one checkbox is selected
         #for the binwidth one, make sure that frequcny graph is checked (truthy) and input is true. It's true if the conditional binwidth panel doesn't display
-        validReportInputs <- isTruthy(input$summaryTableCheckbox) || isTruthy(input$lengthWeightCheckbox) || (isTruthy(input$lengthFrequencyCheckbox) && iv$is_valid())
+        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || (isTruthy(input$lengthFrequencyCheckbox) && iv$is_valid())
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
         } else {
@@ -189,9 +189,9 @@ runReport_Server <- function(id, data, rsdLimits) {
           reportParams <- list(
             sampleFData = data,
             rsdLimits = rsdLimits,
-            summaryTable = list(
-              "display" = isolate(input$summaryTableCheckbox), 
-              "groupingCols" = isolate(input$summaryTableGroupingOptions)
+            combinedSummaries = list(
+              "display" = isolate(input$combinedSummariesCheckbox), 
+              "groupingCols" = isolate(input$combinedSummariesGroupingOptions)
             ),
             lengthWeightGraph = list(
               "display" = isolate(input$lengthWeightCheckbox),
