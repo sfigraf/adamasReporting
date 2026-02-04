@@ -437,7 +437,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         
         sampleFSummarizedData <- finalFilteredData %>%
           group_by(CommonName) %>%
-          summarize(`Number of Fish` = n(), 
+          summarize(`Number of Fish` = sum(NumFish), 
                     `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
                     `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
                     `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),

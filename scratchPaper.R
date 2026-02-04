@@ -211,3 +211,8 @@ individvualrsd <- tbl(CPW_AqDatAnalysis, "IndividualRSDView") %>%
 
 rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
   collect()
+species <- tbl(CPW_AqDatAnalysis, "SpeciesView") %>%
+  collect()
+species1 <- tbl(CPW_AqDatAnalysis, "SpeciesOccursWhereView") %>%
+  collect()
+

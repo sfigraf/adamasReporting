@@ -13,21 +13,18 @@ runReport_Server <- function(id, data, rsdLimits) {
       
       ns <- session$ns
       
+      #make new shinyvalidate input validator
       iv <- InputValidator$new()
-      # 2. Add rules for your numeric input
+      # add rules for numeric input
       iv$add_rule("lengthFrequencyBinwidthOptions", sv_required()) # Ensure it's not empty
       iv$add_rule("lengthFrequencyBinwidthOptions", sv_numeric())  # Ensure it's a number
       
       # Rule to prevent zero: must be greater than 0
       iv$add_rule("lengthFrequencyBinwidthOptions", sv_gt(0, message = "Value must be greater than 0"))
-      
-      # Use this if you just want to avoid 0 specifically (e.g., negatives are okay)
-      # iv$add_rule("my_number", sv_not_equal(0, message = "Value cannot be zero"))
-      
-      # 3. Enable the validator
+      #enable validator
       iv$enable()
       
-      values <- reactiveValues()
+      #values <- reactiveValues()
 
 # modal to appear on button click -----------------------------------------
 
@@ -73,7 +70,7 @@ runReport_Server <- function(id, data, rsdLimits) {
                   column(6, 
                          radioButtons(
                            ns("lengthWeight_LengthOptions"), 
-                           label = "Length Display:",
+                           label = "Length Display",
                            choiceNames = c("Millimeters", "Inches"),
                            #values need to match column names 
                            choiceValues = c("Length_mm", "Length_inch")
@@ -82,7 +79,7 @@ runReport_Server <- function(id, data, rsdLimits) {
                   column(6, 
                          radioButtons(
                            ns("lengthWeight_WeightOptions"), 
-                           label = "Weight Display:",
+                           label = "Weight Display",
                            choiceNames = c("Grams", "Ounces"),
                            #values need to match column names 
                            choiceValues = c("Weight_g", "Weight_oz")
@@ -98,7 +95,7 @@ runReport_Server <- function(id, data, rsdLimits) {
             condition = "input.lengthFrequencyCheckbox == true",
             ns = ns,
             div(
-              style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
+              style = "margin-left: 25px;",
               tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
                 "#", ns("lengthFrequency_LengthOptions"), " .control-label, ", 
                 "#", ns("lengthFrequencyBinwidthOptions"), "-label ",
@@ -109,7 +106,7 @@ runReport_Server <- function(id, data, rsdLimits) {
                 column(6, 
                        radioButtons(
                          ns("lengthFrequency_LengthOptions"), 
-                         label = "Length Display:",
+                         label = "Length Display",
                          choiceNames = c("Millimeters", "Inches", "RSD Counts"),
                          #values need to match column names 
                          choiceValues = c("Length_mm", "Length_inch", "RSD")
