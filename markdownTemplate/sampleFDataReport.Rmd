@@ -27,8 +27,16 @@ require(tidyverse)
 require(plotly)
 require(shiny)
 require(shinydashboard)
+#require(htmltools)
 
 sampleFData <- params$sampleFData()
+
+title_style <- "background-color: #e2f0d9; 
+                padding: 10px 20px; 
+                border-radius: 15px; 
+                font-weight: bold; 
+                margin-bottom: 10px; 
+                width: 100%;"
 # areaBios <- sort(unique(sampleFData$AreaBio))
 # spConBios <- sort(unique(sampleFData$SpConBio))
 # waterNames <- sort(unique(sampleFData$WaterName))
@@ -141,9 +149,16 @@ if(params$combinedSummaries$display){
   #       )
   # )
   tagList(
+    tags$div("Mean, Min, Max Length/Weight", style = title_style),
     meanMinMaxLengthWeightsTable,
-  proportionalstockdensityTable,
-  relAbundanceCPUETable
+    tags$br(), 
+    
+    tags$div("Proportional Stocking Density and Catch/Unit Effort", style = title_style),
+    proportionalstockdensityTable,
+    tags$br(), 
+    
+    tags$div("Relative Abundance and Catch/Unit Effort", style = title_style),
+    relAbundanceCPUETable
   )
   
   
