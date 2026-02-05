@@ -1,0 +1,33 @@
+
+.navbar .container-fluid {
+    display: flex !important;
+    align-items: center; /* Vertically centers everything in the container */
+}
+.navbar-nav > li > a {
+  display: flex !important;
+  align-items: center;
+  font-size: 18px;
+}
+
+
+
+.navbar-nav .dropdown .caret {
+  margin-left: 5px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.navbar-nav > li > a, .navbar-brand {
+  display: flex;
+  align-items: center;
+  
+  height: 80px;
+}
+.navbar-toggle {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+                           
+/* 
+  padding-bottom:0 !important;
+  padding-top:9px !important;
