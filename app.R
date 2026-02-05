@@ -16,10 +16,11 @@ library(openxlsx) #for saving excel file
 library(knitr) #for rmarkdown
 library(shinyjs) #for greying out buttons
 library(shinyvalidate)
+library(bslib) #for theme
 
 
 source("scripts/connectToDB.R")
-source("misc/graphicsOptions.R")
+#source("misc/graphicsOptions.R")
 
 for (i in list.files("./modules/")) {
   if (grepl(".R", i)) {
@@ -130,6 +131,21 @@ currentSummariesInitialFilterValues <- list(
 rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
   collect()
 
+##grapphics theme: 
+# cpw_theme <- bs_theme(
+#   # Inherit from a standard bootstrap version (4 is common)
+#   version = 4, 
+#   bootswatch = "flatly", # 'flatly' has a clean, flat aesthetic to start with
+#   
+#   # Define the primary colors using CPW hex codes
+#   fg = "#000000",          # Foreground (text color)
+#   primary = "#245d38",     # Primary (e.g., button color)
+#   
+#   # Define navbar specific colors
+#   'navbar-light-bg' = "#245d38",  # The main background color for the bar
+#   'navbar-light-color' = "#FFFFFF" # Color of the link text (white)
+# )
+
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
@@ -138,28 +154,17 @@ ui <- fluidPage(
              header = tags$head(
                tags$link(rel = "stylesheet", type = "text/css", href = "customStyles.css")
              ),
-             
-             # tags$head(
-             #   tags$style(HTML('.navbar-nav > li > a, .navbar-brand {
-             #                padding-top:9px !important;
-             #                padding-bottom:0 !important;
-             #                height: 80px;
-             #                }
-             #               .navbar {min-height:25px !important;}'))
-             # ),
              id = "tabs", 
-             theme = shinytheme("cerulean"),
-             navbarMenu("Data Source", #tags$div( ,style = title_style)
-               tabPanel("SampleFView", 
-                        sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
-               tabPanel("CurrentSummary",  
-                        summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
+             #theme = cpw_theme, #shinytheme("cerulean"),
+             navbarMenu("Data Source",
+                        tabPanel("SampleFView", 
+                                 sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
+                        tabPanel("CurrentSummary",  
+                                 summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
              )
              
-             #selectInput("tableSelect", label = tags$div("Data Table",style = title_style), choices = c(1,2,3)),
-             
   )    
-
+  
 )
 
 server <- function(input, output) {
