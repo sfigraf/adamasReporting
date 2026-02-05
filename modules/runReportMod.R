@@ -129,7 +129,9 @@ runReport_Server <- function(id, data, rsdLimits) {
               width = 12,
               align = "center", 
               useShinyjs(),
-              downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"))
+              shinyjs::disabled(
+                downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"))
+              )
             )
           ),
           
@@ -159,13 +161,13 @@ runReport_Server <- function(id, data, rsdLimits) {
       observe({
         # Enable only if at least one checkbox is selected
         #for the binwidth one, make sure that frequcny graph is checked (truthy) and input is true. It's true if the conditional binwidth panel doesn't display
-        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || (isTruthy(input$lengthFrequencyCheckbox) && iv$is_valid())
+        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) # || (isTruthy(input$lengthFrequencyCheckbox) && iv$is_valid())
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
         } else {
           shinyjs::disable("exportReportButton")
         }
-      })
+      }, priority = -1)
 
 # rendering markdwon and save logic ---------------------------------------
       output$exportReportButton <- downloadHandler(
