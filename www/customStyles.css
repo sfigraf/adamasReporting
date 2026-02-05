@@ -1,33 +1,27 @@
-
+/* Center everything in the navbar container */
 .navbar .container-fluid {
     display: flex !important;
-    align-items: center; /* Vertically centers everything in the container */
+    align-items: center;
 }
+
+/* Targets both the Brand and the Menu labels */
+.navbar-brand,
 .navbar-nav > li > a {
   display: flex !important;
   align-items: center;
-  font-size: 18px;
+  height: 80px;      /* Your custom height */
+  font-size: 18px;   /* Your custom size */
 }
 
-
-
+/* Dropdown Arrow: Fixes the 'floating' caret */
 .navbar-nav .dropdown .caret {
   margin-left: 5px;
-  vertical-align: middle;
   display: inline-block;
+  vertical-align: middle;
 }
 
-.navbar-nav > li > a, .navbar-brand {
-  display: flex;
-  align-items: center;
-  
-  height: 80px;
-}
+/* Mobile Toggle: Alignment for small screens */
 .navbar-toggle {
     margin-top: 4px;
     margin-bottom: 4px;
-}
-                           
-/* 
-  padding-bottom:0 !important;
-  padding-top:9px !important;
+}                       
