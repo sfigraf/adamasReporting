@@ -65,7 +65,7 @@ sampleFData_UI <- function(id, initialValues) {
         uiOutput(ns("lengthFilterUI")), 
         
         actionButton(ns("queryButton"), 
-                     label = "Render Data", width = "100%"), 
+                     label = "Render Data", width = "100%", class = "btn-cpw-sidebar"), 
         
         h6("Note: entries with NA values in any of the filter fields are excluded from the results")
         

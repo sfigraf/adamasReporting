@@ -131,21 +131,6 @@ currentSummariesInitialFilterValues <- list(
 rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
   collect()
 
-##grapphics theme: 
-# cpw_theme <- bs_theme(
-#   # Inherit from a standard bootstrap version (4 is common)
-#   version = 4, 
-#   bootswatch = "flatly", # 'flatly' has a clean, flat aesthetic to start with
-#   
-#   # Define the primary colors using CPW hex codes
-#   fg = "#000000",          # Foreground (text color)
-#   primary = "#245d38",     # Primary (e.g., button color)
-#   
-#   # Define navbar specific colors
-#   'navbar-light-bg' = "#245d38",  # The main background color for the bar
-#   'navbar-light-color' = "#FFFFFF" # Color of the link text (white)
-# )
-
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
@@ -155,7 +140,6 @@ ui <- fluidPage(
                tags$link(rel = "stylesheet", type = "text/css", href = "customStyles.css")
              ),
              id = "tabs", 
-             #theme = cpw_theme, #shinytheme("cerulean"),
              navbarMenu("Data Source",
                         tabPanel("SampleFView", 
                                  sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  

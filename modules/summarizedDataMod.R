@@ -33,7 +33,7 @@ summarizedData_UI <- function(id, initialValues) {
                     sep = ""
         ),
         actionButton(ns("queryButton"),
-                     label = "Render Data", width = "100%")
+                     label = "Render Data", width = "100%", class = "btn-cpw-sidebar")
 
       ),
 

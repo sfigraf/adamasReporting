@@ -90,16 +90,35 @@
     border-bottom: 3px solid #ffd100 !important; /* 3px thick, solid CPW Yellow */
 }
 
+.nav-tabs > li.active > a,
 .btn-default {
-    background-color: #245d38 !important;
+    
+    
+    background-color: #001970 !important; /* CPW Blue */
+    color: #FFFFFF !important;
+    border-color: #000c35 !important;
+    font-weight: bold !important;
+}
+
+.nav-tabs > li.active > a:hover,
+.btn-default:hover {
+    
+    background-color: #000c35 !important;
+    color: #ffd100 !important;
+    border-color: #ffd100 !important;
+}
+
+.btn-cpw-sidebar {
+    background-color: #245d38 !important; /* CPW Green */
     color: #FFFFFF !important;
     border-color: #1e4d2e !important;
     font-weight: bold;
 }
 
-.btn-default:hover {
+/* Define the hover state for that custom class */
+.btn-cpw-sidebar:hover {
     background-color: #1e4d2e !important;
-    color: #ffd100 !important;
+    color: #ffd100 !important; /* Yellow text on hover */
     border-color: #ffd100 !important;
 }
 
@@ -139,16 +158,29 @@
     font-weight: bold;
 }
 
-/* --- Tabset Panels (Different Shade, e.g., CPW Blue or Light Green) --- */
-.nav-tabs > li.active > a {
-    background-color: #001970 !important; /* CPW Blue to contrast with buttons */
-    color: #FFFFFF !important;
-    border: 1px solid #001970 !important;
+/* --- Active Tab (The one currently selected) --- */
+.nav-tabs > li.active > a, 
+.nav-tabs > li.active > a:hover, 
+.nav-tabs > li.active > a:focus {
+    background-color: #245d38 !important; /* CPW Green */
+    color: #FFFFFF !important;            /* White text */
+    border: 1px solid #245d38 !important;
+    border-radius: 4px 4px 0 0;           /* Rounds only the top corners */
 }
 
+/* --- Inactive Tabs (The ones waiting to be clicked) --- */
 .nav-tabs > li > a {
-    color: #001970 !important; /* Inactive tab text */
-    background-color: #f1f8f3;  /* Very light green background for inactive tabs */
+    color: #245d38 !important;           /* CPW Green text */
+    background-color: #f1f8f3 !important; /* Very light green background */
+    border: 1px solid #e2f0d9 !important;
+    margin-right: 2px;
+}
+
+/* --- Hover State for Inactive Tabs --- */
+.nav-tabs > li > a:hover {
+    background-color: #e2f0d9 !important; /* Slightly darker green wash */
+    color: #1e4d2e !important;           /* Darker green text */
+    border-color: #245d38 !important;
 }
 
 
