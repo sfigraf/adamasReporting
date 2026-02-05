@@ -270,4 +270,14 @@ abundanceBiomass <- singlesurvey %>%
             `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
   )
 sampleFData <- singlesurvey
+# styles
+# text coolor in virtualSelectINputs
+# /* Styling individual options */
+#   .vscomp-option {
+#     color: #245d38 !important;
+#   }
 
+# /* Background of the main input box */
+#   .vscomp-wrapper {
+#     border: 1px solid #245d38 !important;
+#   }

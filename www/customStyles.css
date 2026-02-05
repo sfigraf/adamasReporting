@@ -89,3 +89,79 @@
 .navbar {
     border-bottom: 3px solid #ffd100 !important; /* 3px thick, solid CPW Yellow */
 }
+
+.btn-default {
+    background-color: #245d38 !important;
+    color: #FFFFFF !important;
+    border-color: #1e4d2e !important;
+    font-weight: bold;
+}
+
+.btn-default:hover {
+    background-color: #1e4d2e !important;
+    color: #ffd100 !important;
+    border-color: #ffd100 !important;
+}
+
+/* 1. Sidebar Background */
+.well {
+    background-color: #f1f8f3 !important; /* Very light green wash */
+    border: 1px solid #245d38 !important;  /* CPW Green border */
+    border-radius: 10px;
+}
+
+/* 2. Slider - The Bar (the background of the slider) */
+.irs-bar, .irs-bar-edge {
+    background-color: #245d38 !important; /* CPW Green for the 'filled' part */
+    border-top: 1px solid #245d38 !important;
+    border-bottom: 1px solid #245d38 !important;
+}
+
+.irs-line {
+    background: #e2f0d9 !important; /* Light green for the 'unfilled' part */
+    border: 1px solid #cbdcc0 !important;
+}
+
+/* 3. Slider - The Handle (the circle you grab) */
+.irs-single, .irs-bar-edge, .irs-from, .irs-to {
+    background: #245d38 !important; /* Tooltip backgrounds */
+}
+
+.irs-handle {
+    background-color: #ffd100 !important; /* CPW Yellow handle to make it pop */
+    border: 1px solid #245d38 !important;
+    border-radius: 50% !important; /* Makes the handle a perfect circle */
+}
+
+/* 4. Slider - Text Labels (The numbers) */
+.irs-grid-text {
+    color: #245d38 !important;
+    font-weight: bold;
+}
+
+/* --- Tabset Panels (Different Shade, e.g., CPW Blue or Light Green) --- */
+.nav-tabs > li.active > a {
+    background-color: #001970 !important; /* CPW Blue to contrast with buttons */
+    color: #FFFFFF !important;
+    border: 1px solid #001970 !important;
+}
+
+.nav-tabs > li > a {
+    color: #001970 !important; /* Inactive tab text */
+    background-color: #f1f8f3;  /* Very light green background for inactive tabs */
+}
+
+
+/* Background of the actual dropdown list (the 'dropbox') */
+.vscomp-dropbox-container {
+    background-color: #FFFFFF !important;
+    border: 1px solid #245d38 !important;
+}
+
+
+
+/* Active/Hover state inside the dropdown */
+.vscomp-option.active, .vscomp-option.focused {
+    background-color: #245d38 !important; /* CPW Green */
+    color: #FFFFFF !important;            /* White text */
+}
