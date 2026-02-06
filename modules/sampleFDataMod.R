@@ -339,23 +339,50 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
           tabsetPanel(
-            tabPanel("Raw Data", 
-                     div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                         uiOutput(ns("downloadDataUI")),
-                         uiOutput(ns("reportBuilderUI"))
-                     ),
-                     box(
-                       withSpinner(DTOutput(ns("sampleFData")))
+            tabPanel("Tables", 
+                     tabsetPanel(
+                       tabPanel("Raw Data",
+                                div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+                                    uiOutput(ns("downloadDataUI")),
+                                    uiOutput(ns("reportBuilderUI"))
+                                ),
+                                box(
+                                  withSpinner(DTOutput(ns("sampleFData")))
+                                )
+                       ), 
+                       tabPanel("Combined Summaries", 
+                                # div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+                                #     uiOutput(ns("downloadSummarizedDataUI"))
+                                # ),
+                                box(
+                                  fluidRow(
+                                    column(12,
+                                           withSpinner(DTOutput(ns("sampleFSummarizedMeanTable")))
+                                           
+                                           )
+                                  )
+                                ), 
+                                box(
+                                  fluidRow(
+                                    column(12,
+                                           withSpinner(DTOutput(ns("sampleFSummarizedStockDensity")))
+                                           
+                                    )
+                                  )
+                                ), 
+                                box(
+                                  fluidRow(
+                                    column(12,
+                                           withSpinner(DTOutput(ns("sampleFSummarizedCPUE")))
+                                           
+                                    )
+                                  )
+                                )
+                       )
                      )
+                     
             ), 
-            tabPanel("Species Summarized Data", 
-                     div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                         uiOutput(ns("downloadSummarizedDataUI"))
-                     ),
-                     box(
-                       withSpinner(DTOutput(ns("sampleFSummarizedData")))
-                     )
-            )
+            tabPanel("Graphs")
           )
           
         )
@@ -370,10 +397,10 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         runReport_UI(ns("reportBuilder"))
       })
       #for summarized data
-      output$downloadSummarizedDataUI <- renderUI({
-        req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
-        downloadData_UI(ns("downloadSampleFSummarizedData"))
-      })
+      # output$downloadSummarizedDataUI <- renderUI({
+      #   req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
+      #   downloadData_UI(ns("downloadSampleFSummarizedData"))
+      # })
 
 # data wrangling ----------------------------------------------------------
       
@@ -435,19 +462,19 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
           #show_query() %>%
           collect()
         
-        sampleFSummarizedData <- finalFilteredData %>%
-          group_by(CommonName) %>%
-          summarize(`Number of Fish` = sum(NumFish), 
-                    `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
-                    `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
-                    `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
-                    `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
-                    `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
-                    )
+        sampleFCombinedSummarizedData <- getCombinedSummariesTables("CommonName", data = finalFilteredData) #%>%
+          # group_by(CommonName) %>%
+          # summarize(`Number of Fish` = sum(NumFish), 
+          #           `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
+          #           `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
+          #           `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
+          #           `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
+          #           `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
+          #           )
         
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData, 
-          "sampleFSummarizedData" = sampleFSummarizedData
+          "sampleFCombinedSummarizedData" = sampleFCombinedSummarizedData
         )
         
         return(finalFilteredDataList)
@@ -475,22 +502,37 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
        
       }, server = TRUE)
       
-      output$sampleFSummarizedData <- renderDT({
+      output$sampleFSummarizedMeanTable <- renderDT({
         
-        req(sampleFDataList()$sampleFSummarizedData)
+        req(sampleFDataList()$sampleFCombinedSummarizedData$meanMinMaxLengthWeightsTable)
+        sampleFDataList()$sampleFCombinedSummarizedData$meanMinMaxLengthWeightsTable
         
-        datatable(sampleFDataList()$sampleFSummarizedData,
-                  rownames = FALSE,
-                  extensions = c('Buttons'),
-                  #for slider filter instead of text input
-                  filter = 'top',
-                  options = list(
-                    pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
-                    dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
-                    language = list(emptyTable = "Enter inputs and press Render Table")
-                    #buttons = c('csv', 'excel')
-                  )
-        )
+        # datatable(sampleFDataList()$sampleFSummarizedData,
+        #           rownames = FALSE,
+        #           extensions = c('Buttons'),
+        #           #for slider filter instead of text input
+        #           filter = 'top',
+        #           options = list(
+        #             pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
+        #             dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
+        #             language = list(emptyTable = "Enter inputs and press Render Table")
+        #             #buttons = c('csv', 'excel')
+        #           )
+        # )
+        
+      }, server = TRUE)
+      
+      output$sampleFSummarizedStockDensity <- renderDT({
+        
+        req(sampleFDataList()$sampleFCombinedSummarizedData$proportionalstockdensityTable)
+        sampleFDataList()$sampleFCombinedSummarizedData$proportionalstockdensityTable
+        
+      }, server = TRUE)
+      
+      output$sampleFSummarizedCPUE <- renderDT({
+        
+        req(sampleFDataList()$sampleFCombinedSummarizedData$relAbundanceCPUETable)
+        sampleFDataList()$sampleFCombinedSummarizedData$relAbundanceCPUETable
         
       }, server = TRUE)
       

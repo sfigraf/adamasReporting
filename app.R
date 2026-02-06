@@ -16,16 +16,20 @@ library(openxlsx) #for saving excel file
 library(knitr) #for rmarkdown
 library(shinyjs) #for greying out buttons
 library(shinyvalidate)
-library(bslib) #for theme
-
+#library(bslib) #for theme
 
 source("scripts/connectToDB.R")
-#source("misc/graphicsOptions.R")
 
 for (i in list.files("./modules/")) {
   if (grepl(".R", i)) {
     source(paste0("./modules/",i))
   }
+}
+
+neededFunctions <- c("getCombinedSummariesTables.R")
+
+for (i in neededFunctions) {
+  source(paste0("./functions/",i))
 }
 
 ##get initial Vlaues
@@ -141,9 +145,9 @@ ui <- fluidPage(
              ),
              id = "tabs", 
              navbarMenu("Data Source",
-                        tabPanel("SampleFView", 
+                        tabPanel("Raw Data", 
                                  sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
-                        tabPanel("CurrentSummary",  
+                        tabPanel("Aggregated Data",  
                                  summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
              )
              

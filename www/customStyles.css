@@ -217,3 +217,10 @@ input[type="checkbox"] {
     transform: scale(1.1); /* Optional: makes the checkbox slightly larger */
 }
 
+
+input[type="radio"] {
+    accent-color: #245d38 !important; /* Forces the internal check/box to CPW Green */
+    cursor: pointer;
+    transform: scale(1.1); 
+}
+

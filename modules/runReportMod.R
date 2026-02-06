@@ -189,6 +189,8 @@ runReport_Server <- function(id, data, rsdLimits) {
           removeModal()
           
           reportParams <- list(
+            # get working directoy as a parameter to be able to source files
+            appRoot = getwd(),
             sampleFData = data,
             rsdLimits = rsdLimits,
             combinedSummaries = list(
@@ -216,6 +218,7 @@ runReport_Server <- function(id, data, rsdLimits) {
           
           rmarkdown::render(tempReport, output_file = file,
                             params = reportParams,
+                            #envir passes the apps functions/variables
                             envir = new.env(parent = globalenv()))
           
         }

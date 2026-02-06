@@ -42,6 +42,8 @@ datatable(x1)
 
 #coln names 
 dbListFields(CPW_AqDatAnalysis, "SampleFView")
+sort(dbListFields(CPW_AqDatAnalysis, "SurveyView"))
+
 
 allBios <- tbl(CPW_AqDatAnalysis, "SampleFView") %>%
   distinct(AreaBio) %>%
@@ -287,4 +289,12 @@ sampleFData <- singlesurvey
 # .checkbox input[type="checkbox"]:checked + span {
 #     color: #245d38 !important;
 #     font-weight: bold;
+# }
+#focus rings
+# input[type="checkbox"]:focus {
+#   outline: 2px solid #ffd100 !important; /* CPW Yellow focus ring */
+# }
+# input[type="radio"]:focus {
+#   outline: 2px solid #ffd100 !important; /* CPW Yellow focus ring */
+#   outline-offset: 2px;
 # }
