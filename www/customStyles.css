@@ -230,3 +230,8 @@ input[type="radio"] {
           margin-bottom: 20px;
           border-radius: 5px;
         }
+        
+.normal-label-row .control-label, 
+.normal-label-row label {
+  font-weight: normal !important;
+}

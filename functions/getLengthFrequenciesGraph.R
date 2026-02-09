@@ -2,7 +2,7 @@
 # lengthOptions <- "Length_mm"
 # binwidth = 10
 getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
-  
+  print("got this far")
   if(lengthOptions == "RSD"){
     sampleFDataRSD <- data %>%
       #this works as long as there are no group RSD designations if there are a like 20 fish in the "numfish" column
@@ -23,6 +23,7 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
       labs(caption = "RSD (mm)")
     
   } else{
+    print("no rsd selected")
     plot <- data %>%
       ggplot(aes(x = .data[[lengthOptions]], 
                  fill = CommonName)) +

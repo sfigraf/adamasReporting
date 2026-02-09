@@ -96,31 +96,12 @@ runReport_Server <- function(id, data, rsdLimits) {
             ns = ns,
             div(
               style = "margin-left: 25px;",
-              tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                "#", ns("lengthFrequency_LengthOptions"), " .control-label, ", 
-                "#", ns("lengthFrequencyBinwidthOptions"), "-label ",
-                "{ font-weight: normal !important; }"
-              ))), # Makes the title not bold
-              
-              fluidRow(
-                column(6, 
-                       radioButtons(
-                         ns("lengthFrequency_LengthOptions"), 
-                         label = "Length Display",
-                         choiceNames = c("Millimeters", "Inches", "RSD Counts"),
-                         #values need to match column names 
-                         choiceValues = c("Length_mm", "Length_inch", "RSD")
-                       )
-                ),
-                column(6,
-                       conditionalPanel(
-                         condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
-                         ns = ns,
-                         numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
-                                      min = 0)
-                       )
-                )
-              )
+              # tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
+              #   "#", ns("lengthFrequency_LengthOptions"), " .control-label, ", 
+              #   "#", ns("lengthFrequencyBinwidthOptions"), "-label ",
+              #   "{ font-weight: normal !important; }"
+              # ))), # Makes the title not bold
+              lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod_Report"), class = "normal-label-row"),
             )
           ),
           
@@ -161,7 +142,7 @@ runReport_Server <- function(id, data, rsdLimits) {
       observe({
         # Enable only if at least one checkbox is selected
         #for the binwidth one, make sure that frequcny graph is checked (truthy) and input is true. It's true if the conditional binwidth panel doesn't display
-        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || (isTruthy(input$lengthFrequencyCheckbox) && iv$is_valid())
+        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) # && lengthFrequencyInputs$validBinWidth()
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
         } else {
