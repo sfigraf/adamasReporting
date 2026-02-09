@@ -408,26 +408,28 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                 ),
                                 withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
                        ), 
-                       tabPanel("Length/Weights", 
-                                fluidRow(class = "green-row",
-                                  column(6, 
-                                         radioButtons(
-                                           ns("lengthFrequency_LengthOptions"), 
-                                           label = "Length Display",
-                                           choiceNames = c("Millimeters", "Inches", "RSD Counts"),
-                                           #values need to match column names 
-                                           choiceValues = c("Length_mm", "Length_inch", "RSD")
-                                         )
-                                  ),
-                                  column(6,
-                                         conditionalPanel(
-                                           condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
-                                           ns = ns,
-                                           numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
-                                                        min = 0)
-                                         )
-                                  )
-                                ),
+                       tabPanel("Length/Weights",
+                                lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
+                                #lengthFrequencyGraphInputs(ns),
+                                # fluidRow(class = "green-row",
+                                #   column(6, 
+                                #          radioButtons(
+                                #            ns("lengthFrequency_LengthOptions"), 
+                                #            label = "Length Display",
+                                #            choiceNames = c("Millimeters", "Inches", "RSD Counts"),
+                                #            #values need to match column names 
+                                #            choiceValues = c("Length_mm", "Length_inch", "RSD")
+                                #          )
+                                #   ),
+                                #   column(6,
+                                #          conditionalPanel(
+                                #            condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
+                                #            ns = ns,
+                                #            numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
+                                #                         min = 0)
+                                #          )
+                                #   )
+                                # ),
                                 withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                        )
                      )
@@ -445,6 +447,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
         runReport_UI(ns("reportBuilder"))
       })
+      lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
       #for summarized data
       # output$downloadSummarizedDataUI <- renderUI({
       #   req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
