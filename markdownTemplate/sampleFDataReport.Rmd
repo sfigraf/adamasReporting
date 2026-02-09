@@ -85,21 +85,6 @@ if(params$combinedSummaries$display){
 if(params$lengthWeightGraph$display){
   
   getLengthWeightGraph(data = sampleFData, lengthOptions = params$lengthWeightGraph$lengthOptions, weightOptions = params$lengthWeightGraph$weightOptions)
-  #using .data pronoun to access column by string
-  # plot <- sampleFData %>%
-  #   ggplot(aes(x = .data[[params$lengthWeightGraph$lengthOptions]], y = .data[[params$lengthWeightGraph$weightOptions]], 
-  #              color = CommonName, 
-  #              text = paste0('Length: ', as.character(round(.data[[params$lengthWeightGraph$lengthOptions]], 2)),
-  #                            '<br>Weight: ', as.character(round(.data[[params$lengthWeightGraph$weightOptions]], 2)), 
-  #                            '<br>Species: ', CommonName, 
-  #                            '<br>Survey ID: ', SurveyID
-  #              )
-  #   )) +
-  #   geom_point() + 
-  #   theme_classic() +
-  #   labs(title = "Length/Weight Data") #+
-  # #scale_color_manual(values = allColors)
-  # ggplotly(plot, tooltip = "text")
   
 } #else{
     #asis_output("## Parameter not selected")

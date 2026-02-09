@@ -1,4 +1,8 @@
+#renders plotly length weight graph
 getLengthWeightGraph <- function(data, lengthOptions, weightOptions){
+  
+  #using .data pronoun to access column by string
+  
   plot <- data %>%
     ggplot(aes(x = .data[[lengthOptions]], y = .data[[weightOptions]], 
                color = CommonName, 

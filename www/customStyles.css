@@ -224,3 +224,9 @@ input[type="radio"] {
     transform: scale(1.1); 
 }
 
+.green-row {
+          background-color: #f1f8f3; /* A very light green that complements the green skin */
+          padding-top: 15px;
+          margin-bottom: 20px;
+          border-radius: 5px;
+        }
