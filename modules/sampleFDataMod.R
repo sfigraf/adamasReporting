@@ -447,7 +447,8 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
         runReport_UI(ns("reportBuilder"))
       })
-      lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
+      
+      lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
       #for summarized data
       # output$downloadSummarizedDataUI <- renderUI({
       #   req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
@@ -582,8 +583,8 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       output$lengthFrequenciesGraph <- renderPlotly({
 
         getLengthFrequenciesGraph(data = sampleFDataList()$sampleFRawDataToDisplay, 
-                                  lengthOptions =input$lengthFrequency_LengthOptions,
-                                  binwidth = input$lengthFrequencyBinwidthOptions, 
+                                  lengthOptions = lengthFrequencyInputs$lengthFrequency_LengthOptions(),
+                                  binwidth = lengthFrequencyInputs$lengthFrequencyBinwidthOptions(), 
                                   rsdLimits = rsdLimits)
       })
       

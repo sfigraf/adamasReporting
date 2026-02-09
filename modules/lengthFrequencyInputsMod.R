@@ -50,9 +50,21 @@ lengthFrequencyInputs_Server <- function(id) {
     id,
     function(input, output, session) {
       observeEvent(input$lengthFrequency_LengthOptions, {
+        #for graph rendering stuff; tells shiny not to let anything else use binwidth value until it finishes updating
+        # prevents "double render/flicker when graph renders in app. Shouldn't make a dif in report rendering ui
+        freezeReactiveValue(input, "lengthFrequencyBinwidthOptions")
+        
         numericInputVal <- if (input$lengthFrequency_LengthOptions == "Length_inch") 1 else 10
         updateNumericInput(session, "lengthFrequencyBinwidthOptions", value = numericInputVal)
       })
+      
+      #inputs to return to parent module
+      return(
+        list(
+          "lengthFrequency_LengthOptions" = reactive({ input$lengthFrequency_LengthOptions }),
+          "lengthFrequencyBinwidthOptions" = reactive({ input$lengthFrequencyBinwidthOptions })
+        )
+      )
     }
   )
 }
