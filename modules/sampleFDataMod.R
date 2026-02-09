@@ -368,12 +368,12 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                            )
                                   ),
                                 #br(),
-                                h3("Mean, Min, Max Length and Weight by Species"),
+                                h3(paste0("Mean, Min, Max Length and Weight")), #by ", isolate(input$combinedSummariesGroupingOptions))),
                                   withSpinner(DTOutput(ns("sampleFSummarizedMeanTable"))),
-                                h3("Proportional Stocking Density and Catch/Unit Effort by Species"),
+                                h3(paste0("Proportional Stocking Density and Catch/Unit Effort")),# by ", isolate(input$combinedSummariesGroupingOptions))),
                                 br(),
                                   withSpinner(DTOutput(ns("sampleFSummarizedStockDensity"))),
-                                h3("Relative Abundance and Catch Per Unit Effort"),
+                                h3(paste0("Relative Abundance and Catch Per Unit Effort")), #by ", isolate(input$combinedSummariesGroupingOptions))),
                                   withSpinner(DTOutput(ns("sampleFSummarizedCPUE")))
                                 )
                                 
