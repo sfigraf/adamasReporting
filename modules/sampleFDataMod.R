@@ -409,6 +409,25 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                 withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
                        ), 
                        tabPanel("Length/Weights", 
+                                fluidRow(class = "green-row",
+                                  column(6, 
+                                         radioButtons(
+                                           ns("lengthFrequency_LengthOptions"), 
+                                           label = "Length Display",
+                                           choiceNames = c("Millimeters", "Inches", "RSD Counts"),
+                                           #values need to match column names 
+                                           choiceValues = c("Length_mm", "Length_inch", "RSD")
+                                         )
+                                  ),
+                                  column(6,
+                                         conditionalPanel(
+                                           condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
+                                           ns = ns,
+                                           numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
+                                                        min = 0)
+                                         )
+                                  )
+                                ),
                                 withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                        )
                      )
@@ -557,9 +576,13 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, input$lengthWeight_LengthOptions, input$lengthWeight_WeightOptions)
       })
       
-      # output$lengthFrequenciesGraph <- renderPlotly({
-      #   getLengthFrequenciesGraph(data = sampleFDataList()$sampleFRawDataToDisplay, input$lengthWeight_LengthOptions, input$lengthWeight_WeightOptions)
-      # })
+      output$lengthFrequenciesGraph <- renderPlotly({
+
+        getLengthFrequenciesGraph(data = sampleFDataList()$sampleFRawDataToDisplay, 
+                                  lengthOptions =input$lengthFrequency_LengthOptions,
+                                  binwidth = input$lengthFrequencyBinwidthOptions, 
+                                  rsdLimits = rsdLimits)
+      })
       
       #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
       #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
