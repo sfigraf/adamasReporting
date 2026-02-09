@@ -351,33 +351,31 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                 )
                        ), 
                        tabPanel("Combined Summaries", 
-                                # div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                                #     uiOutput(ns("downloadSummarizedDataUI"))
-                                # ),
-                                box(
+                                wellPanel(
                                   fluidRow(
-                                    column(12,
-                                           withSpinner(DTOutput(ns("sampleFSummarizedMeanTable")))
+                                    column(12, 
+                                           pickerInput(ns("combinedSummariesGroupingOptions"), "Group By", 
+                                                       choices = c("Species" = "CommonName", "Water Name" = "WaterName",
+                                                                   "Station Code" = "StationCode", "Survey ID" = "SurveyID", "Year" = "Year"),
+                                                       multiple = TRUE
+                                                       #values except Year need to match column names 
+                                                       #year column is made in the markdwon before grouping
+                                                       #choiceValues = c("CommonName", "WaterName", "StationCode", "SurveyID", "Year")
+                                                       )
                                            
                                            )
-                                  )
-                                ), 
-                                box(
-                                  fluidRow(
-                                    column(12,
-                                           withSpinner(DTOutput(ns("sampleFSummarizedStockDensity")))
-                                           
-                                    )
-                                  )
-                                ), 
-                                box(
-                                  fluidRow(
-                                    column(12,
-                                           withSpinner(DTOutput(ns("sampleFSummarizedCPUE")))
-                                           
-                                    )
-                                  )
+                                  ),
+                                br(),
+                                h3("Mean, Min, Max Length and Weight by Species"),
+                                  withSpinner(DTOutput(ns("sampleFSummarizedMeanTable"))),
+                                h3("Proportional Stocking Density and Catch/Unit Effort by Species"),
+                                br(),
+                                  withSpinner(DTOutput(ns("sampleFSummarizedStockDensity"))),
+                                h3("Relative Abundance and Catch Per Unit Effort"),
+                                  withSpinner(DTOutput(ns("sampleFSummarizedCPUE")))
                                 )
+                                
+                                
                        )
                      )
                      
