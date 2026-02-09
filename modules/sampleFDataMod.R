@@ -354,10 +354,12 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                 wellPanel(
                                   fluidRow(
                                     column(12, 
-                                           pickerInput(ns("combinedSummariesGroupingOptions"), "Group By", 
+                                           pickerInput(ns("combinedSummariesGroupingOptions"), "Group By",
+                                                       #should be the same options as what we have in render report
                                                        choices = c("Species" = "CommonName", "Water Name" = "WaterName",
                                                                    "Station Code" = "StationCode", "Survey ID" = "SurveyID", "Year" = "Year"),
-                                                       multiple = TRUE
+                                                       multiple = TRUE, 
+                                                       selected = "CommonName"
                                                        #values except Year need to match column names 
                                                        #year column is made in the markdwon before grouping
                                                        #choiceValues = c("CommonName", "WaterName", "StationCode", "SurveyID", "Year")
@@ -365,7 +367,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                            
                                            )
                                   ),
-                                br(),
+                                #br(),
                                 h3("Mean, Min, Max Length and Weight by Species"),
                                   withSpinner(DTOutput(ns("sampleFSummarizedMeanTable"))),
                                 h3("Proportional Stocking Density and Catch/Unit Effort by Species"),
@@ -460,22 +462,22 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
           #show_query() %>%
           collect()
         
-        sampleFCombinedSummarizedData <- getCombinedSummariesTables("CommonName", data = finalFilteredData) #%>%
-          # group_by(CommonName) %>%
-          # summarize(`Number of Fish` = sum(NumFish), 
-          #           `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
-          #           `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
-          #           `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
-          #           `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
-          #           `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
-          #           )
+        #sampleFCombinedSummarizedData <- getCombinedSummariesTables(input$combinedSummariesGroupingOptions, data = finalFilteredData) #%>%
         
         finalFilteredDataList <- list(
-          "sampleFRawDataToDisplay" = finalFilteredData, 
-          "sampleFCombinedSummarizedData" = sampleFCombinedSummarizedData
+          "sampleFRawDataToDisplay" = finalFilteredData 
+          #"sampleFCombinedSummarizedData" = sampleFCombinedSummarizedData
         )
         
         return(finalFilteredDataList)
+        
+      })
+      
+      ##get just tables from group buttons
+      sampleFCombinedSummarizedData <- eventReactive(input$combinedSummariesGroupingOptions, {
+        req(isTruthy(sampleFDataList()))
+        sampleFCombinedSummarizedData <- getCombinedSummariesTables(input$combinedSummariesGroupingOptions, data = sampleFDataList()$sampleFRawDataToDisplay) #%>%
+        return(sampleFCombinedSummarizedData)
         
       })
 
@@ -502,35 +504,22 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       
       output$sampleFSummarizedMeanTable <- renderDT({
         
-        req(sampleFDataList()$sampleFCombinedSummarizedData$meanMinMaxLengthWeightsTable)
-        sampleFDataList()$sampleFCombinedSummarizedData$meanMinMaxLengthWeightsTable
-        
-        # datatable(sampleFDataList()$sampleFSummarizedData,
-        #           rownames = FALSE,
-        #           extensions = c('Buttons'),
-        #           #for slider filter instead of text input
-        #           filter = 'top',
-        #           options = list(
-        #             pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
-        #             dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
-        #             language = list(emptyTable = "Enter inputs and press Render Table")
-        #             #buttons = c('csv', 'excel')
-        #           )
-        # )
+        req(sampleFCombinedSummarizedData()$meanMinMaxLengthWeightsTable)
+        sampleFCombinedSummarizedData()$meanMinMaxLengthWeightsTable
         
       }, server = TRUE)
       
       output$sampleFSummarizedStockDensity <- renderDT({
         
-        req(sampleFDataList()$sampleFCombinedSummarizedData$proportionalstockdensityTable)
-        sampleFDataList()$sampleFCombinedSummarizedData$proportionalstockdensityTable
+        req(sampleFCombinedSummarizedData()$proportionalstockdensityTable)
+        sampleFCombinedSummarizedData()$proportionalstockdensityTable
         
       }, server = TRUE)
       
       output$sampleFSummarizedCPUE <- renderDT({
         
-        req(sampleFDataList()$sampleFCombinedSummarizedData$relAbundanceCPUETable)
-        sampleFDataList()$sampleFCombinedSummarizedData$relAbundanceCPUETable
+        req(sampleFCombinedSummarizedData()$relAbundanceCPUETable)
+        sampleFCombinedSummarizedData()$relAbundanceCPUETable
         
       }, server = TRUE)
       
