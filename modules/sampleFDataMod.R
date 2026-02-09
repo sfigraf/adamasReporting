@@ -385,49 +385,34 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
             tabPanel("Graphs", 
                      tabsetPanel(
                        tabPanel("Length/Weights", 
-                                # splitLayout(
-                                #   radioButtons(
-                                #     ns("lengthWeight_LengthOptions"), 
-                                #     label = "Length Display",
-                                #     choiceNames = c("Millimeters", "Inches"),
-                                #     #values need to match column names 
-                                #     choiceValues = c("Length_mm", "Length_inch")
-                                #   ),
-                                #   radioButtons(
-                                #     ns("lengthWeight_WeightOptions"), 
-                                #     label = "Weight Display",
-                                #     choiceNames = c("Grams", "Ounces"),
-                                #     #values need to match column names 
-                                #     choiceValues = c("Weight_g", "Weight_oz")
-                                #   )
-                                # ),
+                                #same inputs as in 
                                 fluidRow(class = "green-row",
-                                  column(3,
-                                         radioButtons(
-                                           ns("lengthWeight_LengthOptions"),
-                                           label = "Length Display",
-                                           choiceNames = c("Millimeters", "Inches"),
-                                           #values need to match column names
-                                           choiceValues = c("Length_mm", "Length_inch")
+                                         column(3,
+                                                radioButtons(
+                                                  ns("lengthWeight_LengthOptions"),
+                                                  label = "Length Display",
+                                                  choiceNames = c("Millimeters", "Inches"),
+                                                  #values need to match column names
+                                                  choiceValues = c("Length_mm", "Length_inch")
+                                                )
+                                         ),
+                                         column(3,
+                                                radioButtons(
+                                                  ns("lengthWeight_WeightOptions"),
+                                                  label = "Weight Display",
+                                                  choiceNames = c("Grams", "Ounces"),
+                                                  #values need to match column names
+                                                  choiceValues = c("Weight_g", "Weight_oz")
+                                                )
                                          )
-                                  ),
-                                  column(3,
-                                         radioButtons(
-                                           ns("lengthWeight_WeightOptions"),
-                                           label = "Weight Display",
-                                           choiceNames = c("Grams", "Ounces"),
-                                           #values need to match column names
-                                           choiceValues = c("Weight_g", "Weight_oz")
-                                         )
-                                  )
                                 ),
                                 withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
-                                ), 
+                       ), 
                        tabPanel("Length/Weights", 
                                 withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                        )
                      )
-                   )
+            )
           )
           
         )
@@ -571,6 +556,10 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       output$lengthWeightsGraph <- renderPlotly({
         getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, input$lengthWeight_LengthOptions, input$lengthWeight_WeightOptions)
       })
+      
+      # output$lengthFrequenciesGraph <- renderPlotly({
+      #   getLengthFrequenciesGraph(data = sampleFDataList()$sampleFRawDataToDisplay, input$lengthWeight_LengthOptions, input$lengthWeight_WeightOptions)
+      # })
       
       #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
       #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
