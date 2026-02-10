@@ -67,6 +67,13 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
           on.exit(removeModal())
           #grabs the current version of that data with this call using ()
           data <- if(is.reactive(data)) data() else data
+          
+          id <- showNotification(
+            "Collecting data to save...",
+            duration = NULL,
+            closeButton = FALSE
+          )
+          on.exit(removeNotification(id), add = TRUE)
           write_csv(data, file, progress = TRUE)
           
         }
@@ -81,6 +88,13 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
           on.exit(removeModal())
           #grabs the current version of that data with this call using ()
           data <- if(is.reactive(data)) data() else data
+          id <- showNotification(
+            "Collecting data to save...",
+            duration = NULL,
+            closeButton = FALSE
+          )
+          on.exit(removeNotification(id), add = TRUE)
+          
           openxlsx::write.xlsx(data, file)
 
         }
@@ -96,6 +110,14 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
           on.exit(removeModal())
           #grabs the current version of that data with this call using ()
           data <- if(is.reactive(data)) data() else data
+          
+          id <- showNotification(
+            "Collecting data to save...",
+            duration = NULL,
+            closeButton = FALSE
+          )
+          on.exit(removeNotification(id), add = TRUE)
+          
           saveRDS(data, file = file)
         }
       )

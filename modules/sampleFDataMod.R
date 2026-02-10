@@ -65,7 +65,7 @@ sampleFData_UI <- function(id, initialValues) {
         uiOutput(ns("lengthFilterUI")), 
         
         actionButton(ns("queryButton"), 
-                     label = "Render Data", width = "100%"), 
+                     label = "Render Data", width = "100%", class = "btn-cpw-sidebar"), 
         
         h6("Note: entries with NA values in any of the filter fields are excluded from the results")
         
@@ -79,7 +79,7 @@ sampleFData_UI <- function(id, initialValues) {
   )
 }
 
-sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
+sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -328,7 +328,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
         }
         #check if waterNames or Station Code or survey ID inputs are valid, and return a message if not
         if (!(waterNameInputCheck || stationCodeInputCheck || surveyIDInputCheck)) {
-          return(p("Please select a Water Name or Station Code before rendering.", 
+          return(p("Please select a Water Name, Station Code, or Survey ID before rendering.", 
                    style = "color: gray;"))
         }
         #pretty much every time an input is called explicitly it should be wrapped in isolate() within this block to prevent UI render before input$querybutton is clicked
@@ -339,21 +339,65 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
         #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
           tabsetPanel(
-            tabPanel("Raw Data", 
-                     div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                         uiOutput(ns("downloadDataUI")),
-                         uiOutput(ns("reportBuilderUI"))
-                     ),
-                     box(
-                       withSpinner(DTOutput(ns("sampleFData")))
+            tabPanel("Tables", 
+                     tabsetPanel(
+                       tabPanel("Raw Data",
+                                div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+                                    uiOutput(ns("downloadDataUI")),
+                                    uiOutput(ns("reportBuilderUI"))
+                                ),
+                                box(
+                                  withSpinner(DTOutput(ns("sampleFData")))
+                                )
+                       ), 
+                       tabPanel("Combined Summaries", 
+                                wellPanel(
+                                  fluidRow(
+                                    column(12, 
+                                           pickerInput(ns("combinedSummariesGroupingOptions"), "Group By",
+                                                       #should be the same options as what we have in render report
+                                                       choices = c("Species" = "CommonName", "Water Name" = "WaterName",
+                                                                   "Station Code" = "StationCode", "Survey ID" = "SurveyID", "Year" = "Year"),
+                                                       multiple = TRUE, 
+                                                       selected = "CommonName"
+                                                       #values except Year need to match column names 
+                                                       #year column is made in the markdwon before grouping
+                                                       
+                                                       )
+                                           
+                                           )
+                                  ),
+                                #br(),
+                                h3(paste0("Mean, Min, Max Length and Weight")), #by ", isolate(input$combinedSummariesGroupingOptions))),
+                                  withSpinner(DTOutput(ns("sampleFSummarizedMeanTable"))),
+                                h3(paste0("Proportional Stocking Density and Catch/Unit Effort")),# by ", isolate(input$combinedSummariesGroupingOptions))),
+                                br(),
+                                  withSpinner(DTOutput(ns("sampleFSummarizedStockDensity"))),
+                                h3(paste0("Relative Abundance and Catch Per Unit Effort")), #by ", isolate(input$combinedSummariesGroupingOptions))),
+                                  withSpinner(DTOutput(ns("sampleFSummarizedCPUE")))
+                                )
+                                
+                                
+                       )
                      )
+                     
             ), 
-            tabPanel("Species Summarized Data", 
-                     div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                         uiOutput(ns("downloadSummarizedDataUI"))
-                     ),
-                     box(
-                       withSpinner(DTOutput(ns("sampleFSummarizedData")))
+            tabPanel("Graphs", 
+                     tabsetPanel(
+                       tabPanel("Length/Weights", 
+                                wellPanel(
+                                  lengthWeightInputs_UI(ns("lengthWeightInputsMod")),
+                                  withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
+                                )
+                                
+                       ), 
+                       tabPanel("Length Frequencies",
+                                wellPanel(
+                                  lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
+                                  withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
+                                )
+                                
+                       )
                      )
             )
           )
@@ -369,11 +413,11 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
         req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
         runReport_UI(ns("reportBuilder"))
       })
-      #for summarized data
-      output$downloadSummarizedDataUI <- renderUI({
-        req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
-        downloadData_UI(ns("downloadSampleFSummarizedData"))
-      })
+      
+      # module reactive inputs return
+      lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
+      lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
+
 
 # data wrangling ----------------------------------------------------------
       
@@ -434,23 +478,20 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
         finalFilteredData <- samplFDataFiltered %>%
           #show_query() %>%
           collect()
-        
-        sampleFSummarizedData <- finalFilteredData %>%
-          group_by(CommonName) %>%
-          summarize(`Number of Fish` = n(), 
-                    `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
-                    `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
-                    `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
-                    `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
-                    `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
-                    )
-        
+  
         finalFilteredDataList <- list(
-          "sampleFRawDataToDisplay" = finalFilteredData, 
-          "sampleFSummarizedData" = sampleFSummarizedData
+          "sampleFRawDataToDisplay" = finalFilteredData 
         )
         
         return(finalFilteredDataList)
+        
+      })
+      
+      ##get just tables from group buttons
+      sampleFCombinedSummarizedData <- eventReactive(input$combinedSummariesGroupingOptions, {
+        req(isTruthy(sampleFDataList()))
+        sampleFCombinedSummarizedData <- getCombinedSummariesTables(input$combinedSummariesGroupingOptions, data = sampleFDataList()$sampleFRawDataToDisplay) #%>%
+        return(sampleFCombinedSummarizedData)
         
       })
 
@@ -475,24 +516,38 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
        
       }, server = TRUE)
       
-      output$sampleFSummarizedData <- renderDT({
+      output$sampleFSummarizedMeanTable <- renderDT({
         
-        req(sampleFDataList()$sampleFSummarizedData)
-        
-        datatable(sampleFDataList()$sampleFSummarizedData,
-                  rownames = FALSE,
-                  extensions = c('Buttons'),
-                  #for slider filter instead of text input
-                  filter = 'top',
-                  options = list(
-                    pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
-                    dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
-                    language = list(emptyTable = "Enter inputs and press Render Table")
-                    #buttons = c('csv', 'excel')
-                  )
-        )
+        req(sampleFCombinedSummarizedData()$meanMinMaxLengthWeightsTable)
+        sampleFCombinedSummarizedData()$meanMinMaxLengthWeightsTable
         
       }, server = TRUE)
+      
+      output$sampleFSummarizedStockDensity <- renderDT({
+        
+        req(sampleFCombinedSummarizedData()$proportionalstockdensityTable)
+        sampleFCombinedSummarizedData()$proportionalstockdensityTable
+        
+      }, server = TRUE)
+      
+      output$sampleFSummarizedCPUE <- renderDT({
+        
+        req(sampleFCombinedSummarizedData()$relAbundanceCPUETable)
+        sampleFCombinedSummarizedData()$relAbundanceCPUETable
+        
+      }, server = TRUE)
+      
+      output$lengthWeightsGraph <- renderPlotly({
+        getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, lengthWeightsInputs$lengthWeight_LengthOptions(), lengthWeightsInputs$lengthWeight_WeightOptions())
+      })
+      
+      output$lengthFrequenciesGraph <- renderPlotly({
+
+        getLengthFrequenciesGraph(data = sampleFDataList()$sampleFRawDataToDisplay, 
+                                  lengthOptions = lengthFrequencyInputs$lengthFrequency_LengthOptions(),
+                                  binwidth = lengthFrequencyInputs$lengthFrequencyBinwidthOptions(), 
+                                  rsdLimits = rsdLimits)
+      })
       
       #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
       #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
@@ -500,7 +555,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues) {
       
       #sample f rawe data tab
       downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
-      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}))
+      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
       #summarized data tab
       downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
       

@@ -1,10 +1,23 @@
 ---
-title: "sampleFDataReport"
-date: "`r Sys.Date()`"
+title: |
+  <img src="CPWLogoLarge.png" style="float: left; width: 100px; padding-right: 15px;"> sampleFDataReport
+
+subtitle: |
+ <div style="clear: both; padding-top: 10px;">
+ `r Sys.Date()` <br>
+   <span style='font-size: 0.6em;'>**Area Bio(s): ** `r sort(unique(params$sampleFData()$AreaBio))`</span>
+   <span style='font-size: 0.6em;'>**Sp Con Bio(s): ** `r sort(unique(params$sampleFData()$SpConBio))`</span>
+   <span style='font-size: 0.6em;'>**Water Name(s): ** `r sort(unique(params$sampleFData()$WaterName))`</span>
+   <span style='font-size: 0.6em;'>**Station Code(s): ** `r sort(unique(params$sampleFData()$StationCode))`</span>
+   <span style='font-size: 0.6em;'>**Survey ID(s): ** `r sort(unique(params$sampleFData()$SurveyID))`</span>
+  </div>
+
 output: html_document
 params:
+  appRoot: ""
   sampleFData: NULL
-  summaryTable: NULL
+  rsdLimits: NULL
+  combinedSummaries: NULL
   lengthWeightGraph: FALSE
   lengthFrequencyGraph: FALSE
 ---
@@ -13,56 +26,66 @@ params:
 require(knitr)
 require(tidyverse)
 require(plotly)
+require(shiny)
+require(shinydashboard)
+#require(htmltools)
 
+#set root directory to where app ius to be able to source files
+functionsDirectory <- file.path(params$appRoot, "functions")
+# #functions
+neededFunctions <- c("getCombinedSummariesTables.R", "getLengthWeightGraph.R", 
+                     "getLengthFrequenciesGraph.R")
+# 
+for (i in neededFunctions) {
+  source(file.path(functionsDirectory, i))
+}
 sampleFData <- params$sampleFData()
+
+title_style <- "background-color: #e2f0d9; 
+                padding: 10px 20px; 
+                border-radius: 15px; 
+                font-weight: bold; 
+                margin-bottom: 10px; 
+                width: 100%;"
+# areaBios <- sort(unique(sampleFData$AreaBio))
+# spConBios <- sort(unique(sampleFData$SpConBio))
+# waterNames <- sort(unique(sampleFData$WaterName))
+# stationCode <- sort(unique(sampleFData$StationCode))
+# surveyIds <- sort(unique(sampleFData$SurveyID))
 
 ```
 
-`r if(params$summaryTable$display) "## Summary Table"`
+`r if(params$combinedSummaries$display) "## Combined Summaries"`
 
-```{r summaryTable, include=TRUE, echo=FALSE, warning=FALSE,message=FALSE,error=FALSE}
-if(params$summaryTable$display){
-  groupByCols <- params$summaryTable$groupingCols
+```{r combinedSummaries, include=TRUE, echo=FALSE, warning=FALSE,message=FALSE,error=FALSE}
+if(params$combinedSummaries$display){
   
-  sampleFSummarized <- sampleFData %>%
-    mutate(Year = year(SampleDate)) %>%
-    group_by(across(any_of(groupByCols))) %>%
-    summarize(`Number of Fish` = n(), 
-              `Average Length (mm)` = round(mean(Length_mm, na.rm = TRUE), 2), 
-              `Median Length (mm)` = round(median(Length_mm, na.rm = TRUE), 2), 
-              `Min Length (mm)` = round(min(Length_mm, na.rm = TRUE), 2),
-              `Max Length (mm)` = round(max(Length_mm, na.rm = TRUE), 2), 
-              `Standard Deviation (mm)` = round(sd(Length_mm, na.rm = TRUE), 2)
-    )
+  combinedSummariesTables <- getCombinedSummariesTables(groupByCols = params$combinedSummaries$groupingCols, data = sampleFData)
   
-  datatable(sampleFSummarized,
-            rownames = FALSE,
-            extensions = c('Buttons'),
-            #for slider filter instead of text input
-            filter = 'top',
-            options = list(
-              pageLength = 10, info = TRUE, lengthMenu = list(c(10,25, 50, 100, 200), c("10", "25", "50","100","200")),
-              dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
-              language = list(emptyTable = "Enter inputs and press Render Table")
-              #buttons = c('csv', 'excel')
-            )
+  tagList(
+    tags$div("Mean, Min, Max Length/Weight", style = title_style),
+    combinedSummariesTables$meanMinMaxLengthWeightsTable,
+    tags$br(), 
+    
+    tags$div("Proportional Stocking Density and Catch/Unit Effort", style = title_style),
+    combinedSummariesTables$proportionalstockdensityTable,
+    tags$br(), 
+    
+    tags$div("Relative Abundance and Catch/Unit Effort", style = title_style),
+    combinedSummariesTables$relAbundanceCPUETable
   )
+  
+  
 }
 
 ```
 
-`r if(params$lengthWeightGraph) "## Length/Weights"`
+`r if(params$lengthWeightGraph$display) "## Length/Weights"`
 
 ```{r lwGraph, include=TRUE, echo=FALSE}
-if(params$lengthWeightGraph){
-  
-  plot <- sampleFData %>%
-          ggplot(aes(x = Length_mm, y = Weight_g, color = CommonName)) +
-          geom_point() + 
-          theme_classic() +
-          labs(title = "Length/Weight Data") #+
-          #scale_color_manual(values = allColors)
-  ggplotly(plot)
+if(params$lengthWeightGraph$display){
+  #since the inpout options are reactive expressions from their module, need to use () to access
+  getLengthWeightGraph(data = sampleFData, lengthOptions = params$lengthWeightGraph$lengthOptions(), weightOptions = params$lengthWeightGraph$weightOptions())
   
 } #else{
     #asis_output("## Parameter not selected")
@@ -70,19 +93,13 @@ if(params$lengthWeightGraph){
 #}
 ```
 
-`r if(params$lengthFrequencyGraph) "## Length Frequencies"`
+`r if(params$lengthFrequencyGraph$display) "## Length Frequencies"`
 
 ```{r lfGraph, include=TRUE, echo=FALSE}
-if(params$lengthFrequencyGraph){
+if(params$lengthFrequencyGraph$display){
+  getLengthFrequenciesGraph(data = sampleFData, lengthOptions = params$lengthFrequencyGraph$lengthOptions(), 
+                            binwidth = params$lengthFrequencyGraph$binwidth(), rsdLimits = params$rsdLimits)
 
-  plot <- sampleFData %>%
-          ggplot(aes(x = Length_mm, fill = CommonName) ) +
-          geom_histogram(binwidth = 20)+
-          theme_classic() +
-          labs(title = "Length Frequencies", caption = "Binwidth = 20mm") #+
-          #scale_fill_manual(values = allColors)
-  ggplotly(plot)
-  
 } 
 ```
 

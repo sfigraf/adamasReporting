@@ -15,10 +15,11 @@ library(dbplyr)
 library(openxlsx) #for saving excel file
 library(knitr) #for rmarkdown
 library(shinyjs) #for greying out buttons
-
+library(shinyvalidate)
+library(later) #for watining to fire code
+#library(bslib) #for theme
 
 source("scripts/connectToDB.R")
-source("misc/graphicsOptions.R")
 
 for (i in list.files("./modules/")) {
   if (grepl(".R", i)) {
@@ -26,48 +27,68 @@ for (i in list.files("./modules/")) {
   }
 }
 
+neededFunctions <- c("getCombinedSummariesTables.R", "getLengthWeightGraph.R", 
+                     "getLengthFrequenciesGraph.R")
+for (i in neededFunctions) {
+  source(paste0("./functions/",i))
+}
+
 ##get initial Vlaues
 
 ###sampleFData options for filters
 sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
 
-allDistinctWaters <- sampleFData %>%
-  distinct(WaterName) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
+if(!exists("allDistinctWaters")){
+  allDistinctWaters <- sampleFData %>%
+    distinct(WaterName) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
 
-allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
-allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
+if(!exists("allYears")){
+  allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
+  allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
+}
 
-allBios <- sampleFData %>%
-  distinct(AreaBio) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
+if(!exists("allBios")){
+  allBios <- sampleFData %>%
+    distinct(AreaBio) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
 
-allSPBios <- sampleFData %>%
-  distinct(SpConBio) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
+if(!exists("allSPBios")){
+  allSPBios <- sampleFData %>%
+    distinct(SpConBio) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
 
-allStationCodes <- sampleFData %>%
-  distinct(StationCode) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
+if(!exists("allStationCodes")){
+  allStationCodes <- sampleFData %>%
+    distinct(StationCode) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
 
-allSurveyIDs <- sampleFData %>%
-  distinct(SurveyID) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
+if(!exists("allSurveyIDs")){
+  allSurveyIDs <- sampleFData %>%
+    distinct(SurveyID) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
 
-allLengths <- sampleFData %>%
-  distinct(Length_mm) %>%
-  show_query() %>%
-  pull() 
+if(!exists("allLengths")){
+  allLengths <- sampleFData %>%
+    distinct(Length_mm) %>%
+    show_query() %>%
+    pull() 
+}
 
 sampleFInitialFilterValues <- list(
   "allBios" = allBios,
@@ -83,52 +104,61 @@ sampleFInitialFilterValues <- list(
 ###Same thing for current summaries
 #current summary options for filters
 currentSummaryData <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
-allYearsSummarizedData <- currentSummaryData %>%
-  distinct(year(SampleDate)) %>%
-  pull()
-allBiosSummarizedData <- currentSummaryData %>%
-  distinct(AreaBio) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
-allDistinctWatersSummarizedData <- currentSummaryData %>%
-  distinct(WaterName) %>%
-  show_query() %>%
-  pull() %>%
-  sort()
+
+if(!exists("allYearsSummarizedData")){
+  allYearsSummarizedData <- currentSummaryData %>%
+    distinct(year(SampleDate)) %>%
+    pull()
+}
+
+if(!exists("allBiosSummarizedData")){
+  allBiosSummarizedData <- currentSummaryData %>%
+    distinct(AreaBio) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
+
+if(!exists("allDistinctWatersSummarizedData")){
+  allDistinctWatersSummarizedData <- currentSummaryData %>%
+    distinct(WaterName) %>%
+    show_query() %>%
+    pull() %>%
+    sort()
+}
 
 currentSummariesInitialFilterValues <- list(
   "allYearsSummarizedData" = allYearsSummarizedData, 
   "allBiosSummarizedData" = allBiosSummarizedData, 
   "allDistinctWatersSummarizedData" = allDistinctWatersSummarizedData
 )
+#rsd limits for graph rsd ranges
+rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
+  collect()
 
 ui <- fluidPage(
   navbarPage(title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"), 
              #selected = c("Map"),
-             windowTitle = HTML("<title>Residual Pool Depth</title> <link rel='icon' type='image/gif/png' href='CPWLogoLarge.png'>"),
+             windowTitle = HTML("<title>Adamas Reporting</title> <link rel='icon' type='image/gif/png' href='CPWLogoLarge.png'>"),
              #this part changes the navbar options
-             tags$head(
-               tags$style(HTML('.navbar-nav > li > a, .navbar-brand {
-                            padding-top:9px !important; 
-                            padding-bottom:0 !important;
-                            height: 80px;
-                            }
-                           .navbar {min-height:25px !important;}'))
+             header = tags$head(
+               tags$link(rel = "stylesheet", type = "text/css", href = "customStyles.css")
              ),
              id = "tabs", 
-             theme = shinytheme("cerulean"),
-             tabPanel(tags$div("SampleF Data",style = title_style), 
-                      sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
-             tabPanel(tags$div("Summarized Data", style = title_style), 
-                      summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
+             navbarMenu("Data Source",
+                        tabPanel("Raw Data", 
+                                 sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
+                        tabPanel("Aggregated Data",  
+                                 summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
+             )
+             
   )    
-
+  
 )
 
 server <- function(input, output) {
   observe({
-    sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues)
+    sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
     summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
   })
 }
