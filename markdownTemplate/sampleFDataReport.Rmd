@@ -16,7 +16,7 @@ output: html_document
 params:
   appRoot: ""
   sampleFData: NULL
-  rsdLimits: Null
+  rsdLimits: NULL
   combinedSummaries: NULL
   lengthWeightGraph: FALSE
   lengthFrequencyGraph: FALSE
@@ -97,8 +97,8 @@ if(params$lengthWeightGraph$display){
 
 ```{r lfGraph, include=TRUE, echo=FALSE}
 if(params$lengthFrequencyGraph$display){
-  getLengthFrequenciesGraph(data = sampleFData, lengthOptions = params$lengthFrequencyGraph$lengthOptions, 
-                            binwidth = params$lengthFrequencyGraph$binwidth, rsdLimits = params$rsdLimits)
+  getLengthFrequenciesGraph(data = sampleFData, lengthOptions = params$lengthFrequencyGraph$lengthOptions(), 
+                            binwidth = params$lengthFrequencyGraph$binwidth(), rsdLimits = params$rsdLimits)
 
   # plot <- sampleFData %>%
   #   ggplot(aes(x = .data[[params$lengthFrequencyGraph$lengthOptions]],

@@ -101,7 +101,7 @@ runReport_Server <- function(id, data, rsdLimits) {
               #   "#", ns("lengthFrequencyBinwidthOptions"), "-label ",
               #   "{ font-weight: normal !important; }"
               # ))), # Makes the title not bold
-              lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod_Report"), class = "normal-label-row"),
+              lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod_Report"), class = "normal-label-row"), #, 
             )
           ),
           
@@ -134,15 +134,16 @@ runReport_Server <- function(id, data, rsdLimits) {
       }, ignoreInit = TRUE)
       
       # update binwidth based on button click; default 1 inch or 10 mm
-      observeEvent(input$lengthFrequency_LengthOptions, {
-        numericInputVal <- if (input$lengthFrequency_LengthOptions == "Length_inch") 1 else 10
-        updateNumericInput(session, "lengthFrequencyBinwidthOptions", value = numericInputVal)
-      })
+      lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod_Report")
+      # observeEvent(input$lengthFrequency_LengthOptions, {
+      #   numericInputVal <- if (input$lengthFrequency_LengthOptions == "Length_inch") 1 else 10
+      #   updateNumericInput(session, "lengthFrequencyBinwidthOptions", value = numericInputVal)
+      # })
       
       observe({
         # Enable only if at least one checkbox is selected
         #for the binwidth one, make sure that frequcny graph is checked (truthy) and input is true. It's true if the conditional binwidth panel doesn't display
-        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) # && lengthFrequencyInputs$validBinWidth()
+        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) #&& iv$is_valid())  #lengthFrequencyInputs$validBinWidth()
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
         } else {
@@ -185,10 +186,14 @@ runReport_Server <- function(id, data, rsdLimits) {
             ),
             lengthFrequencyGraph = list(
               "display" = isolate(input$lengthFrequencyCheckbox), 
-              "lengthOptions" = isolate(input$lengthFrequency_LengthOptions), 
-              "binwidth" = isolate(input$lengthFrequencyBinwidthOptions)
+              "lengthOptions" = isolate(lengthFrequencyInputs$lengthFrequency_LengthOptions), 
+              "binwidth" = isolate(lengthFrequencyInputs$lengthFrequencyBinwidthOptions)
               )
           )
+          print(paste("diplay:", input$lengthFrequencyCheckbox, 
+                      "lengthOptions", lengthFrequencyInputs$lengthFrequency_LengthOptions(), 
+                      "binwidth", lengthFrequencyInputs$lengthFrequencyBinwidthOptions()
+                      ))
           
           id <- showNotification(
             "Rendering report...",
