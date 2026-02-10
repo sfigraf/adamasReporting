@@ -13,16 +13,16 @@ runReport_Server <- function(id, data, rsdLimits) {
       
       ns <- session$ns
       
-      #make new shinyvalidate input validator
-      iv <- InputValidator$new()
-      # add rules for numeric input
-      iv$add_rule("lengthFrequencyBinwidthOptions", sv_required()) # Ensure it's not empty
-      iv$add_rule("lengthFrequencyBinwidthOptions", sv_numeric())  # Ensure it's a number
-      
-      # Rule to prevent zero: must be greater than 0
-      iv$add_rule("lengthFrequencyBinwidthOptions", sv_gt(0, message = "Value must be greater than 0"))
-      #enable validator
-      iv$enable()
+      # #make new shinyvalidate input validator
+      # iv <- InputValidator$new()
+      # # add rules for numeric input
+      # iv$add_rule("lengthFrequencyBinwidthOptions", sv_required()) # Ensure it's not empty
+      # iv$add_rule("lengthFrequencyBinwidthOptions", sv_numeric())  # Ensure it's a number
+      # 
+      # # Rule to prevent zero: must be greater than 0
+      # iv$add_rule("lengthFrequencyBinwidthOptions", sv_gt(0, message = "Value must be greater than 0"))
+      # #enable validator
+      # iv$enable()
       
       #values <- reactiveValues()
 
@@ -96,12 +96,7 @@ runReport_Server <- function(id, data, rsdLimits) {
             ns = ns,
             div(
               style = "margin-left: 25px;",
-              # tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-              #   "#", ns("lengthFrequency_LengthOptions"), " .control-label, ", 
-              #   "#", ns("lengthFrequencyBinwidthOptions"), "-label ",
-              #   "{ font-weight: normal !important; }"
-              # ))), # Makes the title not bold
-              lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod_Report"), class = "normal-label-row"), #, 
+              lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod_Report"), class = "normal-label-row"),  
             )
           ),
           
@@ -133,12 +128,7 @@ runReport_Server <- function(id, data, rsdLimits) {
         
       }, ignoreInit = TRUE)
       
-      # update binwidth based on button click; default 1 inch or 10 mm
       lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod_Report")
-      # observeEvent(input$lengthFrequency_LengthOptions, {
-      #   numericInputVal <- if (input$lengthFrequency_LengthOptions == "Length_inch") 1 else 10
-      #   updateNumericInput(session, "lengthFrequencyBinwidthOptions", value = numericInputVal)
-      # })
       
       observe({
         # Enable only if at least one checkbox is selected
@@ -190,10 +180,6 @@ runReport_Server <- function(id, data, rsdLimits) {
               "binwidth" = isolate(lengthFrequencyInputs$lengthFrequencyBinwidthOptions)
               )
           )
-          print(paste("diplay:", input$lengthFrequencyCheckbox, 
-                      "lengthOptions", lengthFrequencyInputs$lengthFrequency_LengthOptions(), 
-                      "binwidth", lengthFrequencyInputs$lengthFrequencyBinwidthOptions()
-                      ))
           
           id <- showNotification(
             "Rendering report...",

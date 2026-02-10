@@ -277,7 +277,12 @@ singlesurvey <- sampleFData %>%
   filter(SurveyID == "42671") %>%
   collect()
 
+SurveyLocationView <- tbl(CPW_AqDatAnalysis, "SurveyLocationView") %>%
+  collect()
+#dbListFields(CPW_AqDatAnalysis, "SampleFView")
+sort(dbListFields(CPW_AqDatAnalysis, "SurveyLocationView"))
 
+SurveyLocationView
 # styles
 # text coolor in virtualSelectINputs
 # /* Styling individual options */
