@@ -362,7 +362,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                                        selected = "CommonName"
                                                        #values except Year need to match column names 
                                                        #year column is made in the markdwon before grouping
-                                                       #choiceValues = c("CommonName", "WaterName", "StationCode", "SurveyID", "Year")
+                                                       
                                                        )
                                            
                                            )

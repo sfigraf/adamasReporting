@@ -21,7 +21,7 @@ lengthWeightInputs_UI <- function(id, class = "green-row") {
                     )
              )
     )
-  
+    
   )
 }
 

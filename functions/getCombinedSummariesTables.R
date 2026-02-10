@@ -63,7 +63,10 @@ getCombinedSummariesTables <- function(groupByCols, data){
               #sums whole column numfish but ignores group_by()
               #could also do the same thing with mutating after
               `Percent Total Catch` = round(sum(NumFish, na.rm = TRUE)/sum(.$NumFish, na.rm = TRUE) *100, 2), 
-              `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
+              `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2),
+              
+               `CPUE Number/Effort` = round(sum(NumFish, na.rm = TRUE) / mean(TotalEffort, na.rm = TRUE), 2),
+               `CPUE Kg/Effort` = round(sum(Weight_g, na.rm = TRUE)/1000 / mean(TotalEffort, na.rm = TRUE), 2)
     )
   
   relAbundanceCPUETable <- datatable(relAbundanceCPUE,
