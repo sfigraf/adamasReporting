@@ -151,6 +151,8 @@ plot1 <- plot +
 #getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
 #"Memorable" "Preferred" "Quality"   "Stock"     "Trophy"   
 survey1239Data <- survey1239 %>%
+  # group_by(RSD, SpeciesCode) %>%
+  # summarise(Count = sum(NumFish))
   count(RSD, SpeciesCode, name = "Count") %>%
   left_join(rsdLimits, by = "SpeciesCode") %>%
   mutate(RSD = replace_na(RSD, "Below Stock Size")) %>%
@@ -167,6 +169,11 @@ survey1239Data <- survey1239 %>%
   ungroup()
 plot1 <- ggplot(survey1239Data, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
   geom_col()
+### find any isntance of Numfish column >1 and RSD not na
+x <- sampleFData %>%
+  filter(NumFish >1, 
+         !is.na(RSD)) %>%
+  collect()
 # plot1 <- ggplot(survey1239Data, aes(x = RSD, fill = commonName)) +
 #   geom_histogram(
 #     stat = "count",

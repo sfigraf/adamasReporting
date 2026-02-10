@@ -1,9 +1,15 @@
 
 getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
+  
+  
   if(lengthOptions == "RSD"){
+    
     sampleFDataRSD <- data %>%
-      #this works as long as there are no group RSD designations if there are a like 20 fish in the "numfish" column
-      count(RSD, SpeciesCode, name = "Count") %>%
+      #can't just count rsd and species bc there might be more than one fish in the numfish column
+      #like the 5000 "Stock" sized carp in 2008 lol
+      #shoudl do this all the time in this data, not use count()
+      group_by(RSD, SpeciesCode) %>%
+      summarise(Count = sum(NumFish)) %>%
       left_join(rsdLimits, by = "SpeciesCode") %>%
       mutate(RSD = replace_na(RSD, "Below Stock Size")) %>%
       mutate(hoverText = case_when(
@@ -23,18 +29,26 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
       labs(caption = "RSD (mm)")
     
   } else{
+    # datagrouped <- data %>%
+    #   group_by(RSD, SpeciesCode) %>%
+    #   summarise(Count = sum(NumFish)) 
     plot <- data %>%
-      ggplot(aes(x = .data[[lengthOptions]], 
+      #mutate(hoverText = )
+      #weighting by numFIsh allows to see total number of fish, not just count the rows
+      #numfish will get summed for a certain bin
+      ggplot(aes(x = .data[[lengthOptions]], weight = NumFish, #y = Count, text = paste0("Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
+                                                                      #"<br>Count: ", after_stat(count),
+                                                                      #'<br>Species: ', after_stat(label)
+      #), 
                  fill = CommonName)) +
-      #theme_classic() +
-      # labs(title = "Length Frequencies", caption = "Binwidth = 20mm") +
       geom_histogram(binwidth = binwidth, 
                      aes(
                        group = CommonName,
                        label = CommonName,
-                       text = paste0("Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
-                                     "<br>Count: ", after_stat(count),
-                                     '<br>Species: ', after_stat(label)
+                       text = paste0('<br>Species: ', after_stat(label),
+                                     "Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
+                                     "<br>Count: ", after_stat(count)
+                                     
                        )
                      )) +
       labs(caption = paste(lengthOptions, ": Binwidth", binwidth))
