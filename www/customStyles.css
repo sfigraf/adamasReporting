@@ -229,6 +229,7 @@ input[type="radio"] {
           padding-top: 15px;
           margin-bottom: 20px;
           border-radius: 5px;
+          border-color: #245d38;
         }
         
 .normal-label-row .control-label, 

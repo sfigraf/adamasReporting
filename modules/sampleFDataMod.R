@@ -385,33 +385,18 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
             tabPanel("Graphs", 
                      tabsetPanel(
                        tabPanel("Length/Weights", 
-                                #same inputs as in 
-                                lengthWeightInputs_UI(ns("lengthWeightInputsMod")),
-                                # fluidRow(class = "green-row",
-                                #          column(3,
-                                #                 radioButtons(
-                                #                   ns("lengthWeight_LengthOptions"),
-                                #                   label = "Length Display",
-                                #                   choiceNames = c("Millimeters", "Inches"),
-                                #                   #values need to match column names
-                                #                   choiceValues = c("Length_mm", "Length_inch")
-                                #                 )
-                                #          ),
-                                #          column(3,
-                                #                 radioButtons(
-                                #                   ns("lengthWeight_WeightOptions"),
-                                #                   label = "Weight Display",
-                                #                   choiceNames = c("Grams", "Ounces"),
-                                #                   #values need to match column names
-                                #                   choiceValues = c("Weight_g", "Weight_oz")
-                                #                 )
-                                #          )
-                                # ),
-                                withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
+                                wellPanel(
+                                  lengthWeightInputs_UI(ns("lengthWeightInputsMod")),
+                                  withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
+                                )
+                                
                        ), 
                        tabPanel("Length Frequencies",
-                                lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
-                                withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
+                                wellPanel(
+                                  lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
+                                  withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
+                                )
+                                
                        )
                      )
             )

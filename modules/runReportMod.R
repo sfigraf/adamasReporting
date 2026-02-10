@@ -48,32 +48,7 @@ runReport_Server <- function(id, data, rsdLimits) {
               ns = ns,
               div(
                 style = "margin-left: 25px;", # Indent to the right  margin-top: 10px;
-                # tags$style(HTML(paste0( #using namespacing below ensures this will only be applied to that element
-                #   "#", ns("lengthWeight_LengthOptions"), " .control-label, ", 
-                #   "#", ns("lengthWeight_WeightOptions"), " .control-label ",
-                #   "{ font-weight: normal; }"
-                #))), # Makes the title not bold
                 lengthWeightInputs_UI(ns("lengthWeightInputsMod_Report"), class = "normal-label-row"),
-                # fluidRow(
-                #   column(6, 
-                #          radioButtons(
-                #            ns("lengthWeight_LengthOptions"), 
-                #            label = "Length Display",
-                #            choiceNames = c("Millimeters", "Inches"),
-                #            #values need to match column names 
-                #            choiceValues = c("Length_mm", "Length_inch")
-                #          )
-                #          ), 
-                #   column(6, 
-                #          radioButtons(
-                #            ns("lengthWeight_WeightOptions"), 
-                #            label = "Weight Display",
-                #            choiceNames = c("Grams", "Ounces"),
-                #            #values need to match column names 
-                #            choiceValues = c("Weight_g", "Weight_oz")
-                #          )
-                #          )
-                # )
               )
             ),
           #LENGTH FREUQNCY GRAPH
