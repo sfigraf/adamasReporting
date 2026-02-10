@@ -148,20 +148,22 @@ plot <- survey1239 %>%
 
 plot1 <- plot +
   geom_histogram(stat = "count")
-
+#getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
 #"Memorable" "Preferred" "Quality"   "Stock"     "Trophy"   
 survey1239Data <- survey1239 %>%
-  count(RSD, CommonName, name = "Count") %>%
-  left_join(rsdLimits, by = "CommonName") %>%
-  mutate(hoverText = case_when(RSD == "Stock" ~ paste0(CommonName, " 'Stock' Range (mm): ", SLEN, " - ", QLEN), 
-                               RSD == "Quality" ~ paste0(CommonName, " 'Quality' Range (mm): ", QLEN, " - ", PLEN), 
-                               RSD == "Preferred" ~ paste0(CommonName, " 'Preferred' Range (mm): ", PLEN, " - ", MLEN), 
-                               RSD == "Memorable" ~ paste0(CommonName, " 'Memorable' Range (mm): ", MLEN, " - ", TLEN), 
-                               RSD == "Trophy" ~ paste0(CommonName, " 'Trophy' Range (mm): ", TLEN, "+"), 
-                               TRUE ~ paste0(CommonName, ": No RSD Assigned")
-                               
-                               ), 
-         RSD = factor(RSD, levels = c("Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
+  count(RSD, SpeciesCode, name = "Count") %>%
+  left_join(rsdLimits, by = "SpeciesCode") %>%
+  mutate(RSD = replace_na(RSD, "Below Stock Size")) %>%
+  mutate(hoverText = case_when(RSD == "Stock" ~ paste0(CommonName, " 'Stock' Range (mm): ", SLEN, " - ", QLEN, "<br>", "Count: ", Count), 
+                               RSD == "Quality" ~ paste0(CommonName, " 'Quality' Range (mm): ", QLEN, " - ", PLEN, "<br>", "Count: ", Count), 
+                               RSD == "Preferred" ~ paste0(CommonName, " 'Preferred' Range (mm): ", PLEN, " - ", MLEN, "<br>", "Count: ", Count), 
+                               RSD == "Memorable" ~ paste0(CommonName, " 'Memorable' Range (mm): ", MLEN, " - ", TLEN, "<br>", "Count: ", Count), 
+                               RSD == "Trophy" ~ paste0(CommonName, " 'Trophy' Range (mm): ", TLEN, "+", "<br>", "Count: ", Count), 
+                               RSD == "Below Stock Size" ~ paste0(CommonName, " Below Stock Size: <", SLEN, "mm <br>", "Count: ", Count), 
+                               #with assigning "Below Stock Size" to the NA values, this should never come up so if it does it's worth investigating why
+                               TRUE ~ "No RSD Assigned"
+  ), 
+         RSD = factor(RSD, levels = c("Below Stock Size", "Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
   ungroup()
 plot1 <- ggplot(survey1239Data, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
   geom_col()

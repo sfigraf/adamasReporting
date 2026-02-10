@@ -1,25 +1,3 @@
-# lengthFrequencyGraphInputs <- function(ns, idPrefix = "", class = "green-row"){
-#   fluidRow(class = class, 
-#            column(6,
-#                   radioButtons(
-#                     ns("lengthFrequency_LengthOptions"), 
-#                     label = "Length Display",
-#                     choiceNames = c("Millimeters", "Inches", "RSD Counts"),
-#                     #values need to match column names 
-#                     choiceValues = c("Length_mm", "Length_inch", "RSD")
-#                   )
-#            ),
-#            column(6,
-#                   conditionalPanel(
-#                     condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
-#                     ns = ns,
-#                     numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
-#                                  min = 0)
-#                   )
-#            )
-#   )
-# }
-
 lengthFrequencyInputs_UI <- function(id, class = "green-row") {
   ns <- NS(id)
   tagList(
@@ -54,10 +32,9 @@ lengthFrequencyInputs_Server <- function(id) {
       isUpdating <- reactiveVal(FALSE)
       #make new shinyvalidate input validator
       iv <- InputValidator$new()
-      
-      #add condition to only apply validator rules at specifc time to avoid "required" flicker
-     # print(input$lengthFrequencyBinwidthOptions)
+    
       # set condition on validator to only apply the rules when the numeric bindith input is not updating
+      #this coupled with the "later" re-enable avoids a "flicker" of "required" and "unexpected" error messages with validator
 
       iv$condition(~ !isUpdating())
       # add rules for numeric input
@@ -69,12 +46,9 @@ lengthFrequencyInputs_Server <- function(id) {
       #enable validator
       iv$enable()
       
-      
-      
+      #update binwidth input to 10 or 1 based on seelcted length option
       observeEvent(input$lengthFrequency_LengthOptions, {
-        #print(input$lengthFrequencyBinwidthOptions)
-        #req(iv$is_valid())
-        #iv$disable() 
+        
         # set reactive value to true to disable the validation rules while the binwidth is being updated
         isUpdating(TRUE)
         #for graph rendering stuff; tells shiny not to let anything else use binwidth value until it finishes updating
@@ -85,17 +59,12 @@ lengthFrequencyInputs_Server <- function(id) {
         updateNumericInput(session, "lengthFrequencyBinwidthOptions", value = numericInputVal)
         
         #after the binwidth value is updated, set the reactive value back to false to re-enable validator rules
-        # 
-        #session$onFlushed(function() {
-          #
-          later::later(function() { isUpdating(FALSE) }, 0.1)
-        #}, once = TRUE)
+        #set it at a slight delay using later package
+        #could maybe just do this with iv$enable and iv$disable but not a big deal to use reactive values I think
+        
+        later::later(function() { isUpdating(FALSE) }, 0.1)
         
       })
-      # target_binwidth <- eventReactive(input$lengthFrequency_LengthOptions, {
-      #   req(input$lengthFrequency_LengthOptions)
-      #   if (input$lengthFrequency_LengthOptions == "Length_inch") 1 else 10
-      # })
       
       
       #inputs to return to parent module

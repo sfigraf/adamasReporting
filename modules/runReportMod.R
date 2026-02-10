@@ -12,19 +12,6 @@ runReport_Server <- function(id, data, rsdLimits) {
     function(input, output, session) {
       
       ns <- session$ns
-      
-      # #make new shinyvalidate input validator
-      # iv <- InputValidator$new()
-      # # add rules for numeric input
-      # iv$add_rule("lengthFrequencyBinwidthOptions", sv_required()) # Ensure it's not empty
-      # iv$add_rule("lengthFrequencyBinwidthOptions", sv_numeric())  # Ensure it's a number
-      # 
-      # # Rule to prevent zero: must be greater than 0
-      # iv$add_rule("lengthFrequencyBinwidthOptions", sv_gt(0, message = "Value must be greater than 0"))
-      # #enable validator
-      # iv$enable()
-      
-      #values <- reactiveValues()
 
 # modal to appear on button click -----------------------------------------
 

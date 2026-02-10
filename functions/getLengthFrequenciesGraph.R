@@ -1,21 +1,22 @@
-# data <- singlesurvey
-# lengthOptions <- "Length_mm"
-# binwidth = 10
+
 getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
   if(lengthOptions == "RSD"){
     sampleFDataRSD <- data %>%
       #this works as long as there are no group RSD designations if there are a like 20 fish in the "numfish" column
-      count(RSD, CommonName, name = "Count") %>%
-      left_join(rsdLimits, by = "CommonName") %>%
-      mutate(hoverText = case_when(RSD == "Stock" ~ paste0(CommonName, " 'Stock' Range (mm): ", SLEN, " - ", QLEN), 
-                                   RSD == "Quality" ~ paste0(CommonName, " 'Quality' Range (mm): ", QLEN, " - ", PLEN), 
-                                   RSD == "Preferred" ~ paste0(CommonName, " 'Preferred' Range (mm): ", PLEN, " - ", MLEN), 
-                                   RSD == "Memorable" ~ paste0(CommonName, " 'Memorable' Range (mm): ", MLEN, " - ", TLEN), 
-                                   RSD == "Trophy" ~ paste0(CommonName, " 'Trophy' Range (mm): ", TLEN, "+"), 
-                                   TRUE ~ paste0(CommonName, ": No RSD Assigned")
-                                   
+      count(RSD, SpeciesCode, name = "Count") %>%
+      left_join(rsdLimits, by = "SpeciesCode") %>%
+      mutate(RSD = replace_na(RSD, "Below Stock Size")) %>%
+      mutate(hoverText = case_when(
+        RSD == "Below Stock Size" ~ paste0(CommonName, "<br> Below Stock Size: <", SLEN, "mm <br>", "Count: ", Count), 
+        RSD == "Stock" ~ paste0(CommonName, "<br> 'Stock' Range (mm): ", SLEN, " - ", QLEN, "<br>", "Count: ", Count), 
+        RSD == "Quality" ~ paste0(CommonName, "<br> 'Quality' Range (mm): ", QLEN, " - ", PLEN, "<br>", "Count: ", Count), 
+        RSD == "Preferred" ~ paste0(CommonName, "<br> 'Preferred' Range (mm): ", PLEN, " - ", MLEN, "<br>", "Count: ", Count), 
+        RSD == "Memorable" ~ paste0(CommonName, "<br> 'Memorable' Range (mm): ", MLEN, " - ", TLEN, "<br>", "Count: ", Count), 
+        RSD == "Trophy" ~ paste0(CommonName, "<br> 'Trophy' Range (mm): ", TLEN, "+", "<br>", "Count: ", Count), 
+        #with assigning "Below Stock Size" to the NA values, this should never come up so if it does it's worth investigating why
+        TRUE ~ "No RSD Assigned"
       ), 
-      RSD = factor(RSD, levels = c("Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
+      RSD = factor(RSD, levels = c("Below Stock Size", "Stock", "Quality", "Preferred", "Memorable", "Trophy"))) %>%
       ungroup()
     plot <- ggplot(sampleFDataRSD, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
       geom_col() +
