@@ -103,7 +103,7 @@ lengthFrequencyInputs_Server <- function(id) {
         list(
           "lengthFrequency_LengthOptions" = reactive({ input$lengthFrequency_LengthOptions }),
           "lengthFrequencyBinwidthOptions" = reactive({ input$lengthFrequencyBinwidthOptions }), 
-          "binwidthis_valid" = reactive({ iv$is_valid() })
+          "validBinWidth" = reactive({ iv$is_valid() })
         )
       )
     }
