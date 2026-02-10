@@ -37,8 +37,8 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
                      aes(
                        group = CommonName,
                        label = CommonName,
-                       text = paste0('<br>Species: ', after_stat(label),
-                                     "Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
+                       text = paste0('Species: ', after_stat(label),
+                                     "<br>Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
                                      "<br>Count: ", after_stat(count)
                                      
                        )

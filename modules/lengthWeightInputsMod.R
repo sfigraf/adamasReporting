@@ -2,7 +2,7 @@ lengthWeightInputs_UI <- function(id, class = "green-row") {
   ns <- NS(id)
   tagList(
     fluidRow(class = class,
-             column(3,
+             column(6,
                     radioButtons(
                       ns("lengthWeight_LengthOptions"),
                       label = "Length Display",
@@ -11,7 +11,7 @@ lengthWeightInputs_UI <- function(id, class = "green-row") {
                       choiceValues = c("Length_mm", "Length_inch")
                     )
              ),
-             column(3,
+             column(6,
                     radioButtons(
                       ns("lengthWeight_WeightOptions"),
                       label = "Weight Display",

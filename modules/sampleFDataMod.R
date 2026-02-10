@@ -409,7 +409,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                 # ),
                                 withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
                        ), 
-                       tabPanel("Length/Weights",
+                       tabPanel("Length Frequencies",
                                 lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
                                 withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                        )

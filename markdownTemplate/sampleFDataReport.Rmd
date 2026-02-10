@@ -84,8 +84,8 @@ if(params$combinedSummaries$display){
 
 ```{r lwGraph, include=TRUE, echo=FALSE}
 if(params$lengthWeightGraph$display){
-  
-  getLengthWeightGraph(data = sampleFData, lengthOptions = params$lengthWeightGraph$lengthOptions, weightOptions = params$lengthWeightGraph$weightOptions)
+  #since the inpout options are reactive expressions from their module, need to use () to access
+  getLengthWeightGraph(data = sampleFData, lengthOptions = params$lengthWeightGraph$lengthOptions(), weightOptions = params$lengthWeightGraph$weightOptions())
   
 } #else{
     #asis_output("## Parameter not selected")
