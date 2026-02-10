@@ -386,50 +386,31 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      tabsetPanel(
                        tabPanel("Length/Weights", 
                                 #same inputs as in 
-                                fluidRow(class = "green-row",
-                                         column(3,
-                                                radioButtons(
-                                                  ns("lengthWeight_LengthOptions"),
-                                                  label = "Length Display",
-                                                  choiceNames = c("Millimeters", "Inches"),
-                                                  #values need to match column names
-                                                  choiceValues = c("Length_mm", "Length_inch")
-                                                )
-                                         ),
-                                         column(3,
-                                                radioButtons(
-                                                  ns("lengthWeight_WeightOptions"),
-                                                  label = "Weight Display",
-                                                  choiceNames = c("Grams", "Ounces"),
-                                                  #values need to match column names
-                                                  choiceValues = c("Weight_g", "Weight_oz")
-                                                )
-                                         )
-                                ),
+                                lengthWeightInputs_UI(ns("lengthWeightInputsMod")),
+                                # fluidRow(class = "green-row",
+                                #          column(3,
+                                #                 radioButtons(
+                                #                   ns("lengthWeight_LengthOptions"),
+                                #                   label = "Length Display",
+                                #                   choiceNames = c("Millimeters", "Inches"),
+                                #                   #values need to match column names
+                                #                   choiceValues = c("Length_mm", "Length_inch")
+                                #                 )
+                                #          ),
+                                #          column(3,
+                                #                 radioButtons(
+                                #                   ns("lengthWeight_WeightOptions"),
+                                #                   label = "Weight Display",
+                                #                   choiceNames = c("Grams", "Ounces"),
+                                #                   #values need to match column names
+                                #                   choiceValues = c("Weight_g", "Weight_oz")
+                                #                 )
+                                #          )
+                                # ),
                                 withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
                        ), 
                        tabPanel("Length/Weights",
                                 lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
-                                #lengthFrequencyGraphInputs(ns),
-                                # fluidRow(class = "green-row",
-                                #   column(6, 
-                                #          radioButtons(
-                                #            ns("lengthFrequency_LengthOptions"), 
-                                #            label = "Length Display",
-                                #            choiceNames = c("Millimeters", "Inches", "RSD Counts"),
-                                #            #values need to match column names 
-                                #            choiceValues = c("Length_mm", "Length_inch", "RSD")
-                                #          )
-                                #   ),
-                                #   column(6,
-                                #          conditionalPanel(
-                                #            condition = "input['lengthFrequency_LengthOptions'] != 'RSD'",
-                                #            ns = ns,
-                                #            numericInput(ns("lengthFrequencyBinwidthOptions"), "Binwidth", value = 10, 
-                                #                         min = 0)
-                                #          )
-                                #   )
-                                # ),
                                 withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                        )
                      )
@@ -448,12 +429,10 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         runReport_UI(ns("reportBuilder"))
       })
       
+      # module reactive inputs return
+      lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
       lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
-      #for summarized data
-      # output$downloadSummarizedDataUI <- renderUI({
-      #   req(nrow(sampleFDataList()$sampleFSummarizedData) > 0)
-      #   downloadData_UI(ns("downloadSampleFSummarizedData"))
-      # })
+
 
 # data wrangling ----------------------------------------------------------
       
@@ -577,7 +556,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       }, server = TRUE)
       
       output$lengthWeightsGraph <- renderPlotly({
-        getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, input$lengthWeight_LengthOptions, input$lengthWeight_WeightOptions)
+        getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, lengthWeightsInputs$lengthWeight_LengthOptions(), lengthWeightsInputs$lengthWeight_WeightOptions())
       })
       
       output$lengthFrequenciesGraph <- renderPlotly({

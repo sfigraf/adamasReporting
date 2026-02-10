@@ -1,7 +1,6 @@
 
 getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
   
-  
   if(lengthOptions == "RSD"){
     
     sampleFDataRSD <- data %>%
@@ -28,18 +27,11 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
       geom_col() +
       labs(caption = "RSD (mm)")
     
-  } else{
-    # datagrouped <- data %>%
-    #   group_by(RSD, SpeciesCode) %>%
-    #   summarise(Count = sum(NumFish)) 
+  } else{ 
     plot <- data %>%
-      #mutate(hoverText = )
       #weighting by numFIsh allows to see total number of fish, not just count the rows
       #numfish will get summed for a certain bin
-      ggplot(aes(x = .data[[lengthOptions]], weight = NumFish, #y = Count, text = paste0("Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
-                                                                      #"<br>Count: ", after_stat(count),
-                                                                      #'<br>Species: ', after_stat(label)
-      #), 
+      ggplot(aes(x = .data[[lengthOptions]], weight = NumFish, 
                  fill = CommonName)) +
       geom_histogram(binwidth = binwidth, 
                      aes(
