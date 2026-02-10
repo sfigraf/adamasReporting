@@ -478,12 +478,9 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         finalFilteredData <- samplFDataFiltered %>%
           #show_query() %>%
           collect()
-        
-        #sampleFCombinedSummarizedData <- getCombinedSummariesTables(input$combinedSummariesGroupingOptions, data = finalFilteredData) #%>%
-        
+  
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData 
-          #"sampleFCombinedSummarizedData" = sampleFCombinedSummarizedData
         )
         
         return(finalFilteredDataList)
