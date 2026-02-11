@@ -15,7 +15,7 @@ library(dbplyr)
 library(openxlsx) #for saving excel file
 library(knitr) #for rmarkdown
 library(shinyjs) #for greying out buttons
-library(shinyvalidate)
+#library(shinyvalidate)
 library(later) #for watining to fire code
 #library(bslib) #for theme
 
