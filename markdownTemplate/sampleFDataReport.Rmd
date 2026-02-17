@@ -10,6 +10,11 @@ subtitle: |
    <span style='font-size: 0.6em;'>**Water Name(s): ** `r sort(unique(params$sampleFData()$WaterName))`</span>
    <span style='font-size: 0.6em;'>**Station Code(s): ** `r sort(unique(params$sampleFData()$StationCode))`</span>
    <span style='font-size: 0.6em;'>**Survey ID(s): ** `r sort(unique(params$sampleFData()$SurveyID))`</span>
+   <br>
+   
+   <span style='font-size: 0.6em;'>**Gear(s): ** `r sort(unique(params$sampleFData()$Gear))`</span>
+   <span style='font-size: 0.6em;'>**Effort(s): ** `r sort(unique(params$sampleFData()$TotalEffort))`</span>
+   <span style='font-size: 0.6em;'>**Metric(s): ** `r sort(unique(params$sampleFData()$EffortMetric))`</span>
   </div>
 
 output: html_document
