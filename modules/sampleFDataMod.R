@@ -397,6 +397,25 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                   withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                                 )
                                 
+                       ), 
+                       tabPanel("Relative Weight",
+                                wellPanel(
+                                  fluidRow(class = "green-row", 
+                                           #since this input is used so much, make this a function
+                                           column(6,
+                                                  radioButtons(
+                                                    ns("relativeWeight_LengthOptions"),
+                                                    label = "Length Display",
+                                                    choiceNames = c("Millimeters", "Inches"),
+                                                    #values need to match column names
+                                                    choiceValues = c("Length_mm", "Length_inch")
+                                                  )
+                                           )
+                                  ),
+                                  #lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
+                                  withSpinner(plotlyOutput(ns("relativeWeightGraph")))
+                                )
+                                
                        )
                      )
             )
@@ -548,6 +567,15 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                   binwidth = lengthFrequencyInputs$lengthFrequencyBinwidthOptions(), 
                                   rsdLimits = rsdLimits)
       })
+      
+      output$relativeWeightGraph <- renderPlotly({
+        
+        getRelativeWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, 
+                                  lengthOptions = input$relativeWeight_LengthOptions
+                                  )
+      })
+      
+      
       
       #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
       #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
