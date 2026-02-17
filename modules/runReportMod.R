@@ -63,6 +63,28 @@ runReport_Server <- function(id, data, rsdLimits) {
             )
           ),
           
+          #RELATIVE WEIGHT GRAPH
+          checkboxInput(ns("relativeWeightCheckbox"), "Relative Weight Graph"),
+          conditionalPanel(
+            condition = "input.relativeWeightCheckbox == true",
+            ns = ns,
+            div(
+              style = "margin-left: 25px;",
+              fluidRow(class = "normal-label-row", 
+                       #since this input is used so much, make this a function
+                       column(6,
+                              radioButtons(
+                                ns("relativeWeight_LengthOptions"),
+                                label = "Length Display",
+                                choiceNames = c("Millimeters", "Inches"),
+                                #values need to match column names
+                                choiceValues = c("Length_mm", "Length_inch")
+                              )
+                       )
+                       )
+            )
+          ),
+          
           fluidRow(
             column(
               width = 12,
@@ -98,7 +120,7 @@ runReport_Server <- function(id, data, rsdLimits) {
       observe({
         # Enable only if at least one checkbox is selected
         #for the binwidth one, make sure that frequcny graph is checked (truthy) and input is true. It's true if the conditional binwidth panel doesn't display
-        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) #&& lengthFrequencyInputs$validBinWidth())
+        validReportInputs <- isTruthy(input$combinedSummariesCheckbox) || isTruthy(input$lengthWeightCheckbox) || isTruthy(input$lengthFrequencyCheckbox) || isTruthy(input$relativeWeightCheckbox)  #&& lengthFrequencyInputs$validBinWidth())
         if (validReportInputs) {
           shinyjs::enable("exportReportButton")
         } else {
@@ -143,8 +165,14 @@ runReport_Server <- function(id, data, rsdLimits) {
               "display" = isolate(input$lengthFrequencyCheckbox), 
               "lengthOptions" = isolate(lengthFrequencyInputs$lengthFrequency_LengthOptions), 
               "binwidth" = isolate(lengthFrequencyInputs$lengthFrequencyBinwidthOptions)
-              )
+              ), 
+            relativeWeightGraph = list(
+              "display" = isolate(input$relativeWeightCheckbox), 
+              "lengthOptions" = isolate(input$relativeWeight_LengthOptions)
+            )
           )
+          print(isolate(input$relativeWeight_LengthOptions))
+          print(isolate(reportParams$relativeWeightGraph$lengthOptions))
           
           id <- showNotification(
             "Rendering report...",

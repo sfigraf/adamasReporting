@@ -28,7 +28,7 @@ for (i in list.files("./modules/")) {
 }
 
 neededFunctions <- c("getCombinedSummariesTables.R", "getLengthWeightGraph.R", 
-                     "getLengthFrequenciesGraph.R")
+                     "getLengthFrequenciesGraph.R", "getRelativeWeightGraph.R")
 for (i in neededFunctions) {
   source(paste0("./functions/",i))
 }
