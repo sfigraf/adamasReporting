@@ -320,6 +320,23 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
         surveyIDInputCheck <- isolate(isTruthy(input$surveyIDSearch))
         lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
+        
+        currentSampleFTabsTabset <- isolate(input$sampleFTabsTabset) %||% "tablesTab"
+        currentSampleFTableTabsTab <- isolate(input$sampleFTableTabsTabset) %||% "rawDataTab"
+        currentSampleFGraphsTab <- isolate(input$sampleFGraphsTabset) %||% "lengthWeightsGraphsTab"
+        
+        # session$onFlushed(function() {
+        #   #print(paste("now to udpate", isolate(input$sampleFTabsTabset)))
+        #   updateTabsetPanel(session, "sampleFTabsTabset", selected = currentSampleFTabsTabset)
+        #   print(paste("past 1"))
+        #   #updateTabsetPanel(session, "sampleFTabsTabset", selected = current_tab)
+        # }, once = TRUE)
+        
+        
+        
+        # updateTabsetPanel(session, "sampleFTabsTabset", selected = currentSampleFTabsTabset),
+        # updateTabsetPanel(session, "sampleFGraphsTabset", selected = currentSampleFGraphsTab),
+        # updateTabsetPanel(session, "sampleFTableTabsTabset", selected = currentSampleFTableTabsTab)
 
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
@@ -338,10 +355,12 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         }
         #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
-          tabsetPanel(
-            tabPanel("Tables", 
-                     tabsetPanel(
-                       tabPanel("Raw Data",
+          tabsetPanel(id = ns("sampleFTabsTabset"),
+                      selected = currentSampleFTabsTabset,
+            tabPanel("Tables", value = "tablesTab",
+                     tabsetPanel(id = ns("sampleFTableTabsTabset"),
+                                 selected = currentSampleFTableTabsTab,
+                       tabPanel("Raw Data", value = "rawDataTab", 
                                 div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
                                     uiOutput(ns("downloadDataUI")),
                                     uiOutput(ns("reportBuilderUI"))
@@ -350,7 +369,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                   withSpinner(DTOutput(ns("sampleFData")))
                                 )
                        ), 
-                       tabPanel("Combined Summaries", 
+                       tabPanel("Combined Summaries", value = "combinedSummariesTab", 
                                 wellPanel(
                                   fluidRow(
                                     column(12, 
@@ -382,23 +401,24 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      )
                      
             ), 
-            tabPanel("Graphs", 
-                     tabsetPanel(
-                       tabPanel("Length/Weights", 
+            tabPanel("Graphs", value = "sampleFGraphsTab", 
+                     tabsetPanel(id = ns("sampleFGraphsTabset"), 
+                                 selected = currentSampleFGraphsTab,
+                       tabPanel("Length/Weights", value = "lengthWeightsGraphsTab", 
                                 wellPanel(
                                   lengthWeightInputs_UI(ns("lengthWeightInputsMod")),
                                   withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
                                 )
                                 
                        ), 
-                       tabPanel("Length Frequencies",
+                       tabPanel("Length Frequencies", value = "lengthFreqsGraphsTab", 
                                 wellPanel(
                                   lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
                                   withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
                                 )
                                 
                        ), 
-                       tabPanel("Relative Weight",
+                       tabPanel("Relative Weight", value = "relWeightsGraphsTab", 
                                 wellPanel(
                                   fluidRow(class = "green-row", 
                                            #since this input is used so much, make this a function
@@ -420,6 +440,12 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      )
             )
           )
+          
+          # updateTabsetPanel(session, "sampleFGraphsTabset", selected = currentSampleFGraphsTab),
+          # print(paste("past 2")),
+          # 
+          # updateTabsetPanel(session, "sampleFTableTabsTabset", selected = currentSampleFTableTabsTab),
+          # print(paste("past 3"))
           
         )
       })
@@ -507,7 +533,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       })
       
       ##get just tables from group buttons
-      sampleFCombinedSummarizedData <- eventReactive(input$combinedSummariesGroupingOptions, {
+      sampleFCombinedSummarizedData <- eventReactive(list(input$combinedSummariesGroupingOptions, input$queryButton) , {
         req(isTruthy(sampleFDataList()))
         sampleFCombinedSummarizedData <- getCombinedSummariesTables(input$combinedSummariesGroupingOptions, data = sampleFDataList()$sampleFRawDataToDisplay) #%>%
         return(sampleFCombinedSummarizedData)
