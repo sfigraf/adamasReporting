@@ -36,7 +36,7 @@ for (i in neededFunctions) {
 ##get initial Vlaues
 
 ###sampleFData options for filters
-sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+sampleFData <- tbl(pool, "SampleFView")
 
 if(!exists("allDistinctWaters")){
   allDistinctWaters <- sampleFData %>%
@@ -48,7 +48,7 @@ if(!exists("allDistinctWaters")){
 
 if(!exists("allYears")){
   allYearssql <- c("SELECT DISTINCT year(SampleDate) FROM SampleFView")
-  allYears <- dbGetQuery(CPW_AqDatAnalysis, allYearssql)
+  allYears <- dbGetQuery(pool, allYearssql)
 }
 
 if(!exists("allBios")){
@@ -103,7 +103,7 @@ sampleFInitialFilterValues <- list(
 
 ###Same thing for current summaries
 #current summary options for filters
-currentSummaryData <- tbl(CPW_AqDatAnalysis, "CurrentSummary")
+currentSummaryData <- tbl(pool, "CurrentSummary")
 
 if(!exists("allYearsSummarizedData")){
   allYearsSummarizedData <- currentSummaryData %>%
@@ -133,7 +133,7 @@ currentSummariesInitialFilterValues <- list(
   "allDistinctWatersSummarizedData" = allDistinctWatersSummarizedData
 )
 #rsd limits for graph rsd ranges
-rsdLimits <- tbl(CPW_AqDatAnalysis, "RSDLimitsView") %>%
+rsdLimits <- tbl(pool, "RSDLimitsView") %>%
   collect()
 
 ui <- fluidPage(
