@@ -1,6 +1,6 @@
 ---
 title: |
-  <img src="CPWLogoLarge.png" style="float: left; width: 100px; padding-right: 15px;"> sampleFDataReport
+  <img src="CPWLogoLarge.png" style="float: left; width: 100px; padding-right: 15px;"> Adamas Data Report
 
 subtitle: |
  <div style="clear: both; padding-top: 10px;">
@@ -113,7 +113,7 @@ if(params$lengthFrequencyGraph$display){
 
 ```{r WrGraph, include=TRUE, echo=FALSE}
 if(params$relativeWeightGraph$display){
-  getRelativeWeightGraph(data = sampleFData, lengthOptions = params$relativeWeightGraph$lengthOptions)
+  getRelativeWeightGraph(data = sampleFData, lengthOptions = params$relativeWeightGraph$lengthOptions())
 
 } 
 ```

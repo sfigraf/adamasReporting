@@ -70,18 +70,7 @@ runReport_Server <- function(id, data, rsdLimits) {
             ns = ns,
             div(
               style = "margin-left: 25px;",
-              fluidRow(class = "normal-label-row", 
-                       #since this input is used so much, make this a function
-                       column(6,
-                              radioButtons(
-                                ns("relativeWeight_LengthOptions"),
-                                label = "Length Display",
-                                choiceNames = c("Millimeters", "Inches"),
-                                #values need to match column names
-                                choiceValues = c("Length_mm", "Length_inch")
-                              )
-                       )
-                       )
+              relWeightInputs_UI(ns("relWeightInputsMod_Report"), class = "normal-label-row")
             )
           ),
           
@@ -116,6 +105,8 @@ runReport_Server <- function(id, data, rsdLimits) {
       # module reactive inputs return
       lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod_Report")
       lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod_Report")
+      relWeightsInputs <- relWeightInputs_Server("relWeightInputsMod_Report")
+      
       
       observe({
         # Enable only if at least one checkbox is selected
@@ -168,11 +159,9 @@ runReport_Server <- function(id, data, rsdLimits) {
               ), 
             relativeWeightGraph = list(
               "display" = isolate(input$relativeWeightCheckbox), 
-              "lengthOptions" = isolate(input$relativeWeight_LengthOptions)
+              "lengthOptions" = isolate(relWeightsInputs$relativeWeight_LengthOptions)
             )
           )
-          print(isolate(input$relativeWeight_LengthOptions))
-          print(isolate(reportParams$relativeWeightGraph$lengthOptions))
           
           id <- showNotification(
             "Rendering report...",

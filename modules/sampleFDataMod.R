@@ -321,22 +321,10 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         surveyIDInputCheck <- isolate(isTruthy(input$surveyIDSearch))
         lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
         
+        #tracks which tab within each tabset is selected and ui renders to that tab after new data render
         currentSampleFTabsTabset <- isolate(input$sampleFTabsTabset) %||% "tablesTab"
         currentSampleFTableTabsTab <- isolate(input$sampleFTableTabsTabset) %||% "rawDataTab"
         currentSampleFGraphsTab <- isolate(input$sampleFGraphsTabset) %||% "lengthWeightsGraphsTab"
-        
-        # session$onFlushed(function() {
-        #   #print(paste("now to udpate", isolate(input$sampleFTabsTabset)))
-        #   updateTabsetPanel(session, "sampleFTabsTabset", selected = currentSampleFTabsTabset)
-        #   print(paste("past 1"))
-        #   #updateTabsetPanel(session, "sampleFTabsTabset", selected = current_tab)
-        # }, once = TRUE)
-        
-        
-        
-        # updateTabsetPanel(session, "sampleFTabsTabset", selected = currentSampleFTabsTabset),
-        # updateTabsetPanel(session, "sampleFGraphsTabset", selected = currentSampleFGraphsTab),
-        # updateTabsetPanel(session, "sampleFTableTabsTabset", selected = currentSampleFTableTabsTab)
 
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
@@ -428,13 +416,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      )
             )
           )
-          
-          # updateTabsetPanel(session, "sampleFGraphsTabset", selected = currentSampleFGraphsTab),
-          # print(paste("past 2")),
-          # 
-          # updateTabsetPanel(session, "sampleFTableTabsTabset", selected = currentSampleFTableTabsTab),
-          # print(paste("past 3"))
-          
         )
       })
       # #save data option and run report options only appears if there's a valid dataset to download
@@ -450,7 +431,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       # module reactive inputs return
       lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
       lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
-      
       relWeightsInputs <- relWeightInputs_Server("relWeightInputsMod")
 
 
