@@ -420,19 +420,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                        ), 
                        tabPanel("Relative Weight", value = "relWeightsGraphsTab", 
                                 wellPanel(
-                                  fluidRow(class = "green-row", 
-                                           #since this input is used so much, make this a function
-                                           column(6,
-                                                  radioButtons(
-                                                    ns("relativeWeight_LengthOptions"),
-                                                    label = "Length Display",
-                                                    choiceNames = c("Millimeters", "Inches"),
-                                                    #values need to match column names
-                                                    choiceValues = c("Length_mm", "Length_inch")
-                                                  )
-                                           )
-                                  ),
-                                  #lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
+                                  relWeightInputs_UI(ns("relWeightInputsMod")),
                                   withSpinner(plotlyOutput(ns("relativeWeightGraph")))
                                 )
                                 
@@ -462,6 +450,8 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       # module reactive inputs return
       lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
       lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
+      
+      relWeightsInputs <- relWeightInputs_Server("relWeightInputsMod")
 
 
 # data wrangling ----------------------------------------------------------
@@ -597,7 +587,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       output$relativeWeightGraph <- renderPlotly({
         
         getRelativeWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, 
-                                  lengthOptions = input$relativeWeight_LengthOptions
+                                  lengthOptions = relWeightsInputs$relativeWeight_LengthOptions()
                                   )
       })
       
