@@ -149,7 +149,7 @@ ui <- bslib::page_navbar(
   # header = tags$head(
   #   tags$link(rel = "stylesheet", type = "text/css", href = "customStyles.css")
   # ),
-  id = "tabs",
+  id = "main_nav",
   nav_menu("Data Source",
            nav_panel("Raw Data",
                     sampleFData_UI("sampleFData", sampleFInitialFilterValues)),
@@ -160,10 +160,12 @@ ui <- bslib::page_navbar(
   ), 
   nav_menu("test", 
            nav_panel("test apnel", 
+                     value = "testt",
                      sliderInput("Test", "test", 
-                                 min = 1, max = 10, value = 2))
+                                 min = 1, max = 10, value = 2), 
+                     actionButton("Testbt", "button"))
            ), 
-  nav_spacer(), 
+  nav_spacer() 
   # tags$li( 
   #   class = "dropdown", 
   #   div( 
@@ -173,16 +175,22 @@ ui <- bslib::page_navbar(
   #     ) 
   #   ) 
   # ),
-  nav_menu(
-    title = "Data export otions", 
-    align = "right", 
-    nav_spacer(), 
-    nav_item(
-      actionButton("test1", "test")
-    ), 
-    nav_item(
-      actionButton("test2", "test2")
-    )
+  #uiOutput("buttons")
+  # nav_menu(
+  #   title = "Data export otions", 
+  #   align = "right",
+  #   value = "export_menu",
+  #   nav_spacer(), 
+  #   nav_item(
+  #     actionButton("test1", "test")
+  #   ), 
+  #   nav_item(
+  #     actionButton("test2", "test2")
+  #   )
+  # 
+  #    
+  # )
+  
     # nav_panel("Data exports", 
     #           
     #           )
@@ -190,31 +198,88 @@ ui <- bslib::page_navbar(
     # nav_item(
     #   actionBttn("btnt", "button")
     # )
-  )
+  #)
   #uiOutput("button")
 )
 
 server <- function(input, output, session) {
   
-  output$button <- renderUI({
-    #req(data_loaded())
-    
-    tagList(
-      nav_item(
-        actionButton("download_btn", "Download Report", 
-                     class = "btn-primary btn-sm", 
-                     icon = icon("download"))
-      ),
-      nav_item(
-        actionButton("settings_btn", "", 
-                     icon = icon("gear"), 
-                     class = "btn-outline-secondary btn-sm")
+  x <- sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
+  menu_visible <- reactiveVal(FALSE)
+  
+  # observeEvent(input$Testbt, {
+  #   nav_insert()
+  # })
+  observe({
+    data <- x() # Your module reactive
+    print(nrow(data))
+    # Condition: data exists and menu hasn't been added yet
+    if (!is.null(data) && nrow(data) > 0 ) { #&& !menu_visible()
+      
+      nav_insert(
+        id = "main_nav",
+        target = "testt", # Insert after the spacer
+        position = "after",
+        nav_panel(
+          title = "Data export options",
+          align = "right",
+          nav_item(actionButton("test1", "Export CSV")),
+          nav_item(actionButton("test2", "Export Excel"))
+        )
       )
-    )
+      
+      #menu_visible(TRUE) # Mark as added so it doesn't duplicate
+      
+    } else if ((is.null(data) || nrow(data) == 0) ) { #&& menu_visible()#
+      # Optional: Remove the menu if data becomes empty again
+      nav_remove("main_navbar", "Data export options")
+      #menu_visible(FALSE)
+    }
   })
+  # observe({
+  #   data <- x()
+  #   print(nrow(x()))
+  #   if (!is.null(data) && nrow(data) > 0) {
+  #     #print()
+  #     nav_show("main_navbar", "export_menu")
+  #   } else {
+  #     nav_hide("main_navbar", "export_menu")
+  #   }
+  # })
+  # observeEvent(x(), {
+  #   print(nrow(x()))
+  #   req(nrow(x()) > 0)
+  #   
+  #   # Inject the item into the existing menu
+  #   nav_insert(
+  #     id = "main_nav",
+  #     target = "export_menu",
+  #     nav_item(actionButton("test1", "test"))
+  #   )
+  # }, once = TRUE)
+  # output$buttons <- renderUI({
+  #   print(nrow(x()))
+  #   req(nrow(x()) > 0)
+  #   print(nrow(x()))
+  #   #req(data_loaded())
+  # 
+  #   nav_menu(
+  #     title = "Data export otions", 
+  #     align = "right",
+  #     value = "export_menu",
+  #     nav_spacer(), 
+  #     nav_item(
+  #       actionButton("test1", "test")
+  #     ), 
+  #     nav_item(
+  #       actionButton("test2", "test2")
+  #     )
+  #     
+  #     
+  #   )
+  # })
     
   observe({
-    sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
     summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
   })
 }
