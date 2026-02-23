@@ -1,6 +1,6 @@
 ---
 title: |
-  <img src="CPWLogoLarge.png" style="float: left; width: 100px; padding-right: 15px;"> sampleFDataReport
+  <img src="CPWLogoLarge.png" style="float: left; width: 100px; padding-right: 15px;"> Adamas Data Report
 
 subtitle: |
  <div style="clear: both; padding-top: 10px;">
@@ -10,6 +10,11 @@ subtitle: |
    <span style='font-size: 0.6em;'>**Water Name(s): ** `r sort(unique(params$sampleFData()$WaterName))`</span>
    <span style='font-size: 0.6em;'>**Station Code(s): ** `r sort(unique(params$sampleFData()$StationCode))`</span>
    <span style='font-size: 0.6em;'>**Survey ID(s): ** `r sort(unique(params$sampleFData()$SurveyID))`</span>
+   <br>
+   
+   <span style='font-size: 0.6em;'>**Gear(s): ** `r sort(unique(params$sampleFData()$Gear))`</span>
+   <span style='font-size: 0.6em;'>**Effort(s): ** `r sort(unique(params$sampleFData()$TotalEffort))`</span>
+   <span style='font-size: 0.6em;'>**Metric(s): ** `r sort(unique(params$sampleFData()$EffortMetric))`</span>
   </div>
 
 output: html_document
@@ -20,6 +25,7 @@ params:
   combinedSummaries: NULL
   lengthWeightGraph: FALSE
   lengthFrequencyGraph: FALSE
+  relativeWeightGraph: FALSE
 ---
 
 ```{r setup, include=FALSE}
@@ -34,7 +40,7 @@ require(shinydashboard)
 functionsDirectory <- file.path(params$appRoot, "functions")
 # #functions
 neededFunctions <- c("getCombinedSummariesTables.R", "getLengthWeightGraph.R", 
-                     "getLengthFrequenciesGraph.R")
+                     "getLengthFrequenciesGraph.R", "getRelativeWeightGraph.R")
 # 
 for (i in neededFunctions) {
   source(file.path(functionsDirectory, i))
@@ -102,4 +108,14 @@ if(params$lengthFrequencyGraph$display){
 
 } 
 ```
+
+`r if(params$relativeWeightGraph$display) "## Relative Weight"`
+
+```{r WrGraph, include=TRUE, echo=FALSE}
+if(params$relativeWeightGraph$display){
+  getRelativeWeightGraph(data = sampleFData, lengthOptions = params$relativeWeightGraph$lengthOptions())
+
+} 
+```
+
 

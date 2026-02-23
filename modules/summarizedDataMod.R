@@ -237,7 +237,11 @@ summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) 
                     dom = 'lfrtip', #had to add 'lowercase L' letter to display the page length again #errorin list: arg 5 is empty because I had a comma after the dom argument so it thought there was gonna be another argument input
                     language = list(emptyTable = "Enter inputs and press Render Table")
                   )
-        )
+        )  %>%
+          formatStyle(
+            columns = 'Comments', # Name of the column to wrap
+            `white-space` = 'nowrap'
+          )
       })
       
       downloadData_Server("downloadcurrentSummariesData", currentSummaryDataToDisplay, "CurrentSummaryData")

@@ -271,15 +271,7 @@ relAbundanceCPue <- singlesurvey %>%
             `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
   )
 ###
-abundanceBiomass <- singlesurvey %>%
-  group_by(CommonName) %>%
-  summarize(`Total Catch` = sum(NumFish), 
-            `Weight Kg` = round(sum(Weight_g, na.rm = TRUE)/1000, 2), 
-            #sums whole column numfish but ignores group_by()
-            #could also do the same thing with mutating after
-            `Percent Total Catch` = round(sum(NumFish, na.rm = TRUE)/sum(.$NumFish, na.rm = TRUE) *100, 2), 
-            `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
-  )
+
 sampleFData <- singlesurvey
 
 singlesurvey <- sampleFData %>%
@@ -292,6 +284,79 @@ SurveyLocationView <- tbl(CPW_AqDatAnalysis, "SurveyLocationView") %>%
 sort(dbListFields(CPW_AqDatAnalysis, "SurveyLocationView"))
 
 SurveyLocationView
+
+sort(dbListFields(CPW_AqDatAnalysis, "SurveyView"))
+
+surveys <- tbl(CPW_AqDatAnalysis, "SurveyView") 
+#sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView")
+
+singlesurvey <- sampleFData %>%
+  filter(SurveyID == "1783") %>%
+  collect()
+  #left_join(surveys, by = "StationCode")
+x <- singlesurvey %>%
+  collect()
+
+abundanceBiomass <- singlesurvey %>%
+  group_by(CommonName) %>%
+  summarize(`Total Catch` = sum(NumFish), 
+            `Weight Kg` = round(sum(Weight_g, na.rm = TRUE)/1000, 2), 
+            #sums whole column numfish but ignores group_by()
+            #could also do the same thing with mutating after
+            `Percent Total Catch` = round(sum(NumFish, na.rm = TRUE)/sum(.$NumFish, na.rm = TRUE) *100, 2), 
+            `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2), 
+  )
+
+singleSUrveyANdArea <- abundanceBiomass %>%
+  left_join(tbl(CPW_AqDatAnalysis, "SurveyView"), by = "")
+
+sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView") 
+survey1239 <- sampleFData %>%
+  filter(SurveyID == 1239) %>%
+  collect()
+
+plot <- survey1239 %>%
+  ggplot(aes(x = Wr, y = Length_mm, 
+             color = CommonName, 
+             text = paste0('Length: ', as.character(round(Length_mm, 2)),
+                           '<br>Relative Weight: ', as.character(round(Wr, 2)), 
+                           '<br>Species: ', CommonName, 
+                           '<br>Survey ID: ', SurveyID
+             )
+  )) +
+  geom_point() + 
+  theme_classic() +
+  labs(title = "Relative Weight Data") #+
+#scale_color_manual(values = allColors)
+plot <- ggplotly(plot, tooltip = "text")
+getRelativeWeightGraph(data = survey1239, lengthOptions = "Length_mm")
+
+tagList(
+  tabsetPanel(id = "parent_tabs",
+              tabPanel("Data Set A", value = "p1",
+                       tabsetPanel(id = "child_tabs_A",
+                                   tabPanel("Plot", value = "a1", plotOutput("plotA")),
+                                   tabPanel("Table", value = "a2", tableOutput("tableA"))
+                       )
+              ),
+              tabPanel("Data Set B", value = "p2",
+                       tabsetPanel(id = "child_tabs_B",
+                                   tabPanel("Summary", value = "b1", verbatimTextOutput("sumB")),
+                                   tabPanel("Raw", value = "b2", tableOutput("rawB"))
+                       )
+              )
+  ),
+  
+  # 3. Restore the states in sequence
+  updateTabsetPanel(session, "parent_tabs", selected = sel_parent),
+  updateTabsetPanel(session, "child_tabs_A", selected = sel_child_A),
+  updateTabsetPanel(session, "child_tabs_B", selected = sel_child_B)
+)
+
+singlesurvey <- sampleFData %>%
+  filter(SurveyID == "98868") %>%
+  collect()
+#98868
 # styles
 # text coolor in virtualSelectINputs
 # /* Styling individual options */

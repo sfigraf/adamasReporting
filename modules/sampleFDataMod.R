@@ -320,6 +320,11 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         stationCodeInputCheck <- isolate(isTruthy(input$stationCodeSearch))
         surveyIDInputCheck <- isolate(isTruthy(input$surveyIDSearch))
         lengthInputCheck <- isolate(all(is.numeric(input$lengthSlider)))
+        
+        #tracks which tab within each tabset is selected and ui renders to that tab after new data render
+        currentSampleFTabsTabset <- isolate(input$sampleFTabsTabset) %||% "tablesTab"
+        currentSampleFTableTabsTab <- isolate(input$sampleFTableTabsTabset) %||% "rawDataTab"
+        currentSampleFGraphsTab <- isolate(input$sampleFGraphsTabset) %||% "lengthWeightsGraphsTab"
 
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
@@ -338,10 +343,12 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         }
         #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
-          tabsetPanel(
-            tabPanel("Tables", 
-                     tabsetPanel(
-                       tabPanel("Raw Data",
+          tabsetPanel(id = ns("sampleFTabsTabset"),
+                      selected = currentSampleFTabsTabset,
+            tabPanel("Tables", value = "tablesTab",
+                     tabsetPanel(id = ns("sampleFTableTabsTabset"),
+                                 selected = currentSampleFTableTabsTab,
+                       tabPanel("Raw Data", value = "rawDataTab", 
                                 div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
                                     uiOutput(ns("downloadDataUI")),
                                     uiOutput(ns("reportBuilderUI"))
@@ -350,7 +357,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                   withSpinner(DTOutput(ns("sampleFData")))
                                 )
                        ), 
-                       tabPanel("Combined Summaries", 
+                       tabPanel("Combined Summaries", value = "combinedSummariesTab", 
                                 wellPanel(
                                   fluidRow(
                                     column(12, 
@@ -382,26 +389,33 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      )
                      
             ), 
-            tabPanel("Graphs", 
-                     tabsetPanel(
-                       tabPanel("Length/Weights", 
+            tabPanel("Graphs", value = "sampleFGraphsTab", 
+                     tabsetPanel(id = ns("sampleFGraphsTabset"), 
+                                 selected = currentSampleFGraphsTab,
+                       tabPanel("Length/Weights", value = "lengthWeightsGraphsTab", 
                                 wellPanel(
                                   lengthWeightInputs_UI(ns("lengthWeightInputsMod")),
                                   withSpinner(plotlyOutput(ns("lengthWeightsGraph")))
                                 )
                                 
                        ), 
-                       tabPanel("Length Frequencies",
+                       tabPanel("Length Frequencies", value = "lengthFreqsGraphsTab", 
                                 wellPanel(
                                   lengthFrequencyInputs_UI(ns("lengthFrequencyInputsMod")),
                                   withSpinner(plotlyOutput(ns("lengthFrequenciesGraph")))
+                                )
+                                
+                       ), 
+                       tabPanel("Relative Weight", value = "relWeightsGraphsTab", 
+                                wellPanel(
+                                  relWeightInputs_UI(ns("relWeightInputsMod")),
+                                  withSpinner(plotlyOutput(ns("relativeWeightGraph")))
                                 )
                                 
                        )
                      )
             )
           )
-          
         )
       })
       # #save data option and run report options only appears if there's a valid dataset to download
@@ -417,6 +431,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       # module reactive inputs return
       lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
       lengthFrequencyInputs <- lengthFrequencyInputs_Server("lengthFrequencyInputsMod")
+      relWeightsInputs <- relWeightInputs_Server("relWeightInputsMod")
 
 
 # data wrangling ----------------------------------------------------------
@@ -488,7 +503,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       })
       
       ##get just tables from group buttons
-      sampleFCombinedSummarizedData <- eventReactive(input$combinedSummariesGroupingOptions, {
+      sampleFCombinedSummarizedData <- eventReactive(list(input$combinedSummariesGroupingOptions, input$queryButton) , {
         req(isTruthy(sampleFDataList()))
         sampleFCombinedSummarizedData <- getCombinedSummariesTables(input$combinedSummariesGroupingOptions, data = sampleFDataList()$sampleFRawDataToDisplay) #%>%
         return(sampleFCombinedSummarizedData)
@@ -548,6 +563,15 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                   binwidth = lengthFrequencyInputs$lengthFrequencyBinwidthOptions(), 
                                   rsdLimits = rsdLimits)
       })
+      
+      output$relativeWeightGraph <- renderPlotly({
+        
+        getRelativeWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, 
+                                  lengthOptions = relWeightsInputs$relativeWeight_LengthOptions()
+                                  )
+      })
+      
+      
       
       #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
       #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data

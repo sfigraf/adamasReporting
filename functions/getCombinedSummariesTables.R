@@ -79,6 +79,22 @@ getCombinedSummariesTables <- function(groupByCols, data){
                                        language = list(emptyTable = "Enter inputs and press Render Table")
                                      )
   )
+  
+  #### Abundance and Biomass
+  abundanceBiomass <- sampleFGrouped %>%
+    summarize(`Total Catch` = sum(NumFish), 
+              `Biomass Kg` = round(sum(Weight_g, na.rm = TRUE)/1000, 2), 
+              #sums whole column numfish but ignores group_by()
+              #could also do the same thing with mutating after
+              `Percent Total Catch` = round(sum(NumFish, na.rm = TRUE)/sum(.$NumFish, na.rm = TRUE) *100, 2), 
+              `Percent Total Weight` = round(sum(Weight_g, na.rm = TRUE)/sum(.$Weight_g, na.rm = TRUE) *100, 2),
+              
+              `Density Kg/Ha` = round(sum(NumFish, na.rm = TRUE) / mean(TotalEffort, na.rm = TRUE), 2),
+              `Density Fish/Ha` = round(sum(Weight_g, na.rm = TRUE)/1000 / mean(TotalEffort, na.rm = TRUE), 2), 
+              `Density Kg/Km` = round(sum(NumFish, na.rm = TRUE) / mean(TotalEffort, na.rm = TRUE), 2)
+              
+    )
+  
   DTList <- list(
     "meanMinMaxLengthWeightsTable" = meanMinMaxLengthWeightsTable,
     "proportionalstockdensityTable" = proportionalstockdensityTable,
