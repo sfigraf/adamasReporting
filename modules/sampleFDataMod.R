@@ -230,6 +230,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
           }
           
           if(isTruthy(surveyIDs)){
+            #print("true")
             sampleFForSlider <- sampleFForSlider %>%
               filter(SurveyID %in% surveyIDs)
           }
@@ -438,7 +439,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
 # data wrangling ----------------------------------------------------------
       
       sampleFDataList <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
-        
+        req(isTruthy(input$yearSlider))
         #only run if one of these are true. if not, it will get get caught in the render UI above
         req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch) || isTruthy(input$surveyIDSearch))
 
@@ -583,6 +584,11 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
       #summarized data tab
       downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
+      
+      return(
+        #req(sampleFDataList()$sampleFRawDataToDisplay)
+        reactive({sampleFDataList()$sampleFRawDataToDisplay})
+      )
       
     }
   )
