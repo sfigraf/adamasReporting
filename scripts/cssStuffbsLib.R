@@ -128,8 +128,6 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
 
 .nav-tabs > li.active > a,
 .btn-default {
-    
-    
     background-color: #001970 !important; /* CPW Blue */
     color: #FFFFFF !important;
     border-color: #000c35 !important;
@@ -197,29 +195,37 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
 }
 
 /* --- Active Tab (The one currently selected) --- */
-.nav-tabs > li.active > a, 
-.nav-tabs > li.active > a:hover, 
-.nav-tabs > li.active > a:focus {
-    background-color: #245d38 !important; /* CPW Green */
-    color: #FFFFFF !important;            /* White text */
-    border: 1px solid #245d38 !important;
-    border-radius: 4px 4px 0 0;           /* Rounds only the top corners */
+.nav-tabs .nav-link.active, 
+.nav-tabs .nav-item.show .nav-link {
+    background-color: #e2f0d9 !important; /* Light Green Background */
+    color: #245d38 !important;            /* CPW Green Text */
+    border: 1px solid #245d38 !important; /* CPW Green Border */
+    border-bottom-color: #e2f0d9 !important; /* Blends the bottom into the panel */
+    border-radius: 4px 4px 0 0;           
+    font-weight: bold;
 }
 
 /* --- Inactive Tabs (The ones waiting to be clicked) --- */
-.nav-tabs > li > a {
-    color: #245d38 !important;           /* CPW Green text */
+.nav-tabs .nav-link {
+    color: #245d38 !important;            /* CPW Green text */
     background-color: #f1f8f3 !important; /* Very light green background */
-    border: 1px solid #e2f0d9 !important;
+    border: 1px solid #dee2e6 !important; /* Light grey default border */
     margin-right: 2px;
+    transition: all 0.1s ease-in-out;
 }
 
 /* --- Hover State for Inactive Tabs --- */
-.nav-tabs > li > a:hover {
-    background-color: #e2f0d9 !important; /* Slightly darker green wash */
-    color: #1e4d2e !important;           /* Darker green text */
+.nav-tabs .nav-link:hover:not(.active) {
+    background-color: #e2f0d9 !important; /* Light green wash */
+    color: #1e4d2e !important;            /* Darker green text */
     border-color: #245d38 !important;
 }
+
+/* --- Remove the default Bootstrap 'blue' glow/outline on click --- */
+.nav-tabs .nav-link:focus {
+    box-shadow: none !important;
+}
+
 
 
 /* Background of the actual dropdown list (the 'dropbox') */
@@ -235,13 +241,6 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
     background-color: #245d38 !important; /* CPW Green */
     color: #FFFFFF !important;            /* White text */
 }
-
-input[type='checkbox'] {
-    accent-color: #245d38 !important; /* Forces the internal check/box to CPW Green */
-    cursor: pointer;
-    transform: scale(1.1); /* Optional: makes the checkbox slightly larger */
-}
-
 
 input[type='radio'] {
     accent-color: #245d38 !important; /* Forces the internal check/box to CPW Green */
@@ -262,6 +261,7 @@ input[type='radio'] {
   font-weight: normal !important;
 }
 
+/* DT table pagination buttons */
 .pagination .page-item.active .page-link {
     background-color: #0f7864 !important;
     border-color: #0f7864 !important;

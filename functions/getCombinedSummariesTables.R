@@ -1,5 +1,6 @@
 ###make summary tables function
-
+# data <- singlesurvey
+# groupByCols <- "CommonName"
 getCombinedSummariesTables <- function(groupByCols, data){
 
   

@@ -14,7 +14,10 @@ allyears <- singleWaterOnly %>%
   distinct(year(SampleDate)) %>%
   pull()
 #print(allyears)
-
+"#FFFFFF"
+"#245d38"
+"#f1f8f3"
+"#e2f0d9"
 years <- unique(year(singleWaterOnly$SampleDate))
 
 x <- as.data.frame(singleWaterOnly)
