@@ -142,6 +142,7 @@ rsdLimits <- tbl(pool, "RSDLimitsView") %>%
 ui <- bslib::page_navbar(
   theme = my_theme,
   title = div(img(src="CPWLogoLarge.png", height = "60px", style = "margin-right: 15px;"), "Adamas Reporting"),
+  #navbar_options = navbar_options(collapsible = FALSE),
   #selected = c("Map"),
   window_title = HTML("<title>Adamas Reporting</title> <link rel='icon' type='image/gif/png' href='CPWLogoLarge.png'>"),
   #this part changes the navbar options
@@ -161,113 +162,56 @@ ui <- bslib::page_navbar(
            nav_panel("test apnel", 
                      sliderInput("Test", "test", 
                                  min = 1, max = 10, value = 2))
-           )
-)
-#   fluidPage(
-#   
-#   
-# )
-  #dashboardPage(
-  # dashboardHeader(title = "Adamas Reporting",
-  #                 leftUi = tagList(
-  #                   dropdownBlock(
-  #                     id = "mydropdown",
-  #                     title = "Data Source",
-  #                     actionButton("btn1", "Raw Data"), 
-  #                     actionButton("btn2", "summarized Data")
-  #                     # 
-  #                     # type = "messages",
-  #                     # icon = icon("database"),
-  #                     # headerText = "Data Source",
-  #                     # # shinydashboardPlus adds 'inputId' to these items
-  #                     # messageItem(from = "Raw", message = "View data", icon = icon("table"), inputId = "btn_raw"),
-  #                     # messageItem(from = "Summary", message = "View summary", icon = icon("chart-line"), inputId = "btn_agg")
-  #                   )
-  #                 )
-  # ), 
-  # dashboardSidebar(
-  #   width = 300,
-  #   sidebarMenu(
-  #     id = "sidebar",
-  #     menuItem("Data Source", tabName = "dashboard", icon = icon("tachometer-alt")),
-  #     menuItem("Projects", tabName = "projects", icon = icon("folder-open"))
-  #     # menuItem("Data Editor", tabName = "editor", icon = icon("edit")),
-  #     # menuItem("My Changes", tabName = "mychanges", icon = icon("history")),
-  #     # conditionalPanel(
-  #     #   condition = "output.is_admin == true",
-  #     #   menuItem("Change Requests", tabName = "changes", icon = icon("inbox")),
-  #     #   menuItem("User Management", tabName = "users", icon = icon("users"))
-  #     # )
-  #   )
-  #  # hr(),
-  #   # div(style = "padding: 10px; text-align: center; color: #9d9d9d;",
-  #   #     p(style = "margin: 0;", "LOCAL DEMO VERSION"),
-  #   #     p(style = "margin: 0; font-size: 12px;", "Wildlife Data Management"),
-  #   #     br(),
-  #   #     div(style = "background-color: #f39c12; color: white; padding: 5px; border-radius: 3px;",
-  #   #         p(style = "margin: 0; font-size: 11px;", "⚠️ Using Mock Data")
-  #   #     )
-  #   # )
+           ), 
+  nav_spacer(), 
+  # tags$li( 
+  #   class = "dropdown", 
+  #   div( 
+  #     actionButton("showHelpModal", 
+  #                  class ="btn-help", 
+  #                  HTML("<b>?</b>") 
+  #     ) 
+  #   ) 
   # ),
-  
-  # body = dashboardBody(
-  #   tags$head(
-  #     tags$link(rel = "stylesheet", type = "text/css", href = "customStyles.css")
-  #   ),
-  #   tabItems(
-  #     tabItem(tabName = "dashboard",
-  #             sampleFData_UI("sampleFData", sampleFInitialFilterValues)
-  #             ),
-  #     tabItem(tabName = "projects", 
-  #             summarizedData_UI("summarizedData", currentSummariesInitialFilterValues)
-  #             )
-  #   )
-  # )
-  # dashboardBody(
-  #   
-  #   tabItems(
-  #     tabItem(tabName = "home", h2("Welcome! Load data to see options.")),
-  #     
-  #     # These are the targets for your dropdown buttons
-  #     tabItem(tabName = "raw_data", 
-  #             sampleFData_UI("sampleFData", sampleFInitialFilterValues)),  
-  #     tabItem(tabName = "agg_data", 
-  #             summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
-  #   )
-  # )
-#)
-
+  nav_menu(
+    title = "Data export otions", 
+    align = "right", 
+    nav_spacer(), 
+    nav_item(
+      actionButton("test1", "test")
+    ), 
+    nav_item(
+      actionButton("test2", "test2")
+    )
+    # nav_panel("Data exports", 
+    #           
+    #           )
+    
+    # nav_item(
+    #   actionBttn("btnt", "button")
+    # )
+  )
+  #uiOutput("button")
+)
 
 server <- function(input, output, session) {
-  # observeEvent(input$btn_raw, { 
-  #   updateTabItems(session, "tabs", "raw_page") 
-  #   sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
-  #   
-  #   })
-  # observeEvent(input$btn_agg, { updateTabItems(session, "tabs", "agg_page") })
-  # output$dataSourceMenu <- renderMenu({
-  #   # req(data_is_loaded()) # Uncomment this to hide until data exists
-  #   
-  #   dropdownMenu(
-  #     type = "messages", # Use 'messages' or 'tasks' for custom icons
-  #     headerText = "Data Source",
-  #     icon = icon("database"),
-  #     
-  #     # Custom message items that act as buttons
-  #     messageItem(
-  #       from = "Raw Data",
-  #       message = "View unedited records",
-  #       icon = icon("table"),
-  #       href = "#", # Keeps it from refreshing the page
-  #     ),
-  #     messageItem(
-  #       from = "Aggregated Data",
-  #       message = "View summarized trends",
-  #       icon = icon("chart-line"),
-  #       href = "#"
-  #     )
-  #   )
-  # })
+  
+  output$button <- renderUI({
+    #req(data_loaded())
+    
+    tagList(
+      nav_item(
+        actionButton("download_btn", "Download Report", 
+                     class = "btn-primary btn-sm", 
+                     icon = icon("download"))
+      ),
+      nav_item(
+        actionButton("settings_btn", "", 
+                     icon = icon("gear"), 
+                     class = "btn-outline-secondary btn-sm")
+      )
+    )
+  })
     
   observe({
     sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
