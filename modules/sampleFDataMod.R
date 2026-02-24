@@ -87,6 +87,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       ns <- session$ns
       
       downloadButtonVisible <- reactiveVal(FALSE)
+      yearSliderVisible <- reactiveVal(FALSE)
 
 # UI Components -----------------------------------------------------------
       
@@ -241,31 +242,38 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             pull()
-
-          tagList(
-            sliderInput(ns("yearSlider"), "Date",
-                        min = min(allyears, na.rm = TRUE),
-                        max = max(allyears, na.rm = TRUE),
-                        value = c(min(allyears, na.rm = TRUE), max(allyears, na.rm = TRUE)),
-                        step = 1,
-                        sep = ""
+          
+          yearSliderVisible(TRUE)
+          
+          return(
+            tagList(
+              sliderInput(ns("yearSlider"), "Date",
+                          min = min(allyears, na.rm = TRUE),
+                          max = max(allyears, na.rm = TRUE),
+                          value = c(min(allyears, na.rm = TRUE), max(allyears, na.rm = TRUE)),
+                          step = 1,
+                          sep = ""
+              )
             )
           )
         } else{
           #print("slider not shown")
-          downloadButtonVisible(FALSE)
+          yearSliderVisible(FALSE)
+          #downloadButtonVisible(FALSE)
         }
       })
       
-      # observe( { #input$queryButton,
-      #   
-      #   if (isTruthy(input$yearSlider)) {
-      #     downloadButtonVisible(TRUE)
-      #   } else {
-      #     print("false button")
-      #     downloadButtonVisible(FALSE)
-      #   }
-      # }) #, ignoreNULL = FALSE
+      observeEvent(input$queryButton, { #
+        print("query button pressed within the download button visible logic")
+        print(paste("year d=slider visible:",  yearSliderVisible()))
+        
+        if (yearSliderVisible()) {
+          downloadButtonVisible(TRUE)
+        } else {
+          print(paste("changing download button logic currently", downloadButtonVisible(), "to false"))
+          downloadButtonVisible(FALSE)
+        }
+      }) #, ignoreNULL = FALSE
       
       #adding optional length filter that updates based off year slider, water names, and station code
       output$lengthFilterUI <- renderUI({
@@ -464,9 +472,11 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       
       sampleFDataList <- eventReactive(input$queryButton, {
         #important so that data doesn't try to render before slider does
-        print("button pressed")
-        print(input$yearSlider)
+        print("button pressed in sample f data list")
+        print(paste("year slider values", input$yearSlider))
         if(!isTruthy(input$yearSlider)) return(NULL)
+        if(!isTruthy(input$waterNameSearch) && !isTruthy(input$stationCodeSearch) && !isTruthy(input$surveyIDSearch)) return(NULL)
+        print("rendering data")
         downloadButtonVisible(TRUE)
         #req(isTruthy(input$yearSlider))
         #only run if one of these are true. if not, it will get get caught in the render UI above

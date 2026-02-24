@@ -178,7 +178,7 @@ server <- function(input, output, session) {
   # })
   observe({
     data <- x$data() # Your module reactive
-    print(x$displayButton())
+    print(paste("display button value in app.r", x$displayButton()))
     print(nrow(data))
     # Condition: data exists and menu hasn't been added yet
     if (x$displayButton() && !menu_visible()) { #
