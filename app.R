@@ -166,40 +166,6 @@ ui <- bslib::page_navbar(
                      actionButton("Testbt", "button"))
            ), 
   nav_spacer() 
-  # tags$li( 
-  #   class = "dropdown", 
-  #   div( 
-  #     actionButton("showHelpModal", 
-  #                  class ="btn-help", 
-  #                  HTML("<b>?</b>") 
-  #     ) 
-  #   ) 
-  # ),
-  #uiOutput("buttons")
-  # nav_menu(
-  #   title = "Data export otions", 
-  #   align = "right",
-  #   value = "export_menu",
-  #   nav_spacer(), 
-  #   nav_item(
-  #     actionButton("test1", "test")
-  #   ), 
-  #   nav_item(
-  #     actionButton("test2", "test2")
-  #   )
-  # 
-  #    
-  # )
-  
-    # nav_panel("Data exports", 
-    #           
-    #           )
-    
-    # nav_item(
-    #   actionBttn("btnt", "button")
-    # )
-  #)
-  #uiOutput("button")
 )
 
 server <- function(input, output, session) {
@@ -211,73 +177,38 @@ server <- function(input, output, session) {
   #   nav_insert()
   # })
   observe({
-    data <- x() # Your module reactive
+    data <- x$data() # Your module reactive
+    print(x$displayButton())
     print(nrow(data))
     # Condition: data exists and menu hasn't been added yet
-    if (!is.null(data) && nrow(data) > 0 ) { #&& !menu_visible()
+    if (x$displayButton() && !menu_visible()) { #
       
       nav_insert(
         id = "main_nav",
-        target = "testt", # Insert after the spacer
-        position = "after",
-        nav_panel(
+        # target = "testt", # Insert after the spacer
+        # position = "after",
+        nav = nav_menu(
           title = "Data export options",
+          value = "exportOptions",
           align = "right",
-          nav_item(actionButton("test1", "Export CSV")),
-          nav_item(actionButton("test2", "Export Excel"))
+          #nav_panel("heello", 
+            nav_item(actionButton("test1", "Export CSV")),
+            nav_item(actionButton("test2", "Export Excel"))
+          #)
+          
         )
       )
       
-      #menu_visible(TRUE) # Mark as added so it doesn't duplicate
+      menu_visible(TRUE) # Mark as added so it doesn't duplicate
       
-    } else if ((is.null(data) || nrow(data) == 0) ) { #&& menu_visible()#
+    } else if (!x$displayButton()) { ##
+      print(paste("removed", x$displayButton()))
       # Optional: Remove the menu if data becomes empty again
-      nav_remove("main_navbar", "Data export options")
-      #menu_visible(FALSE)
+      nav_remove("main_nav", target = "exportOptions")
+      menu_visible(FALSE)
     }
   })
-  # observe({
-  #   data <- x()
-  #   print(nrow(x()))
-  #   if (!is.null(data) && nrow(data) > 0) {
-  #     #print()
-  #     nav_show("main_navbar", "export_menu")
-  #   } else {
-  #     nav_hide("main_navbar", "export_menu")
-  #   }
-  # })
-  # observeEvent(x(), {
-  #   print(nrow(x()))
-  #   req(nrow(x()) > 0)
-  #   
-  #   # Inject the item into the existing menu
-  #   nav_insert(
-  #     id = "main_nav",
-  #     target = "export_menu",
-  #     nav_item(actionButton("test1", "test"))
-  #   )
-  # }, once = TRUE)
-  # output$buttons <- renderUI({
-  #   print(nrow(x()))
-  #   req(nrow(x()) > 0)
-  #   print(nrow(x()))
-  #   #req(data_loaded())
-  # 
-  #   nav_menu(
-  #     title = "Data export otions", 
-  #     align = "right",
-  #     value = "export_menu",
-  #     nav_spacer(), 
-  #     nav_item(
-  #       actionButton("test1", "test")
-  #     ), 
-  #     nav_item(
-  #       actionButton("test2", "test2")
-  #     )
-  #     
-  #     
-  #   )
-  # })
+
     
   observe({
     summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)

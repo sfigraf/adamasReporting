@@ -85,6 +85,8 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
     id,
     function(input, output, session) {
       ns <- session$ns
+      
+      downloadButtonVisible <- reactiveVal(FALSE)
 
 # UI Components -----------------------------------------------------------
       
@@ -249,8 +251,21 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                         sep = ""
             )
           )
+        } else{
+          #print("slider not shown")
+          downloadButtonVisible(FALSE)
         }
       })
+      
+      # observe( { #input$queryButton,
+      #   
+      #   if (isTruthy(input$yearSlider)) {
+      #     downloadButtonVisible(TRUE)
+      #   } else {
+      #     print("false button")
+      #     downloadButtonVisible(FALSE)
+      #   }
+      # }) #, ignoreNULL = FALSE
       
       #adding optional length filter that updates based off year slider, water names, and station code
       output$lengthFilterUI <- renderUI({
@@ -330,19 +345,25 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
 
         #if button hasn't been clicked at all yet, retun this message
         if (input$queryButton == 0) {
+          #downloadButtonVisible(FALSE)
+          #print(downloadButtonVisible)
           return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
                    style = "color: gray;"))
         }
         #check if waterNames or Station Code or survey ID inputs are valid, and return a message if not
         if (!(waterNameInputCheck || stationCodeInputCheck || surveyIDInputCheck)) {
+          #downloadButtonVisible(FALSE)
+          #print(downloadButtonVisible)
           return(p("Please select a Water Name, Station Code, or Survey ID before rendering.", 
                    style = "color: gray;"))
         }
         #pretty much every time an input is called explicitly it should be wrapped in isolate() within this block to prevent UI render before input$querybutton is clicked
         if (isolate(input$lengthFilter) & !(lengthInputCheck)) {
+          #downloadButtonVisible(FALSE)
           return(p("No data collected for selected year(s) or only NA lengths detected at this water. Please turn off length filter before rendering this data.",
                    style = "color: gray;"))
         }
+        
         #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
           tabsetPanel(id = ns("sampleFTabsTabset"),
@@ -420,6 +441,9 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
           )
         )
       })
+      
+      
+      
       # #save data option and run report options only appears if there's a valid dataset to download
       output$downloadDataUI <- renderUI({
         req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
@@ -438,9 +462,16 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
 
 # data wrangling ----------------------------------------------------------
       
-      sampleFDataList <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
-        req(isTruthy(input$yearSlider))
+      sampleFDataList <- eventReactive(input$queryButton, {
+        #important so that data doesn't try to render before slider does
+        print("button pressed")
+        print(input$yearSlider)
+        if(!isTruthy(input$yearSlider)) return(NULL)
+        downloadButtonVisible(TRUE)
+        #req(isTruthy(input$yearSlider))
         #only run if one of these are true. if not, it will get get caught in the render UI above
+        #if(!isTruthy(input$waterNameSearch) || !isTruthy(input$stationCodeSearch) || !isTruthy(input$surveyIDSearch)) return(NULL)
+        
         req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch) || isTruthy(input$surveyIDSearch))
 
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
@@ -499,7 +530,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData 
         )
-        
+        downloadButtonVisible(TRUE)
         return(finalFilteredDataList)
         
       })
@@ -584,10 +615,14 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
       #summarized data tab
       downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
-      
+      print(downloadButtonVisible)
       return(
+        list(
+          "data" = reactive({sampleFDataList()$sampleFRawDataToDisplay}), 
+          "displayButton"= downloadButtonVisible
+        )
         #req(sampleFDataList()$sampleFRawDataToDisplay)
-        reactive({sampleFDataList()$sampleFRawDataToDisplay})
+        
       )
       
     }

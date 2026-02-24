@@ -281,4 +281,17 @@ input[type='radio'] {
     border-color: #0f7864 !important;
     color: #0f7864 !important;
 }
+
+.btn-help{
+  display: inline-block;
+  margin-left: 8px;
+  margin-top: 12px; 
+  margin-right: 8px; 
+  height: 33px;
+  background-color: #E9EBE0; 
+  color: #355235;
+  border-radius: 50%;
+  border: 1px solid rgba(53, 82, 53, 0.7);
+  
+}
   "))
