@@ -152,33 +152,57 @@ ui <- bslib::page_navbar(
   id = "main_nav",
   nav_menu("Data Source",
            nav_panel("Raw Data",
+                     value = "sampleFDataTab",
                     sampleFData_UI("sampleFData", sampleFInitialFilterValues)),
            nav_panel("Aggregated Data",
+                     value = "currentSummariesDataTab",
                     summarizedData_UI("summarizedData", currentSummariesInitialFilterValues))
            
            
-  ), 
-  nav_menu("test", 
-           nav_panel("test apnel", 
-                     value = "testt",
-                     sliderInput("Test", "test", 
-                                 min = 1, max = 10, value = 2), 
-                     actionButton("Testbt", "button"))
-           ), 
+  ),  
   nav_spacer() 
 )
 
 server <- function(input, output, session) {
   
   sampleFModReturns <- sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
+  summarizedDataModReturns <- summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
+  
   menu_visible <- reactiveVal(FALSE)
+  
+  dataToDownload <- reactiveVal(NULL)
+  displayButton <- reactiveVal(FALSE)
+  # dataExports <- reactiveValues(
+  #   data = NULL, 
+  #   displayButton = FALSE
+  # )
+  #update 
+  observe({ #input$main_nav, 
+    # print()
+    print("inputobserved")
+    if (input$main_nav == "sampleFDataTab") {
+      print("sampleFtabSelected")
+      dataToDownload(sampleFModReturns$data())
+      displayButton(sampleFModReturns$displayButton())
+      
+    } else if (input$main_nav == "currentSummariesDataTab") {
+      print("curretn summaries seleced")
+      dataToDownload(summarizedDataModReturns$data())
+      displayButton(summarizedDataModReturns$displayButton())
+    }
+    # print(nrow(dataExports$data))
+    # print(dataExports$displayButton)
+  }) 
 
   observe({
-    data <- sampleFModReturns$data() # Your module reactive
-    #print(paste("display button value in app.r", x$displayButton()))
-    print(nrow(data))
+    #data <- sampleFModReturns$data() # Your module reactive
+    # summarizedData <- summarizedDataModReturns$data()
+    #print(paste("data exports display button:", dataExports$displayButton))
+    print(paste("display in app.r", displayButton()))
+    print(paste("display button value in app.r for summarizedData", summarizedDataModReturns$displayButton()))
+    #print(paste("summarized data rows", nrow(summarizedData)))
     # Condition: data exists and menu hasn't been added yet
-    if (sampleFModReturns$displayButton() && !menu_visible()) { #
+    if (displayButton() && !menu_visible()) { #
       
       nav_insert(
         id = "main_nav",
@@ -202,7 +226,7 @@ server <- function(input, output, session) {
       
       menu_visible(TRUE) # Mark as added so it doesn't duplicate
       
-    } else if (!sampleFModReturns$displayButton()) { ##
+    } else if (!displayButton()) { ##
       #print(paste("removed", x$displayButton()))
       # Optional: Remove the menu if data becomes empty again
       nav_remove("main_nav", target = "exportOptions")
@@ -220,13 +244,12 @@ server <- function(input, output, session) {
   })
   
   #sample f rawe data tab
-  downloadData_Server("downloadSampleFData", reactive({sampleFModReturns$data()}),  "SampleFData")
+  downloadData_Server("downloadSampleFData", reactive({dataToDownload()}),  "AdamasDataDownload")
   runReport_Server("reportBuilder", reactive({sampleFModReturns$data()}), rsdLimits = rsdLimits)
 
     
-  observe({
-    summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
-  })
+  #observe({
+  #})
   
   
 }
