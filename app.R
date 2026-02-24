@@ -178,7 +178,7 @@ server <- function(input, output, session) {
   # })
   observe({
     data <- x$data() # Your module reactive
-    print(paste("display button value in app.r", x$displayButton()))
+    #print(paste("display button value in app.r", x$displayButton()))
     print(nrow(data))
     # Condition: data exists and menu hasn't been added yet
     if (x$displayButton() && !menu_visible()) { #
@@ -202,7 +202,7 @@ server <- function(input, output, session) {
       menu_visible(TRUE) # Mark as added so it doesn't duplicate
       
     } else if (!x$displayButton()) { ##
-      print(paste("removed", x$displayButton()))
+      #print(paste("removed", x$displayButton()))
       # Optional: Remove the menu if data becomes empty again
       nav_remove("main_nav", target = "exportOptions")
       menu_visible(FALSE)
