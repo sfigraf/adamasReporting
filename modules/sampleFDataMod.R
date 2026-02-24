@@ -351,7 +351,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         currentSampleFTableTabsTab <- isolate(input$sampleFTableTabsTabset) %||% "rawDataTab"
         currentSampleFGraphsTab <- isolate(input$sampleFGraphsTabset) %||% "lengthWeightsGraphsTab"
 
-        #if button hasn't been clicked at all yet, retun this message
+        #if button hasn't been clicked at all yet, return this message
         if (input$queryButton == 0) {
           
           return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
@@ -378,10 +378,10 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      tabsetPanel(id = ns("sampleFTableTabsTabset"),
                                  selected = currentSampleFTableTabsTab,
                        tabPanel("Raw Data", value = "rawDataTab", 
-                                div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                                    uiOutput(ns("downloadDataUI")),
-                                    uiOutput(ns("reportBuilderUI"))
-                                ),
+                                # div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+                                #     uiOutput(ns("downloadDataUI")),
+                                #     uiOutput(ns("reportBuilderUI"))
+                                # ),
                                 box(
                                   withSpinner(DTOutput(ns("sampleFData")))
                                 )
@@ -451,14 +451,14 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       
       
       # #save data option and run report options only appears if there's a valid dataset to download
-      output$downloadDataUI <- renderUI({
-        req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
-        downloadData_UI(ns("downloadSampleFData"))
-      })
-      output$reportBuilderUI <- renderUI({
-        req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
-        runReport_UI(ns("reportBuilder"))
-      })
+      # output$downloadDataUI <- renderUI({
+      #   req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
+      #   downloadData_UI(ns("downloadSampleFData"))
+      # })
+      # output$reportBuilderUI <- renderUI({
+      #   req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
+      #   runReport_UI(ns("reportBuilder"))
+      # })
       
       # module reactive inputs return
       lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
@@ -476,7 +476,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         downloadButtonVisible(FALSE)
         #if all inputs are empty retun a NULL df; needed on return to help with download/report button logic
         if(!isTruthy(input$waterNameSearch) && !isTruthy(input$stationCodeSearch) && !isTruthy(input$surveyIDSearch)) return(NULL)
-        print("rendering data")
+        #print("rendering data")
         downloadButtonVisible(TRUE)
         #req(isTruthy(input$yearSlider))
         #only run if one of these are true. if not, it will get get caught in the render UI above
@@ -620,12 +620,12 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
       #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
       
-      #sample f rawe data tab
-      downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
-      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
+      # #sample f rawe data tab
+      # downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
+      # runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
       #summarized data tab
       downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
-      print(downloadButtonVisible)
+      #print(downloadButtonVisible)
       return(
         list(
           "data" = reactive({sampleFDataList()$sampleFRawDataToDisplay}), 

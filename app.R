@@ -170,18 +170,15 @@ ui <- bslib::page_navbar(
 
 server <- function(input, output, session) {
   
-  x <- sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
+  sampleFModReturns <- sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
   menu_visible <- reactiveVal(FALSE)
-  
-  # observeEvent(input$Testbt, {
-  #   nav_insert()
-  # })
+
   observe({
-    data <- x$data() # Your module reactive
+    data <- sampleFModReturns$data() # Your module reactive
     #print(paste("display button value in app.r", x$displayButton()))
     print(nrow(data))
     # Condition: data exists and menu hasn't been added yet
-    if (x$displayButton() && !menu_visible()) { #
+    if (sampleFModReturns$displayButton() && !menu_visible()) { #
       
       nav_insert(
         id = "main_nav",
@@ -192,27 +189,46 @@ server <- function(input, output, session) {
           value = "exportOptions",
           align = "right",
           #nav_panel("heello", 
-            nav_item(actionButton("test1", "Export CSV")),
-            nav_item(actionButton("test2", "Export Excel"))
+          nav_item(uiOutput("downloadDataUI")),
+          nav_item(uiOutput("reportBuilderUI"))
           #)
+          # div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
+          #     ,
           
         )
+        
+        #)
       )
       
       menu_visible(TRUE) # Mark as added so it doesn't duplicate
       
-    } else if (!x$displayButton()) { ##
+    } else if (!sampleFModReturns$displayButton()) { ##
       #print(paste("removed", x$displayButton()))
       # Optional: Remove the menu if data becomes empty again
       nav_remove("main_nav", target = "exportOptions")
       menu_visible(FALSE)
     }
   })
+  
+  output$downloadDataUI <- renderUI({
+    req(nrow(sampleFModReturns$data()) > 0)
+    downloadData_UI("downloadSampleFData")
+  })
+  output$reportBuilderUI <- renderUI({
+    req(nrow(sampleFModReturns$data()) > 0)
+    runReport_UI("reportBuilder")
+  })
+  
+  #sample f rawe data tab
+  downloadData_Server("downloadSampleFData", reactive({sampleFModReturns$data()}),  "SampleFData")
+  runReport_Server("reportBuilder", reactive({sampleFModReturns$data()}), rsdLimits = rsdLimits)
 
     
   observe({
     summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
   })
+  
+  
 }
 
 # Run the application 
