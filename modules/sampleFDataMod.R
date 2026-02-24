@@ -68,7 +68,7 @@ sampleFData_UI <- function(id, initialValues) {
                      label = "Render Data", width = "100%", class = "btn-cpw-sidebar"),
         br(),
         
-        h6("Note: entries with NA values in any of the filter fields are excluded from the results")
+        h6("Note: entries with NA values in any of the filter fields are excluded from the results", style='font-weight: normal; margin-top: 20px;')
         
       ),
       
@@ -624,15 +624,13 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       # downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
       # runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
       #summarized data tab
-      downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
+      #downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
       #print(downloadButtonVisible)
       return(
         list(
           "data" = reactive({sampleFDataList()$sampleFRawDataToDisplay}), 
           "displayButton"= downloadButtonVisible
         )
-        #req(sampleFDataList()$sampleFRawDataToDisplay)
-        
       )
       
     }
