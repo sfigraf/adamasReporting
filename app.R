@@ -268,6 +268,13 @@ server <- function(input, output, session) {
       firstTimeSummarizedButton(TRUE)
       summarizedMenuVisible(TRUE)
       
+      # if it's the first time showing in the summarized tab but the query button hasn't been pressed yet, remove previosu menu
+    } else if(input$main_nav == "currentSummariesDataTab" && !firstTimeSummarizedButton() && !summarizedDataDisplayButton()) {
+      if(samplFmenuVisible()){
+        nav_remove("main_nav", target = "exportOptions")
+        #update value to show sample f data mod buttons are not visible
+        samplFmenuVisible(FALSE)
+      }
       #if it's not the first time rendering and it's not already showing 
     } else if(input$main_nav == "currentSummariesDataTab" && firstTimeSummarizedButton() && summarizedDataDisplayButton() && !summarizedMenuVisible()){
       #remove previous buttons if present
