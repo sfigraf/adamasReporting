@@ -198,6 +198,7 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
     margin-right: 2px;
     transition: all 0.1s ease-in-out;
 }
+/* --- Hover State nav-link class */
 .nav-link:hover {
     color: #ffd100 !important;
 }

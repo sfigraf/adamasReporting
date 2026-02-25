@@ -20,6 +20,7 @@ library(shinyjs) #for greying out buttons
 library(later) #for watining to fire code
 library(bslib) #for theme
 library(sass)
+library(bsicons)
 
 source("scripts/connectToDB.R")
 source("scripts/cssStuffbsLib.R")
@@ -198,7 +199,7 @@ server <- function(input, output, session) {
           nav_insert(
             id = "main_nav",
             nav = nav_menu(
-              title = "Data export options",
+              title = span(bsicons::bs_icon("database-fill-down"), " Export"),
               value = "exportOptions",
               align = "right",
               nav_item(uiOutput("downloadDataUI")),
@@ -223,7 +224,7 @@ server <- function(input, output, session) {
       nav_insert(
         id = "main_nav",
         nav = nav_menu(
-          title = "Data export options",
+          title = span(bsicons::bs_icon("database-fill-down"), " Export"),
           value = "exportOptions",
           align = "right",
           nav_item(uiOutput("downloadDataUI")),
@@ -256,7 +257,7 @@ server <- function(input, output, session) {
       nav_insert(
         id = "main_nav",
         nav = nav_menu(
-          title = "Data export options 2",
+          title = span(bsicons::bs_icon("database-fill-down"), " Export"),
           value = "exportOptions",
           align = "right",
           nav_item(uiOutput("downloadDataUI"))
@@ -285,7 +286,7 @@ server <- function(input, output, session) {
       nav_insert(
         id = "main_nav",
         nav = nav_menu(
-          title = "Data export options 2",
+          title = span(bsicons::bs_icon("database-fill-down"), " Export"),
           value = "exportOptions",
           align = "right",
           nav_item(uiOutput("downloadDataUI"))
