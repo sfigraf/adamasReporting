@@ -1,7 +1,8 @@
 downloadData_UI <- function(id) {
   ns <- NS(id)
   tagList(
-    actionButton(ns("downloadActionButton"), label = "Save Data", style = "height: 38px;", icon = icon("download")), 
+    actionButton(ns("downloadActionButton"), label = "Save Data", style = "padding-left: 20px; border: none; background: none; width: 100%; text-align: left; height: 38px;", 
+                 icon = icon("download"), class = "nav-link"), 
     hr(),
   )
 }
@@ -19,7 +20,7 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             column(
               width = 12,
               align = "center", 
-              downloadButton(ns("downloadCSV"), "Download as CSV")
+              downloadButton(ns("downloadCSV"), "Download as CSV", class = ".btn-cpw-general")
             )
           ), 
           br(), 
@@ -28,7 +29,7 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             column(
               width = 12,
               align = "center", 
-              downloadButton(ns("downloadExcel"), "Download as Excel")
+              downloadButton(ns("downloadExcel"), "Download as Excel", class = ".btn-cpw-general")
             )
           ), 
           br(), 
@@ -37,7 +38,7 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             column(
               width = 12,
               align = "center", 
-              downloadButton(ns("downloadRDS"), "Download as RDS")
+              downloadButton(ns("downloadRDS"), "Download as RDS", class = ".btn-cpw-general")
             )
           ),
           br(),
@@ -47,7 +48,10 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
               column(
                 width = 12,
                 align = "center", 
-                modalButton("Cancel")
+                tagAppendAttributes(
+                  modalButton("Cancel"), 
+                  class = "btn-cpw-general"
+                )
               )
             )
           ),

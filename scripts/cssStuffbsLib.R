@@ -1,4 +1,6 @@
-/* Center everything in the navbar container */
+my_theme <- bs_theme(version = 5, preset = "flatly") %>%
+  bs_add_rules(as_sass("
+    /* Center everything in the navbar container */
 .navbar .container-fluid {
     display: flex !important;
     align-items: center;
@@ -62,12 +64,18 @@
   }
 
 .dropdown-menu {
+  padding-bottom: 0px !important;
+
   background-color: #245d38 !important;
     border: 1px solid #1e4d2e;
+}
+.dropdown-menu .nav-item {
+  margin-bottom: 0px !important;
 }
 
 /* Dropdown text color */
   .dropdown-menu > li > a {
+    
     color: #FFFFFF !important;
       padding: 10px 20px;
   }
@@ -90,9 +98,30 @@
     background-color: #1e4d2e !important; 
 }
 
+.navbar-nav .nav-item.dropdown .nav-link.dropdown-toggle {
+    /* 1. Add rounding */
+    border-radius: 20px !important; 
+    
+    /* 2. Buffer: Add horizontal space so the rounding isn't cramped */
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+
+    /* Optional: Transition for smoothness */
+    transition: all 0.1s ease;
+    
+}
+
+.navbar-nav .nav-item.dropdown .nav-link.dropdown-toggle.active {
+    color: #ffd100 !important;          /* Yellow text */
+    background-color: transparent;       /* Keep background clean or set to your green */
+    border-bottom: 2px solid #ffd100 !important; /* Replaces white line with yellow */
+    background-color: #1e4d2e !important; 
+}
+
 .dropdown-menu > .active > a, 
 .dropdown-menu > .active > a:hover, 
 .dropdown-menu > .active > a:focus {
+
     background-color: #1e4d2e !important; /* Darker CPW Green */
     color: #ffd100 !important;            /* CPW Yellow text for the active item */
 }
@@ -101,24 +130,20 @@
     border-bottom: 3px solid #ffd100 !important; /* 3px thick, solid CPW Yellow */
 }
 
-.nav-tabs > li.active > a,
-.btn-default {
-    
-    
-    background-color: #001970 !important; /* CPW Blue */
+
+.btn-cpw-general {
+  background-color: #001970 !important; /* CPW Blue */
     color: #FFFFFF !important;
     border-color: #000c35 !important;
     font-weight: bold !important;
 }
 
-.nav-tabs > li.active > a:hover,
-.btn-default:hover {
-    
-    background-color: #000c35 !important;
+.btn-cpw-general:hover {
+
+  background-color: #000c35 !important;
     color: #ffd100 !important;
     border-color: #ffd100 !important;
 }
-
 
 
 .btn-cpw-sidebar {
@@ -172,29 +197,40 @@
 }
 
 /* --- Active Tab (The one currently selected) --- */
-.nav-tabs > li.active > a, 
-.nav-tabs > li.active > a:hover, 
-.nav-tabs > li.active > a:focus {
-    background-color: #245d38 !important; /* CPW Green */
-    color: #FFFFFF !important;            /* White text */
-    border: 1px solid #245d38 !important;
-    border-radius: 4px 4px 0 0;           /* Rounds only the top corners */
+.nav-tabs .nav-link.active, 
+.nav-tabs .nav-item.show .nav-link {
+    background-color: #e2f0d9 !important; /* Light Green Background */
+    color: #245d38 !important;            /* CPW Green Text */
+    border: 1px solid #245d38 !important; /* CPW Green Border */
+    border-bottom-color: #e2f0d9 !important; /* Blends the bottom into the panel */
+    border-radius: 4px 4px 0 0;           
+    font-weight: bold;
 }
 
 /* --- Inactive Tabs (The ones waiting to be clicked) --- */
-.nav-tabs > li > a {
-    color: #245d38 !important;           /* CPW Green text */
+.nav-tabs .nav-link {
+    color: #245d38 !important;            /* CPW Green text */
     background-color: #f1f8f3 !important; /* Very light green background */
-    border: 1px solid #e2f0d9 !important;
+    border: 1px solid #dee2e6 !important; /* Light grey default border */
     margin-right: 2px;
+    transition: all 0.1s ease-in-out;
 }
-
+/* --- Hover State nav-link class */
+.nav-link:hover {
+    color: #ffd100 !important;
+}
 /* --- Hover State for Inactive Tabs --- */
-.nav-tabs > li > a:hover {
-    background-color: #e2f0d9 !important; /* Slightly darker green wash */
-    color: #1e4d2e !important;           /* Darker green text */
+.nav-tabs .nav-link:hover:not(.active) {
+    background-color: #e2f0d9 !important; /* Light green wash */
+    color: #1e4d2e !important;            /* Darker green text */
     border-color: #245d38 !important;
 }
+
+/* --- Remove the default Bootstrap 'blue' glow/outline on click --- */
+.nav-tabs .nav-link:focus {
+    box-shadow: none !important;
+}
+
 
 
 /* Background of the actual dropdown list (the 'dropbox') */
@@ -211,14 +247,7 @@
     color: #FFFFFF !important;            /* White text */
 }
 
-input[type="checkbox"] {
-    accent-color: #245d38 !important; /* Forces the internal check/box to CPW Green */
-    cursor: pointer;
-    transform: scale(1.1); /* Optional: makes the checkbox slightly larger */
-}
-
-
-input[type="radio"] {
+input[type='radio'] {
     accent-color: #245d38 !important; /* Forces the internal check/box to CPW Green */
     cursor: pointer;
     transform: scale(1.1); 
@@ -231,8 +260,45 @@ input[type="radio"] {
           border-radius: 5px;
           border-color: #245d38;
         }
-        
+
+.control-label {
+  font-weight: bold !important;
+}
+/* 1. Target the main title of the checkbox group */
+.shiny-input-checkboxgroup label.control-label {
+  font-weight: normal !important;
+}
+
+/* 2. Target the individual checkbox labels (choices) */
+.shiny-input-checkboxgroup .checkbox label {
+  font-weight: normal !important;
+}
+
 .normal-label-row .control-label, 
 .normal-label-row label {
   font-weight: normal !important;
 }
+
+/* DT table pagination buttons */
+.pagination .page-item.active .page-link {
+    background-color: #0f7864 !important;
+    border-color: #0f7864 !important;
+    color: white !important; /* Ensure text remains readable */
+}
+
+/* 2. Target the OTHER (unselected) pagination buttons */
+.pagination .page-item .page-link {
+    background-color: #d1e7e3 !important; /* A lighter shade of your green */
+    border-color: #badbd5 !important;
+    color: #0f7864 !important; /* Keep text the darker green for consistency */
+}
+
+/* 3. Add a hover effect for better user experience */
+.pagination .page-item .page-link:hover {
+    background-color: #aed1cb !important;
+    border-color: #0f7864 !important;
+    color: #0f7864 !important;
+}
+
+
+  "))

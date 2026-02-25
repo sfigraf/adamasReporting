@@ -65,9 +65,10 @@ sampleFData_UI <- function(id, initialValues) {
         uiOutput(ns("lengthFilterUI")), 
         
         actionButton(ns("queryButton"), 
-                     label = "Render Data", width = "100%", class = "btn-cpw-sidebar"), 
+                     label = "Render Data", width = "100%", class = "btn-cpw-sidebar"),
+        br(),
         
-        h6("Note: entries with NA values in any of the filter fields are excluded from the results")
+        h6("Note: entries with NA values in any of the filter fields are excluded from the results", style='font-weight: normal; margin-top: 20px;')
         
       ),
       
@@ -84,6 +85,9 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
     id,
     function(input, output, session) {
       ns <- session$ns
+      
+      #used to keep track of if the data gets rendered in the mainpanel or not
+      downloadButtonVisible <- reactiveVal(FALSE)
 
 # UI Components -----------------------------------------------------------
       
@@ -237,17 +241,19 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             pull()
-
-          tagList(
-            sliderInput(ns("yearSlider"), "Date",
-                        min = min(allyears, na.rm = TRUE),
-                        max = max(allyears, na.rm = TRUE),
-                        value = c(min(allyears, na.rm = TRUE), max(allyears, na.rm = TRUE)),
-                        step = 1,
-                        sep = ""
+          
+          return(
+            tagList(
+              sliderInput(ns("yearSlider"), "Date",
+                          min = min(allyears, na.rm = TRUE),
+                          max = max(allyears, na.rm = TRUE),
+                          value = c(min(allyears, na.rm = TRUE), max(allyears, na.rm = TRUE)),
+                          step = 1,
+                          sep = ""
+              )
             )
           )
-        }
+        } 
       })
       
       #adding optional length filter that updates based off year slider, water names, and station code
@@ -326,21 +332,25 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         currentSampleFTableTabsTab <- isolate(input$sampleFTableTabsTabset) %||% "rawDataTab"
         currentSampleFGraphsTab <- isolate(input$sampleFGraphsTabset) %||% "lengthWeightsGraphsTab"
 
-        #if button hasn't been clicked at all yet, retun this message
+        #if button hasn't been clicked at all yet, return this message
         if (input$queryButton == 0) {
+          
           return(p("Please select a Area Bio, Species Con Bio, Water Name, or Station Code and click 'Render'.", 
                    style = "color: gray;"))
         }
         #check if waterNames or Station Code or survey ID inputs are valid, and return a message if not
         if (!(waterNameInputCheck || stationCodeInputCheck || surveyIDInputCheck)) {
+          
           return(p("Please select a Water Name, Station Code, or Survey ID before rendering.", 
                    style = "color: gray;"))
         }
         #pretty much every time an input is called explicitly it should be wrapped in isolate() within this block to prevent UI render before input$querybutton is clicked
         if (isolate(input$lengthFilter) & !(lengthInputCheck)) {
+          
           return(p("No data collected for selected year(s) or only NA lengths detected at this water. Please turn off length filter before rendering this data.",
                    style = "color: gray;"))
         }
+        
         #if we make it this far, it's because all the previous conditions are met and we can successfully render the UI
         tagList(
           tabsetPanel(id = ns("sampleFTabsTabset"),
@@ -349,11 +359,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      tabsetPanel(id = ns("sampleFTableTabsTabset"),
                                  selected = currentSampleFTableTabsTab,
                        tabPanel("Raw Data", value = "rawDataTab", 
-                                div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                                    uiOutput(ns("downloadDataUI")),
-                                    uiOutput(ns("reportBuilderUI"))
-                                ),
-                                box(
+                                wellPanel(
                                   withSpinner(DTOutput(ns("sampleFData")))
                                 )
                        ), 
@@ -418,15 +424,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
           )
         )
       })
-      # #save data option and run report options only appears if there's a valid dataset to download
-      output$downloadDataUI <- renderUI({
-        req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
-        downloadData_UI(ns("downloadSampleFData"))
-      })
-      output$reportBuilderUI <- renderUI({
-        req(nrow(sampleFDataList()$sampleFRawDataToDisplay) > 0)
-        runReport_UI(ns("reportBuilder"))
-      })
       
       # module reactive inputs return
       lengthWeightsInputs <- lengthWeightInputs_Server("lengthWeightInputsMod")
@@ -436,10 +433,17 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
 
 # data wrangling ----------------------------------------------------------
       
-      sampleFDataList <- eventReactive(input$queryButton, ignoreNULL = TRUE, {
-        
-        #only run if one of these are true. if not, it will get get caught in the render UI above
-        req(isTruthy(input$waterNameSearch) || isTruthy(input$stationCodeSearch) || isTruthy(input$surveyIDSearch))
+      sampleFDataList <- eventReactive(input$queryButton, {
+        #important so that data doesn't try to render before slider does
+        req(isTruthy(input$yearSlider))
+        #change value to false and it will stay this way if the inputs below aren't valid and a NULL df is returned
+        downloadButtonVisible(FALSE)
+        #only run if one of these are true
+        #if all inputs are empty retun a NULL df; needed on return to help with download/report button logic
+        #these are all inputs/checks present for rendering MainPanelUI
+        if(!isTruthy(input$waterNameSearch) && !isTruthy(input$stationCodeSearch) && !isTruthy(input$surveyIDSearch)) return(NULL)
+        #if we make it past the return statement the data will be rendered, so update the reactive value
+        downloadButtonVisible(TRUE)
 
         ##ERROR: Error in .transformer: `value` must be a string or scalar SQL, not the number 1. 
         #caused because it's hard to dbplyr to translate R to sql with lists directly inside a filter for a remote database table
@@ -497,7 +501,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData 
         )
-        
+        #downloadButtonVisible(TRUE)
         return(finalFilteredDataList)
         
       })
@@ -571,17 +575,13 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                                   )
       })
       
-      
-      
-      #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
-      #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
-      #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
-      
-      #sample f rawe data tab
-      downloadData_Server("downloadSampleFData", reactive({sampleFDataList()$sampleFRawDataToDisplay}),  "SampleFData")
-      runReport_Server("reportBuilder", reactive({sampleFDataList()$sampleFRawDataToDisplay}), rsdLimits = rsdLimits)
-      #summarized data tab
-      downloadData_Server("downloadSampleFSummarizedData", reactive({sampleFDataList()$sampleFSummarizedData}),  "SampleFSummarizedData")
+      #returning filtered data and indicator of whether data was rendered in mainpanel or not; used for displaying data export options
+      return(
+        list(
+          "data" = reactive({sampleFDataList()$sampleFRawDataToDisplay}), 
+          "displayButton"= downloadButtonVisible
+        )
+      )
       
     }
   )

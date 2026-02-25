@@ -14,7 +14,10 @@ allyears <- singleWaterOnly %>%
   distinct(year(SampleDate)) %>%
   pull()
 #print(allyears)
-
+"#FFFFFF"
+"#245d38"
+"#f1f8f3"
+"#e2f0d9"
 years <- unique(year(singleWaterOnly$SampleDate))
 
 x <- as.data.frame(singleWaterOnly)
@@ -382,4 +385,32 @@ singlesurvey <- sampleFData %>%
 # input[type="radio"]:focus {
 #   outline: 2px solid #ffd100 !important; /* CPW Yellow focus ring */
 #   outline-offset: 2px;
+# }
+# .btn-help{
+#   display: inline-block;
+#   margin-left: 8px;
+#   margin-top: 12px; 
+#   margin-right: 8px; 
+#   height: 33px;
+#   background-color: #E9EBE0; 
+#     color: #355235;
+#     border-radius: 50%;
+#   border: 1px solid rgba(53, 82, 53, 0.7);
+#   
+# }
+# .nav-tabs > li.active > a,
+# .btn-default {
+#   background-color: #001970 !important; /* CPW Blue */
+#     color: #FFFFFF !important;
+#     border-color: #000c35 !important;
+#     font-weight: bold !important;
+# }
+# 
+# 
+# .nav-tabs > li.active > a:hover,
+# .btn-default:hover {
+#   
+#   background-color: #000c35 !important;
+#     color: #ffd100 !important;
+#     border-color: #ffd100 !important;
 # }

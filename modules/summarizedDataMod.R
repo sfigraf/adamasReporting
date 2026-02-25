@@ -50,6 +50,7 @@ summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) 
     function(input, output, session) {
       ns <- session$ns
       
+      downloadButtonVisible <- reactiveVal(FALSE)
 
 # UI Components -----------------------------------------------------------
 
@@ -66,16 +67,10 @@ summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) 
 
         #if we make it this far, it's becausse all the previosu conditions are met and we can successfully render the UI
         tagList(
-          uiOutput(ns("downloadDataUI")),
           box(
             withSpinner(DTOutput(ns("currentSummariesData")))
           )
         )
-      })
-      # #save data option only appears if there's a valid dataset to download
-      output$downloadDataUI <- renderUI({
-        req(nrow(currentSummaryDataToDisplay()) > 0)
-        downloadData_UI(ns("downloadcurrentSummariesData"))
       })
       
       #update watername based on inputs
@@ -225,6 +220,15 @@ summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) 
         return(finalFilteredData1)
       })
       
+      observeEvent(input$queryButton, {
+        if(nrow(currentSummaryDataToDisplay()) > 0){
+          downloadButtonVisible(TRUE)
+        } else{
+          downloadButtonVisible(FALSE)
+        }
+        
+      })
+      
       output$currentSummariesData <- renderDT(server = TRUE, {
         
         datatable(currentSummaryDataToDisplay(),
@@ -243,8 +247,13 @@ summarizedData_Server <- function(id, currentSummaryDataAsTable, initialValues) 
             `white-space` = 'nowrap'
           )
       })
-      
-      downloadData_Server("downloadcurrentSummariesData", currentSummaryDataToDisplay, "CurrentSummaryData")
+      #return data and reactive value saying that data is displayed; will always be true if query button is hit
+      return(
+        list(
+          "data" = currentSummaryDataToDisplay, 
+          "displayButton"= downloadButtonVisible
+        )
+      )
 
     }
   )

@@ -1,7 +1,8 @@
 runReport_UI <- function(id) {
   ns <- NS(id)
   tagList(
-    actionButton(ns("reportBuilderButton"), "Run Report", style = "height: 38px;", icon = icon("chart-simple")),
+    actionButton(ns("reportBuilderButton"), "Run Report", style = "border: none; background: none; width: 100%; padding-left: 20px; text-align: left; height: 38px;",
+                 icon = icon("chart-simple"), class = "nav-link"),
     hr()
   )
 }
@@ -80,7 +81,7 @@ runReport_Server <- function(id, data, rsdLimits) {
               align = "center", 
               useShinyjs(),
               shinyjs::disabled(
-                downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"))
+                downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"), class = "btn-cpw-general")
               )
             )
           ),
@@ -90,7 +91,10 @@ runReport_Server <- function(id, data, rsdLimits) {
               column(
                 width = 12,
                 align = "center", 
-                modalButton("Cancel")
+                tagAppendAttributes(
+                  modalButton("Cancel"), 
+                  class = "btn-cpw-general"
+                )
               )
             )
           ),

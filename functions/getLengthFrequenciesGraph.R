@@ -1,4 +1,4 @@
-#lengthOptions <- "RSD"
+
 getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
   
   if(lengthOptions == "RSD"){
