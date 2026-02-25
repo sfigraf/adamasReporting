@@ -310,7 +310,7 @@ server <- function(input, output, session) {
   
   output$downloadDataUI <- renderUI({
     #req(nrow(sampleFModReturns$data()) > 0)
-    downloadData_UI("downloadSampleFData")
+    downloadData_UI("downloadAdamasData")
   })
   output$reportBuilderUI <- renderUI({
     req(nrow(sampleFModReturns$data()) > 0)
@@ -321,7 +321,7 @@ server <- function(input, output, session) {
   #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
   #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
   #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
-  downloadData_Server("downloadSampleFData", reactive({dataToDownload()}),  "AdamasDataDownload")
+  downloadData_Server("downloadAdamasData", reactive({dataToDownload()}),  "AdamasDataDownload")
   #currently report only exists for sample F so just returning this data
   runReport_Server("reportBuilder", reactive({sampleFModReturns$data()}), rsdLimits = rsdLimits)
   

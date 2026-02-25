@@ -126,21 +126,7 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
     border-bottom: 3px solid #ffd100 !important; /* 3px thick, solid CPW Yellow */
 }
 
-.nav-tabs > li.active > a,
-.btn-default {
-    background-color: #001970 !important; /* CPW Blue */
-    color: #FFFFFF !important;
-    border-color: #000c35 !important;
-    font-weight: bold !important;
-}
 
-.nav-tabs > li.active > a:hover,
-.btn-default:hover {
-    
-    background-color: #000c35 !important;
-    color: #ffd100 !important;
-    border-color: #ffd100 !important;
-}
 
 
 .btn-cpw-sidebar {
@@ -212,7 +198,9 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
     margin-right: 2px;
     transition: all 0.1s ease-in-out;
 }
-
+.nav-link:hover {
+    color: #ffd100 !important;
+}
 /* --- Hover State for Inactive Tabs --- */
 .nav-tabs .nav-link:hover:not(.active) {
     background-color: #e2f0d9 !important; /* Light green wash */
@@ -285,16 +273,5 @@ input[type='radio'] {
     color: #0f7864 !important;
 }
 
-.btn-help{
-  display: inline-block;
-  margin-left: 8px;
-  margin-top: 12px; 
-  margin-right: 8px; 
-  height: 33px;
-  background-color: #E9EBE0; 
-  color: #355235;
-  border-radius: 50%;
-  border: 1px solid rgba(53, 82, 53, 0.7);
-  
-}
+
   "))

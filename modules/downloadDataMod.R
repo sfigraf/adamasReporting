@@ -1,7 +1,8 @@
 downloadData_UI <- function(id) {
   ns <- NS(id)
   tagList(
-    actionButton(ns("downloadActionButton"), label = "Save Data", style = "height: 38px;", icon = icon("download")), 
+    actionButton(ns("downloadActionButton"), label = "Save Data", style = "padding-left: 20px; border: none; background: none; width: 100%; text-align: left; height: 38px;", 
+                 icon = icon("download"), class = "nav-link"), 
     hr(),
   )
 }

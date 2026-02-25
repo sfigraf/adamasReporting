@@ -1,7 +1,8 @@
 runReport_UI <- function(id) {
   ns <- NS(id)
   tagList(
-    actionButton(ns("reportBuilderButton"), "Run Report", style = "height: 38px;", icon = icon("chart-simple")),
+    actionButton(ns("reportBuilderButton"), "Run Report", style = "border: none; background: none; width: 100%; padding-left: 20px; text-align: left; height: 38px;",
+                 icon = icon("chart-simple"), class = "nav-link"),
     hr()
   )
 }
