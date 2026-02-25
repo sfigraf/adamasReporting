@@ -501,7 +501,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData 
         )
-        #downloadButtonVisible(TRUE)
         return(finalFilteredDataList)
         
       })
