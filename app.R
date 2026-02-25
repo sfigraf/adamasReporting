@@ -190,7 +190,6 @@ server <- function(input, output, session) {
     if(input$main_nav == "sampleFDataTab" && !firstTimesampleFButton() && sampleFDataDisplayButton()){
       # if the other menu has been rendered before, remove it ifrst before render
       if(summarizedMenuVisible()){
-        print("summarized menu visible, removing now")
         nav_remove("main_nav", target = "exportOptions")
         #update value to show summarized data mod buttons are not visible
         summarizedMenuVisible(FALSE)
@@ -216,7 +215,6 @@ server <- function(input, output, session) {
     } else if(input$main_nav == "sampleFDataTab" && !samplFmenuVisible() && firstTimesampleFButton() && sampleFDataDisplayButton()) {
       #if summarized buttons already visiible, remove them
       if(summarizedMenuVisible()){
-        print("summarized menu visible, removing now")
         nav_remove("main_nav", target = "exportOptions")
         #update value to show summarized data mod buttons are not visible
         summarizedMenuVisible(FALSE)
@@ -298,143 +296,17 @@ server <- function(input, output, session) {
     }
   })
   
-  # firstTimesampleFButton <- reactiveVal(FALSE)
-  # 
-  # menu_visible <- reactiveVal(FALSE)
-  # 
-  # summarizedQueryRendered <- reactiveVal(summarizedDataModReturns$displayButton())
-  # 
-  # summarizedMenuVisible <- reactiveVal(FALSE)
-  # summarizedDataRenderedOnce <- reactiveVal(FALSE)
-  # 
-  # dataToDownload <- reactiveVal(NULL)
-  # displayButton <- reactiveVal(FALSE)
-  # dataExports <- reactiveValues(
-  #   data = NULL, 
-  #   displayButton = FALSE
-  # )
-  # observeEvent(input$main_nav,{
-  #   if (input$main_nav == "currentSummariesDataTab" && !summarizedDataRenderedOnce()){
-  #     print("changing display button to false")
-  #     displayButton(FALSE)
-  #   }
-  # })
-  #update data absed on which tab is selected
+  #update data based on which tab is selected
   observe({ #input$main_nav, 
-    # print()
     #trigegers every time the "render" button is pressed in either mod since that's when values are returned from the servers
-    print("inputobserved")
+    
     if (input$main_nav == "sampleFDataTab") {
-      print("sampleFtabSelected")
       dataToDownload(sampleFModReturns$data())
-      #displayButton(sampleFModReturns$displayButton())
-      
+
     } else if (input$main_nav == "currentSummariesDataTab") {
-      print("curretn summaries seleced")
       dataToDownload(summarizedDataModReturns$data())
-      #if(!summarizedDataRenderedOnce()){
-        
-     # } else{
-        print(paste("anythingreturned from summarized display button",  isTruthy(summarizedDataModReturns$displayButton())))
-        #displayButton(summarizedDataModReturns$displayButton())
-        
-      #}
-      #summarizedMenuVisible(summarizedDataModReturns$displayButton())
     }
   }) 
-
-  # observe({
-  #   #data <- sampleFModReturns$data() # Your module reactive
-  #   # summarizedData <- summarizedDataModReturns$data()
-  #   #print(paste("data exports display button:", dataExports$displayButton))
-  #   print(paste("summarizedMenuVisible:", summarizedMenuVisible()))
-  #   # print(paste("display in app.r", displayButton()))
-  #   # print(paste("display button value in app.r for summarizedData", summarizedDataModReturns$displayButton()))
-  #   #print(paste("summarized data rows", nrow(summarizedData)))
-  #   # Condition: tab is on the samplF tab and buttons are not showing
-  #   if (input$main_nav == "sampleFDataTab" && displayButton() && !menu_visible() ) { #
-  #     if(summarizedMenuVisible()){
-  #       print("summarized menu visible, removing now")
-  #       nav_remove("main_nav", target = "exportOptions")
-  #       #menu_visible(FALSE)
-  #       summarizedMenuVisible(FALSE)
-  #     }
-  #     
-  #     nav_insert(
-  #       id = "main_nav",
-  #       # target = "testt", # Insert after the spacer
-  #       # position = "after",
-  #       nav = nav_menu(
-  #         title = "Data export options",
-  #         value = "exportOptions",
-  #         align = "right",
-  #         #nav_panel("heello", 
-  #         nav_item(uiOutput("downloadDataUI")),
-  #         nav_item(uiOutput("reportBuilderUI"))
-  #         #)
-  #         # div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-  #         #     ,
-  #         
-  #       )
-  #       
-  #       #)
-  #     )
-  #     firstTimesampleFButton(TRUE)
-  #     menu_visible(TRUE) # Mark as added so it doesn't duplicate
-  #     
-  #     #if the display button is off, remove button menus
-  #   } else if (input$main_nav == "sampleFDataTab" && !firstTimesampleFButton() && summarizedMenuVisible()) { ##
-  #     #print(paste("removed", x$displayButton()))
-  #     # Optional: Remove the menu if data becomes empty again
-  #     nav_remove("main_nav", target = "exportOptions")
-  #     menu_visible(FALSE)
-  #     summarizedMenuVisible(FALSE)
-  #     #if current summaries tab selected and summarized menu is not visible and it's the first time it's been rendered and the menu is already visible from sampleF inputs, remove the data
-  #   } else if (!displayButton()) { ##
-  #     #print(paste("removed", x$displayButton()))
-  #     # Optional: Remove the menu if data becomes empty again
-  #     nav_remove("main_nav", target = "exportOptions")
-  #     menu_visible(FALSE)
-  #     summarizedMenuVisible(FALSE)
-  #     #if current summaries tab selected and summarized menu is not visible and it's the first time it's been rendered and the menu is already visible from sampleF inputs, remove the data
-  #   } else if (input$main_nav == "currentSummariesDataTab" && !summarizedMenuVisible() && !summarizedDataRenderedOnce() && menu_visible() && !displayButton()) {
-  #     print("menu removed because summarized data's not been rendered yet")
-  #     #if(menu_visible()){
-  #       nav_remove("main_nav", target = "exportOptions")
-  #       menu_visible(FALSE)
-  #     #}
-  #     
-  #     #summarizedMenuVisible(TRUE)
-  #       #if current saummaries tab selected and the display button is on and the summarized menu hasn't been rendered already: make the buttons
-  #   } else if (input$main_nav == "currentSummariesDataTab" && !summarizedMenuVisible() && !summarizedDataRenderedOnce() && displayButton()) {
-  #     
-  #     if(menu_visible()){
-  #       nav_remove("main_nav", target = "exportOptions")
-  #       menu_visible(FALSE)
-  #     }
-  #     nav_insert(
-  #       id = "main_nav",
-  #       # target = "testt", # Insert after the spacer
-  #       # position = "after",
-  #       nav = nav_menu(
-  #         title = "Data export options 2",
-  #         value = "exportOptions",
-  #         align = "right",
-  #         #nav_panel("heello", 
-  #         nav_item(uiOutput("downloadDataUI"))#,
-  #         #nav_item(uiOutput("reportBuilderUI"))
-  #         #)
-  #         
-  #       )
-  #     )
-  #     summarizedDataRenderedOnce(TRUE)
-  #     summarizedMenuVisible(TRUE)
-  #     #if the current summaries tab is selected and the menu 
-  #   } #else if (input$main_nav == "currentSummariesDataTab" && !summarizedMenuVisible()){
-  #     #nav_remove("main_nav", target = "exportOptions")
-  #     #menu_visible(FALSE)
-  #   #} 
-  # })
   
   output$downloadDataUI <- renderUI({
     #req(nrow(sampleFModReturns$data()) > 0)
@@ -446,13 +318,12 @@ server <- function(input, output, session) {
   })
   
   #sample f rawe data tab
+  #not using sampleFDataList()$sampleFRawDataToDisplay because that unwraps the object and passes the static result of the data at that exact moment. instead, 
+  #reactive({sampleFDataList()$sampleFRawDataToDisplay}) passes the reactive object itself and tells the mod to "go get" the data
+  #same idea around making the filename reactive. one option is reactive({ paste0(input$waterNameSearch) })
   downloadData_Server("downloadSampleFData", reactive({dataToDownload()}),  "AdamasDataDownload")
+  #currently report only exists for sample F so just returning this data
   runReport_Server("reportBuilder", reactive({sampleFModReturns$data()}), rsdLimits = rsdLimits)
-
-    
-  #observe({
-  #})
-  
   
 }
 
