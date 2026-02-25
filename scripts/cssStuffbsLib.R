@@ -143,7 +143,6 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
 }
 
 
-
 .btn-cpw-sidebar {
     background-color: #245d38 !important; /* CPW Green */
     color: #FFFFFF !important;
@@ -255,7 +254,11 @@ input[type='radio'] {
           border-radius: 5px;
           border-color: #245d38;
         }
-        
+
+.control-label {
+  font-weight: bold !important;
+}
+
 .normal-label-row .control-label, 
 .normal-label-row label {
   font-weight: normal !important;
