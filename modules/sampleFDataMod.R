@@ -233,7 +233,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
           }
           
           if(isTruthy(surveyIDs)){
-            #print("true")
             sampleFForSlider <- sampleFForSlider %>%
               filter(SurveyID %in% surveyIDs)
           }
@@ -242,8 +241,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
             distinct(year(SampleDate)) %>%
             #show_query() %>%
             pull()
-          
-          #yearSliderVisible(TRUE)
           
           return(
             tagList(
@@ -362,10 +359,6 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
                      tabsetPanel(id = ns("sampleFTableTabsTabset"),
                                  selected = currentSampleFTableTabsTab,
                        tabPanel("Raw Data", value = "rawDataTab", 
-                                # div(style = "display: flex; gap: 10px; margin-bottom: 10px; margin-top: 10px;",
-                                #     uiOutput(ns("downloadDataUI")),
-                                #     uiOutput(ns("reportBuilderUI"))
-                                # ),
                                 wellPanel(
                                   withSpinner(DTOutput(ns("sampleFData")))
                                 )
@@ -508,7 +501,7 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
         finalFilteredDataList <- list(
           "sampleFRawDataToDisplay" = finalFilteredData 
         )
-        downloadButtonVisible(TRUE)
+        #downloadButtonVisible(TRUE)
         return(finalFilteredDataList)
         
       })

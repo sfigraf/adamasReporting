@@ -94,7 +94,6 @@ runReport_Server <- function(id, data, rsdLimits) {
                 tagAppendAttributes(
                   modalButton("Cancel"), 
                   class = "btn-cpw-general"
-                
                 )
               )
             )

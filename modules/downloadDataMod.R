@@ -20,7 +20,7 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             column(
               width = 12,
               align = "center", 
-              downloadButton(ns("downloadCSV"), "Download as CSV")
+              downloadButton(ns("downloadCSV"), "Download as CSV", class = ".btn-cpw-general")
             )
           ), 
           br(), 
@@ -29,7 +29,7 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             column(
               width = 12,
               align = "center", 
-              downloadButton(ns("downloadExcel"), "Download as Excel")
+              downloadButton(ns("downloadExcel"), "Download as Excel", class = ".btn-cpw-general")
             )
           ), 
           br(), 
@@ -38,7 +38,7 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
             column(
               width = 12,
               align = "center", 
-              downloadButton(ns("downloadRDS"), "Download as RDS")
+              downloadButton(ns("downloadRDS"), "Download as RDS", class = ".btn-cpw-general")
             )
           ),
           br(),
@@ -48,7 +48,10 @@ downloadData_Server <- function(id, data, fileName = "ADAMASDataDownload") {
               column(
                 width = 12,
                 align = "center", 
-                modalButton("Cancel")
+                tagAppendAttributes(
+                  modalButton("Cancel"), 
+                  class = "btn-cpw-general"
+                )
               )
             )
           ),
