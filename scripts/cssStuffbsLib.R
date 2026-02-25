@@ -64,9 +64,13 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
   }
 
 .dropdown-menu {
+  padding-bottom: 0px !important;
 
   background-color: #245d38 !important;
     border: 1px solid #1e4d2e;
+}
+.dropdown-menu .nav-item {
+  margin-bottom: 0px !important;
 }
 
 /* Dropdown text color */
@@ -127,6 +131,19 @@ my_theme <- bs_theme(version = 5, preset = "flatly") %>%
 }
 
 
+.btn-cpw-general {
+  background-color: #001970 !important; /* CPW Blue */
+    color: #FFFFFF !important;
+    border-color: #000c35 !important;
+    font-weight: bold !important;
+}
+
+.btn-cpw-general:hover {
+
+  background-color: #000c35 !important;
+    color: #ffd100 !important;
+    border-color: #ffd100 !important;
+}
 
 
 .btn-cpw-sidebar {
@@ -246,6 +263,15 @@ input[type='radio'] {
 
 .control-label {
   font-weight: bold !important;
+}
+/* 1. Target the main title of the checkbox group */
+.shiny-input-checkboxgroup label.control-label {
+  font-weight: normal !important;
+}
+
+/* 2. Target the individual checkbox labels (choices) */
+.shiny-input-checkboxgroup .checkbox label {
+  font-weight: normal !important;
 }
 
 .normal-label-row .control-label, 

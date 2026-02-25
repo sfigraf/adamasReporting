@@ -20,7 +20,7 @@ library(shinyjs) #for greying out buttons
 library(later) #for watining to fire code
 library(bslib) #for theme
 library(sass)
-library(bsicons)
+#library(bsicons) # for export icon, could try and use shiny icons instead
 
 source("scripts/connectToDB.R")
 source("scripts/cssStuffbsLib.R")
@@ -169,6 +169,7 @@ server <- function(input, output, session) {
   sampleFModReturns <- sampleFData_Server("sampleFData", sampleFData, sampleFInitialFilterValues, rsdLimits = rsdLimits)
   summarizedDataModReturns <- summarizedData_Server("summarizedData", currentSummaryData, currentSummariesInitialFilterValues)
   
+  #nned the first time visible reactiveVals becuase nothing is returned at first from the mods; once render buttons are clicked the the displayBUttons are activated
   firstTimesampleFButton <- reactiveVal(FALSE)
   sampleFDataDisplayButton <- reactiveVal(FALSE)
   samplFmenuVisible <- reactiveVal(FALSE)
@@ -202,8 +203,8 @@ server <- function(input, output, session) {
               title = span(bsicons::bs_icon("database-fill-down"), " Export"),
               value = "exportOptions",
               align = "right",
-              nav_item(uiOutput("downloadDataUI")),
-              nav_item(uiOutput("reportBuilderUI"))
+              nav_item(uiOutput("downloadDataUI", inline = TRUE)),
+              nav_item(uiOutput("reportBuilderUI", inline = TRUE))
 
             )
           )
@@ -224,7 +225,7 @@ server <- function(input, output, session) {
       nav_insert(
         id = "main_nav",
         nav = nav_menu(
-          title = span(bsicons::bs_icon("database-fill-down"), " Export"),
+          title = span(icon("file-export"), " Export"),
           value = "exportOptions",
           align = "right",
           nav_item(uiOutput("downloadDataUI")),
@@ -257,7 +258,7 @@ server <- function(input, output, session) {
       nav_insert(
         id = "main_nav",
         nav = nav_menu(
-          title = span(bsicons::bs_icon("database-fill-down"), " Export"),
+          title = span(icon("file-export"), " Export"),
           value = "exportOptions",
           align = "right",
           nav_item(uiOutput("downloadDataUI"))
@@ -286,7 +287,7 @@ server <- function(input, output, session) {
       nav_insert(
         id = "main_nav",
         nav = nav_menu(
-          title = span(bsicons::bs_icon("database-fill-down"), " Export"),
+          title = span(icon("file-export"), " Export"),
           value = "exportOptions",
           align = "right",
           nav_item(uiOutput("downloadDataUI"))

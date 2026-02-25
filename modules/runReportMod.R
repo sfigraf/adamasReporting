@@ -81,7 +81,7 @@ runReport_Server <- function(id, data, rsdLimits) {
               align = "center", 
               useShinyjs(),
               shinyjs::disabled(
-                downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"))
+                downloadButton(ns("exportReportButton"), "Export and Save Report", icon = icon("save"), class = "btn-cpw-general")
               )
             )
           ),
@@ -91,7 +91,11 @@ runReport_Server <- function(id, data, rsdLimits) {
               column(
                 width = 12,
                 align = "center", 
-                modalButton("Cancel")
+                tagAppendAttributes(
+                  modalButton("Cancel"), 
+                  class = "btn-cpw-general"
+                
+                )
               )
             )
           ),
