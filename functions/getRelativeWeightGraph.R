@@ -3,19 +3,27 @@ getRelativeWeightGraph <- function(data, lengthOptions){
   #using .data pronoun to access column by string
   
   plot <- data %>%
-    ggplot(aes(x = Wr, y = .data[[lengthOptions]], 
-               color = CommonName, 
-               text = paste0('Length: ', as.character(round(.data[[lengthOptions]], 2)),
-                             '<br>Relative Weight: ', as.character(round(Wr, 2)), 
-                             '<br>Species: ', CommonName, 
-                             '<br>Survey ID: ', SurveyID
-               )
-    )) +
-    geom_point() + 
-    theme_classic() +
-    labs(title = "Relative Weight Data") #+
-  #scale_color_manual(values = allColors)
-  plot <- ggplotly(plot, tooltip = "text")
-  
+    plot_ly(
+      x = ~Wr, 
+      y = ~get(lengthOptions), 
+      color = ~CommonName,
+      type = 'scatter', 
+      mode = 'markers',
+      # Custom tooltip text
+      text = ~paste0('Length: ', round(get(lengthOptions), 2),
+                     '<br>Relative Weight: ', round(Wr, 2), 
+                     '<br>Species: ', CommonName, 
+                     '<br>Survey ID: ', SurveyID),
+      hoverinfo = 'text'
+    ) %>%
+    layout(
+      title = "Relative Weight Data",
+      xaxis = list(title = "Relative Weight (Wr)"),
+      yaxis = list(title = lengthOptions),
+      # Mimics theme_classic()
+      plot_bgcolor = 'white',
+      xaxis = list(showline = TRUE, linewidth = 1, linecolor = 'black', mirror = TRUE),
+      yaxis = list(showline = TRUE, linewidth = 1, linecolor = 'black', mirror = TRUE)
+    )
   return(plot)
 }

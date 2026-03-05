@@ -556,7 +556,18 @@ sampleFData_Server <- function(id, sampleFDataAsTable, initialValues, rsdLimits)
       }, server = TRUE)
       
       output$lengthWeightsGraph <- renderPlotly({
-        getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, lengthWeightsInputs$lengthWeight_LengthOptions(), lengthWeightsInputs$lengthWeight_WeightOptions())
+        #plot_ly(data = iris, x = ~Sepal.Length, y = ~Sepal.Width, type = 'scatter', mode = 'markers')
+        # p <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species,
+        #                       text = paste("Species:", Species, "<br>Value:", Sepal.Length))) +
+        #   geom_point() +
+        #   theme_classic()
+        # 
+        # ggplotly(p, tooltip = "text")
+        # message(lengthWeightsInputs$lengthWeight_LengthOptions())
+        #print(lengthWeightsInputs$lengthWeight_WeightOptions())
+        # message(nrow(sampleFDataList()$sampleFRawDataToDisplay))
+        getLengthWeightGraph(data = sampleFDataList()$sampleFRawDataToDisplay, lengthOptions = lengthWeightsInputs$lengthWeight_LengthOptions(),
+                             weightOptions = lengthWeightsInputs$lengthWeight_WeightOptions())
       })
       
       output$lengthFrequenciesGraph <- renderPlotly({

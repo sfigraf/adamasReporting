@@ -7,7 +7,7 @@ library(leaflet) #for map
 library(sf)
 library(plotly)
 library(shinydashboard) #for box()
-library(shinydashboardPlus)
+#library(shinydashboardPlus)
 library(readxl)
 library(shinycssloaders) #withSpinner
 library(DT)
@@ -200,7 +200,7 @@ server <- function(input, output, session) {
           nav_insert(
             id = "main_nav",
             nav = nav_menu(
-              title = span(bsicons::bs_icon("database-fill-down"), " Export"),
+              title = span(icon("file-export"), " Export"),
               value = "exportOptions",
               align = "right",
               nav_item(uiOutput("downloadDataUI", inline = TRUE)),

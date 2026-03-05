@@ -135,7 +135,7 @@ stockedStrains <- stockingRecordsView %>%
          year(Planted) >= "2024", 
          AreaBioName %in% "Kendall Bakich")
 ######
-sampleFData <- tbl(CPW_AqDatAnalysis, "SampleFView") 
+sampleFData <- tbl(pool, "SampleFView") 
 survey1239 <- sampleFData %>%
   filter(SurveyID == 1239) %>%
   collect()
@@ -414,3 +414,14 @@ singlesurvey <- sampleFData %>%
 #     color: #ffd100 !important;
 #     border-color: #ffd100 !important;
 # }
+
+NCmisc::list.functions.in.file("modules/sampleFDataMod.R", alphabetic = TRUE)
+
+survey18380 <- sampleFData %>%
+  filter(SurveyID == 18380) %>%
+  collect()
+
+x <- survey18380 %>%
+  mutate(CommonName = replace_na(as.character(CommonName), "No Common Name Assigned"))
+
+getLengthFrequenciesGraph(survey18380, "RSD", rsdLimits = rsdLimits)
