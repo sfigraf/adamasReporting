@@ -21,7 +21,7 @@ getRelativeWeightGraph <- function(data, lengthOptions){
       xaxis = list(title = "Relative Weight (Wr)"),
       yaxis = list(title = lengthOptions),
       # Mimics theme_classic()
-      plot_bgcolor = 'white',
+      plot_bgcolor = 'rgba(0,0,0,0)', #'white',
       xaxis = list(showline = TRUE, linewidth = 1, linecolor = 'black', mirror = TRUE),
       yaxis = list(showline = TRUE, linewidth = 1, linecolor = 'black', mirror = TRUE)
     )

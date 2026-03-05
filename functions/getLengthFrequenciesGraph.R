@@ -43,9 +43,6 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
         plot_bgcolor = 'rgba(0,0,0,0)',
         paper_bgcolor = 'rgba(0,0,0,0)'
       )
-    # plot <- ggplot(sampleFDataRSD, aes(x = RSD, y = Count, fill = CommonName, text = hoverText)) +
-    #   geom_col() +
-    #   labs(caption = "RSD (mm)")
     
   } else{ 
     plot <- data %>%
@@ -56,6 +53,9 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
         type = "histogram",
         nbinsx = 30, # Adjust to match your previous 'binwidth'
         # Plotly calculates bins, so we use its internal hover variables
+        # %{x}: Shows the bin range.
+        # %{y}: Shows the summed NumFish for that bin.
+        # <extra></extra>: Removes the annoying secondary "trace name" box that Plotly adds by default.
         hovertemplate = paste0(
           "Species: %{fullData.name}<br>",
           "Length Range: %{x}<br>",
@@ -70,30 +70,8 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
         plot_bgcolor = 'rgba(0,0,0,0)',
         paper_bgcolor = 'rgba(0,0,0,0)'
       )
-    # plot <- data %>%
-    #   #weighting by numFIsh allows to see total number of fish, not just count the rows
-    #   #numfish will get summed for a certain bin
-    #   ggplot(aes(x = .data[[lengthOptions]], weight = NumFish, 
-    #              fill = CommonName)) +
-    #   geom_histogram(binwidth = binwidth, 
-    #                  aes(
-    #                    group = CommonName,
-    #                    label = CommonName,
-    #                    text = paste0('Species: ', after_stat(label),
-    #                                  "<br>Length ", if_else(lengthOptions == "Length_mm", "(mm)", "(inches)"), ' Range: ', after_stat(xmin), " to ", after_stat(xmax),  
-    #                                  "<br>Count: ", after_stat(count)
-    #                                  
-    #                    )
-    #                  )) +
-    #   labs(caption = paste(lengthOptions, ": Binwidth", binwidth))
+
   }
-  plot <- plot #%>% config(displayModeBar = FALSE)
-  # plot <- plot + 
-  #   theme_classic() +
-  #   labs(title = "Length Frequencies") #, caption = "Binwidth = 20mm"
-  # 
-  # #+
-  # #scale_fill_manual(values = allColors)
-  # plot <- ggplotly(plot, tooltip = "text")
+
   return(plot)
 }

@@ -16,3 +16,5 @@ HowToConnectToADAMAS.R
 .RData
 
 .Rhistory
+
+adamasDeploy.sh
