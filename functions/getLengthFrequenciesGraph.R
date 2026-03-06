@@ -30,7 +30,7 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
       plot_ly(
         x = ~RSD, 
         y = ~Count, 
-        color = ~CommonName, 
+        color = ~SpeciesCode, 
         type = 'bar', 
         text = ~hoverText,
         hoverinfo = 'text'
@@ -49,7 +49,7 @@ getLengthFrequenciesGraph <- function(data, lengthOptions, binwidth, rsdLimits){
       plot_ly(
         x = ~get(lengthOptions),
         weights = ~NumFish,
-        color = ~CommonName,
+        color = ~SpeciesCode,
         type = "histogram",
         nbinsx = 30, # Adjust to match your previous 'binwidth'
         # Plotly calculates bins, so we use its internal hover variables
